@@ -1,0 +1,69 @@
+[main panel]
+1 - getImagingCenter
+2 - moveToImagingCenter
+3 - setImagingCenter
+
+4 - getSlicePosition
+5 - setSlicePosition
+6 - moveSlicePositionToZero
+
+7 - getImagingPiezoPosition
+8 - setImagingPiezoPosition
+9 - moveImagingPiezoToZero
+
+10 - getIlluminationPiezoPosition
+11 - setIlluminationPiezoPosition
+12 - setIlluminationPiezoHome
+13 - moveToIlluminationPiezoHome
+
+14 - getSheetWidth
+15 - useAutoSheetWidth, isAutoSheetWidthEnabled
+16 - setSheetSlope, getSheetSlope
+
+17 - setSheetOffset, getSheetOffset
+18 - centerSheetOffset
+
+19 - setSliceSlope, getSliceSlope
+20 - setSliceOffset, getSliceOffset
+
+21 - moveSliceAndPiezoRelative, moveSliceAndPiezoAbsolute
+
+[calibration panel]
+A - ???
+B - moveToCalibrationStart
+C - ???
+D - moveToCalibrationEnd
+E - setCalibrationStart
+F - getCalibrationStart
+G - setCalibrationEnd
+H - getCalibrationEnd
+I - calibrateSliceAndPiezo
+
+Notes:
+run and test autofocus are handled by a different part of the api
++, -, and sliders for sheet width/offset are covered by set methods
+update/2-point in piezo/slice calibration is covered by set methods
+step size um in piezo/slice calibration ....
+
+[autofocus panel]
+1 - setNumImages, getNumImages
+2 - setStepSize, getStepSize
+3 - setMode, getMode
+4 - setScoreType, getScoreType
+5 - setFitFunction, getFitFunction
+6 - setR2, getR2
+
+7 - useEveryStagePass, isUseEveryStagePassEnabled
+8 - useBeforeAcquisition, isUseBeforeAcquisitionEnabled
+9 - setTimePointInterval, getTimePointInterval
+10 - setChannel, getChannel
+11 - setMaxOffset, getMaxOffset
+
+12 - useAutoUpdateOffset, isAutoUpdateOffsetEnabled
+13 - setAutoUpdateMaxOffset, getAutoUpdateMaxOffset
+
+14 - showImages, getShowImages
+15 - showPlot, getShowPlot
+
+Notes:
+movement correction will be its own interface
