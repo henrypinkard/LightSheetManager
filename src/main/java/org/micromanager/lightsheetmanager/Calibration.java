@@ -14,7 +14,7 @@ package org.micromanager.lightsheetmanager;
  * Imaging position is the camera side piezo.
  *
  */
-public interface LightSheetCalibration {
+public interface Calibration {
 
     /**
      * Sets the current position as the new center position.
