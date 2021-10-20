@@ -1,7 +1,5 @@
 package org.micromanager.lightsheetmanager;
 
-import data.AutofocusMode;
-import data.AutofocusType;
 
 /**
  * Autofocus settings.
@@ -9,12 +7,47 @@ import data.AutofocusType;
  */
 public interface AutofocusSettings {
 
-    /**
-     * Sets the number of images to capture in the autofocus routine.
-     *
-     * @param numImages the number of images
-     */
-    void setNumImages(final int numImages);
+    enum AutofocusMode {
+        TYPE1,
+        TYPE2
+    }
+
+    enum AutofocusType {
+        TYPE1,
+        TYPE2
+    }
+
+    interface Builder {
+
+        /**
+         * Sets the number of images to capture in the autofocus routine.
+         *
+         * @param numImages the number of images
+         */
+        void setNumImages(final int numImages);
+
+        /**
+         * Sets the spacing between images in the autofocus routine.
+         *
+         * @param stepSize the step size in microns
+         */
+        void setStepSize(final double stepSize);
+
+        /**
+         * Selects whether to fix the piezo or the sheet for an autofocus routine.
+         *
+         * @param mode the autofocus mode
+         */
+        void setMode(final AutofocusMode mode);
+
+        /**
+         * Creates an immutable instance of AutofocusSettings
+         *
+         * @return Immutable version of AutofocusSettings
+         */
+        AutofocusSettings build();
+    }
+
 
     /**
      * Returns the number of images used in for autofocus routine.
@@ -24,25 +57,11 @@ public interface AutofocusSettings {
     int getNumImages();
 
     /**
-     * Sets the spacing between images in the autofocus routine.
-     *
-     * @param stepSize the step size in microns
-     */
-    void setStepSize(final double stepSize);
-
-    /**
      * Returns the step size between images in microns.
      *
      * @return the step size in microns
      */
     double getStepSize();
-
-    /**
-     * Selects whether to fix the piezo or the sheet for an autofocus routine.
-     *
-     * @param mode the autofocus mode
-     */
-    void setMode(final AutofocusMode mode);
 
     /**
      * Returns the autofocus mode being used.
