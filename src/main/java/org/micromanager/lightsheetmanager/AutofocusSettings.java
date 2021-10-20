@@ -103,42 +103,42 @@ public interface AutofocusSettings {
      *
      * @return the number of images
      */
-    int getNumImages();
+    int numImages();
 
     /**
      * Returns the step size between images in microns.
      *
      * @return the step size in microns
      */
-    double getStepSize();
+    double stepSize();
 
     /**
      * Returns the autofocus mode being used.
      *
      * @return the autofocus mode
      */
-    AutofocusMode getMode();
+    AutofocusMode mode();
 
     /**
      * Returns the type of scoring algorithm used for autofocus.
      *
      * @return the type of scoring algorithm
      */
-    AutofocusType getType();
+    AutofocusType type();
 
     /**
      * Returns the coefficient of determination used in the autofocus routine.
      *
      * @return the coefficient of determination
      */
-    double getR2();
+    double r2();
 
     /**
      * Returns the number of images between autofocus routines.
      *
      * @return the number of images between autofocus routines
      */
-    int getTimePointInterval();
+    int timePointInterval();
 
     /**
      * Returns true if autofocus is run every stage pass.

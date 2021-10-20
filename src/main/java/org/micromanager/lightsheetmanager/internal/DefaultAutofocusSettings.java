@@ -208,7 +208,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        * @return the number of images
        */
       @Override
-      public int getNumImages() {
+      public int numImages() {
          return numImages_;
       }
 
@@ -218,7 +218,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        * @return the step size in microns
        */
       @Override
-   public double getStepSize() {
+   public double stepSize() {
       return stepSize_;
    }
 
@@ -228,7 +228,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
     * @return the autofocus mode
     */
    @Override
-   public AutofocusMode getMode() {
+   public AutofocusMode mode() {
       return mode_;
    }
 
@@ -238,7 +238,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
     * @return the type of scoring algorithm
     */
    @Override
-   public AutofocusType getType() {
+   public AutofocusType type() {
       return type_;
    }
 
@@ -248,7 +248,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
     * @return the coefficient of determination
     */
    @Override
-   public double getR2() {
+   public double r2() {
       return r2_;
    }
 
@@ -258,7 +258,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
     * @return the number of images between autofocus routines
     */
    @Override
-   public int getTimePointInterval() {
+   public int timePointInterval() {
       return timePointInterval_;
    }
 
