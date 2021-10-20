@@ -1,4 +1,4 @@
-package api;
+package org.micromanager.lightsheetmanager;
 
 import data.AutofocusMode;
 import data.AutofocusType;

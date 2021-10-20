@@ -1,4 +1,4 @@
-package api;
+package org.micromanager.lightsheetmanager;
 
 // TODO: determine units for each of the methods (include units in arguments or method name?)
 
