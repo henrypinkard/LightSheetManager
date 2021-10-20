@@ -58,8 +58,9 @@ public interface AutofocusSettings {
 
         /**
          * Sets the number of images to capture before running an autofocus routine during an acquisition.
+         * TODO: what does this measure?
          */
-        Builder timePointInterval(final int numTimePoints);
+        Builder timePointInterval(final int timePointInterval);
 
         /**
          * Run autofocus every time we move to the next channel during an acquisition.
@@ -144,35 +145,40 @@ public interface AutofocusSettings {
      *
      * @return true if autofocus is run every stage pass
      */
-    boolean isUseEveryStagePassEnabled();
+    boolean useEveryStagePass();
 
     /**
      * Returns true if we run an autofocus routine before starting an acquisition.
      *
      * @return true if enabled
      */
-    boolean isUseBeforeAcquisitionEnabled();
+    boolean useBeforeAcquisition();
 
     /**
      * Returns the channel autofocus is being run on.
      *
      * @return the autofocus channel
      */
-    String getChannel();
+    String channel();
 
-    double getMaxOffset();
+   /**
+    * What is this?
+    *
+    * @return
+    */
+    double maxOffset();
 
-    boolean isAutoUpdateOffsetEnabled();
+    boolean autoUpdateOffset();
 
-    double getAutoUpdateMaxOffset();
+    double autoUpdateMaxOffset();
 
     // TODO: do we need these methods for viewing images/plots?
     // NS: these should not be part of the AutofocusSettings, but rather be parameters
     // to the entity using the AutofocusSettings to autofocus.
-    void showImages(final boolean state);
-    boolean getShowImages();
+    // void showImages(final boolean state);
+    // boolean getShowImages();
 
-    void showPlot(final boolean state);
-    boolean getShowPlot();
+    // void showPlot(final boolean state);
+    // boolean getShowPlot();
 
 }
