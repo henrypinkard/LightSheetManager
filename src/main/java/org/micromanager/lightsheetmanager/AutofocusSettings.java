@@ -97,6 +97,12 @@ public interface AutofocusSettings {
         AutofocusSettings build();
     }
 
+   /**
+    * Creates a Builder populated with settings of this AutofocusSettings instance.
+    *
+    * @return AutofocuSettings.Builder pre-populated with settings of this instance.
+    */
+    Builder copyBuilder();
 
     /**
      * Returns the number of images used in for autofocus routine.

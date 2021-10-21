@@ -21,6 +21,32 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
       public Builder() {
       }
 
+      private Builder(int numImages,
+                     double stepSize,
+                     AutofocusMode mode,
+                     AutofocusType type,
+                     double r2,
+                     int timePointInterval,
+                     boolean useEveryStagePass,
+                     boolean useBeforeAcquisition,
+                     String channel,
+                     double maxOffset,
+                     boolean autoUpdateOffset,
+                     double autoUpdateMaxOffset) {
+         numImages_ = numImages;
+         stepSize_ =  stepSize;
+         mode_ =  mode;
+         type_ = type;
+         r2_ =  r2;
+         timePointInterval_ = timePointInterval;
+         useEveryStagePass_ =  useEveryStagePass;
+         useBeforeAcquisition_ =  useBeforeAcquisition;
+         channel_ =  channel;
+         maxOffset_ =  maxOffset;
+         autoUpdateOffset_ =  autoUpdateOffset;
+         autoUpdateMaxOffset_ =  autoUpdateMaxOffset;
+      }
+
       /**
        * Sets the number of images to capture in the autofocus routine.
        *
@@ -202,22 +228,37 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
       autoUpdateMaxOffset_ =  autoUpdateMaxOffset;
    }
 
-      /**
-       * Returns the number of images used for autofocus routine.
-       *
-       * @return the number of images
-       */
-      @Override
-      public int numImages() {
-         return numImages_;
-      }
+   public Builder copyBuilder() {
+      return new Builder(numImages_,
+            stepSize_,
+            mode_,
+            type_,
+            r2_,
+            timePointInterval_,
+            useEveryStagePass_,
+            useBeforeAcquisition_,
+            channel_,
+            maxOffset_,
+            autoUpdateOffset_,
+            autoUpdateMaxOffset_);
+   }
 
-      /**
-       * Returns the step size between images in microns.
-       *
-       * @return the step size in microns
-       */
-      @Override
+   /**
+    * Returns the number of images used for autofocus routine.
+    *
+    * @return the number of images
+    */
+   @Override
+   public int numImages() {
+                         return numImages_;
+                                           }
+
+   /**
+    * Returns the step size between images in microns.
+    *
+    * @return the step size in microns
+    */
+   @Override
    public double stepSize() {
       return stepSize_;
    }

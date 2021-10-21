@@ -53,6 +53,20 @@ public class AutofocusSettingsTest {
       assertEquals(maxOffset_, as.maxOffset(), delta_);
       assertEquals(autoUpdateOffset_, as.autoUpdateOffset());
       assertEquals(autoUpdateMaxOffset_, as.autoUpdateMaxOffset(), delta_);
+
+      as = as.copyBuilder().build();
+      assertEquals(numImages_, as.numImages());
+      assertEquals(stepSize_, as.stepSize(), delta_);
+      assertEquals(mode_, as.mode());
+      assertEquals(type_, as.type());
+      assertEquals(r2_, as.r2(), delta_);
+      assertEquals(timePointInterval_, as.timePointInterval());
+      assertEquals(useEveryStagePass_, as.useEveryStagePass());
+      assertEquals(useBeforeAcquisition_, as.useBeforeAcquisition());
+      assertEquals(channel_, as.channel());
+      assertEquals(maxOffset_, as.maxOffset(), delta_);
+      assertEquals(autoUpdateOffset_, as.autoUpdateOffset());
+      assertEquals(autoUpdateMaxOffset_, as.autoUpdateMaxOffset(), delta_);
    }
 
 }
