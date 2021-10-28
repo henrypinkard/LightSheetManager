@@ -1,0 +1,15 @@
+# Editors, etc..
+*~
+.*.swp
+.swp
+.DS_Store
+
+# IntelliJ and Pycharm
+.idea
+*.iml
+
+# Build
+*.class
+*.jar
+build/
+out/
