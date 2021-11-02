@@ -6,7 +6,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.micromanager.lightsheetmanager.AutofocusSettings;
 import org.micromanager.lightsheetmanager.LightSheetManager;
-import org.micromanager.lightsheetmanager.internal.DefaultLightSheetManager;
 
 public class AutofocusSettingsTest {
    private final int numImages_ = 14;
@@ -40,6 +39,7 @@ public class AutofocusSettingsTest {
             .maxOffset(maxOffset_)
             .autoUpdateOffset(autoUpdateOffset_)
             .autoUpdateMaxOffset(autoUpdateMaxOffset_);
+      
       AutofocusSettings as = asb.build();
       assertEquals(numImages_, as.numImages());
       assertEquals(stepSize_, as.stepSize(), delta_);
