@@ -250,8 +250,8 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
     */
    @Override
    public int numImages() {
-                         return numImages_;
-                                           }
+      return numImages_;
+   }
 
    /**
     * Returns the step size between images in microns.
