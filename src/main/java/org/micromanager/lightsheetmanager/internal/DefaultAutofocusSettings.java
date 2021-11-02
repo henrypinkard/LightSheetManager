@@ -34,17 +34,17 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
                      boolean autoUpdateOffset,
                      double autoUpdateMaxOffset) {
          numImages_ = numImages;
-         stepSize_ =  stepSize;
-         mode_ =  mode;
+         stepSize_ = stepSize;
+         mode_ = mode;
          type_ = type;
-         r2_ =  r2;
+         r2_ = r2;
          timePointInterval_ = timePointInterval;
-         useEveryStagePass_ =  useEveryStagePass;
-         useBeforeAcquisition_ =  useBeforeAcquisition;
-         channel_ =  channel;
-         maxOffset_ =  maxOffset;
-         autoUpdateOffset_ =  autoUpdateOffset;
-         autoUpdateMaxOffset_ =  autoUpdateMaxOffset;
+         useEveryStagePass_ = useEveryStagePass;
+         useBeforeAcquisition_ = useBeforeAcquisition;
+         channel_ = channel;
+         maxOffset_ = maxOffset;
+         autoUpdateOffset_ = autoUpdateOffset;
+         autoUpdateMaxOffset_ = autoUpdateMaxOffset;
       }
 
       /**
@@ -64,7 +64,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        * @param stepSize the step size in microns
        */
       @Override
-      public AutofocusSettings.Builder stepSize(double stepSize) {
+      public AutofocusSettings.Builder stepSize(final double stepSize) {
          stepSize_ = stepSize;
          return this;
       }
@@ -75,7 +75,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        * @param mode the autofocus mode
        */
       @Override
-      public AutofocusSettings.Builder mode(AutofocusMode mode) {
+      public AutofocusSettings.Builder mode(final AutofocusMode mode) {
          mode_ = mode;
          return this;
       }
@@ -86,7 +86,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        * @param type the scoring algorithm
        */
       @Override
-      public AutofocusSettings.Builder type(AutofocusType type) {
+      public AutofocusSettings.Builder type(final AutofocusType type) {
          type_ = type;
          return this;
       }
@@ -97,7 +97,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        * @param value the coefficient of determination
        */
       @Override
-      public AutofocusSettings.Builder r2(double value) {
+      public AutofocusSettings.Builder r2(final double value) {
          r2_ = value;
          return this;
       }
@@ -108,7 +108,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        * @param timePointInterval
        */
       @Override
-      public AutofocusSettings.Builder timePointInterval(int timePointInterval) {
+      public AutofocusSettings.Builder timePointInterval(final int timePointInterval) {
          timePointInterval_ = timePointInterval;
          return this;
       }
@@ -119,7 +119,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        * @param state true to enable autofocus every stage pass
        */
       @Override
-      public AutofocusSettings.Builder useEveryStagePass(boolean state) {
+      public AutofocusSettings.Builder useEveryStagePass(final boolean state) {
          useEveryStagePass_ = state;
          return this;
       }
@@ -130,7 +130,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        * @param state true or false
        */
       @Override
-      public AutofocusSettings.Builder useBeforeAcquisition(boolean state) {
+      public AutofocusSettings.Builder useBeforeAcquisition(final boolean state) {
          useBeforeAcquisition_ = state;
          return this;
       }
@@ -141,25 +141,25 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        * @param channel the channel to run autofocus on
        */
       @Override
-      public AutofocusSettings.Builder channel(String channel) {
+      public AutofocusSettings.Builder channel(final String channel) {
          channel_ = channel;
          return this;
       }
 
       @Override
-      public AutofocusSettings.Builder maxOffset(double maxOffset) {
+      public AutofocusSettings.Builder maxOffset(final double maxOffset) {
          maxOffset_ = maxOffset;
          return this;
       }
 
       @Override
-      public AutofocusSettings.Builder autoUpdateOffset(boolean state) {
+      public AutofocusSettings.Builder autoUpdateOffset(final boolean state) {
          autoUpdateOffset_ = state;
          return this;
       }
 
       @Override
-      public AutofocusSettings.Builder autoUpdateMaxOffset(double um) {
+      public AutofocusSettings.Builder autoUpdateMaxOffset(final double um) {
          autoUpdateMaxOffset_ = um;
          return this;
       }
@@ -171,7 +171,8 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        */
       @Override
       public AutofocusSettings build() {
-         return new DefaultAutofocusSettings(numImages_,
+         return new DefaultAutofocusSettings(
+               numImages_,
                stepSize_,
                mode_,
                type_,
@@ -215,17 +216,17 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
                                     double autoUpdateMaxOffset
                                     ) {
       numImages_ = numImages;
-      stepSize_ =  stepSize;
-      mode_ =  mode;
+      stepSize_ = stepSize;
+      mode_ = mode;
       type_ = type;
-      r2_ =  r2;
+      r2_ = r2;
       timePointInterval_ = timePointInterval;
-      useEveryStagePass_ =  useEveryStagePass;
-      useBeforeAcquisition_ =  useBeforeAcquisition;
-      channel_ =  channel;
-      maxOffset_ =  maxOffset;
-      autoUpdateOffset_ =  autoUpdateOffset;
-      autoUpdateMaxOffset_ =  autoUpdateMaxOffset;
+      useEveryStagePass_ = useEveryStagePass;
+      useBeforeAcquisition_ = useBeforeAcquisition;
+      channel_ = channel;
+      maxOffset_ = maxOffset;
+      autoUpdateOffset_ = autoUpdateOffset;
+      autoUpdateMaxOffset_ = autoUpdateMaxOffset;
    }
 
    public Builder copyBuilder() {
