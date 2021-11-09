@@ -152,7 +152,7 @@ public class DefaultVolumeSettings implements VolumeSettings {
     private final double sampleExposureMs_;
     private final boolean minimizeSlicePeriod_;
 
-    public DefaultVolumeSettings(String firstSide,
+    private DefaultVolumeSettings(String firstSide,
                                  int numSides,
                                  int numSlices,
                                  double sideDelayMs,
