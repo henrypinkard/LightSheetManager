@@ -2,15 +2,15 @@
 
 LightSheetManager is a plugin for [micro-manager](https://micro-manager.org) 2.0 that aims to provide an easy interface to all light sheet microscopes, be they completely custom-built or assembled from commercial parts.
 
-Our goals are as follows:
+Our approach is to:
 - Leverage the foundation of Micro-Manager, while addressing shortcomings specific to light sheet imaging.
-- Be easily used via Python and elsewhere.  This is achieved with an API-centric architecture.  While we plan to implement a Micro-Manager GUI for the plugin, we want to ensure that the business logic of LightSheetManager is accessible elsewhere, e.g. that it's easy to create an alternative Python GUIs.
-- Be a community effort with contributions from many individuals and institutions, reducing duplication of effort across projects.
+- Have an API-centric architecture.  While we plan to implement a Micro-Manager GUI for the plugin, we want to ensure that the business logic of LightSheetManager is accessible elsewhere, e.g. that it's easy to create an alternative Python GUIs, script acquisitions, etc.
+- Reduce duplication of effort across projects.  We want this to be a community effort with contributions from many individuals and institutions and useful for many different microscopes.
 
 
 **High level overview of the design of this code:**
 
-The main units are "Setting" and "Manager" interfaces. Settings are always immutable (i.e., constructed using Builders, and cannot be modified). Settings can be handed to Managers to execute a task given those Settings.
+The main units are categorized into "Setting" and "Manager" interfaces. Settings are always immutable (i.e., constructed using Builders, and cannot be modified), which design pattern is prevalent in MM 2.0.  Settings can be handed to Managers which execute a task using those Settings.
 
 The top level Manager is the "LightSheetManager".  Most likely there is never more than one instance. Getting access to LightSheetManager should enable one to execute everything that can be done with the API.
 
@@ -20,7 +20,7 @@ DataSink interface should be very thin, maybe only a "putImage()" function.  its
 
 A HardwareManager is used to set the hardware to a desired state during both live view and acquisitions.  It takes Settings that describe the "Calibration" of the system.
 
-LightSheetManager will have a dedicated device adapter with a pre-init property called "MicroscopeGeometry" (or similar name).  Possible values for "MicroscopeGeometry" include diSPIM with piezos, iSPIM with piezo, ct-dSPIM, SOLS galvo-scan, SOLS stage-scan, mesoSPIM, OpenSPIM L, OpenSPIM T, OpenSPIM X, etc.  Depending on the value of this property other properties are created that connect logical and physical devices like is done with MultiCamera and other Utility devices.  It is possible to specify "None" for the physical device setting, but many values of "None" indicate that a new possible value for "MicroscopeGeometry" should be added.  The microscope configuration and device mapping is relayed to the LightSheetManager plugin by populating these properties using Micro-Manager’s normal mechanisms (which are amenable to scripting).
+To solve the problem of hardware mapping, LightSheetManager will have a dedicated device adapter with a pre-init property called "MicroscopeGeometry" (or similar name).  Possible values for "MicroscopeGeometry" include diSPIM with piezos, iSPIM with piezo, ct-dSPIM, SOLS galvo-scan, SOLS stage-scan, mesoSPIM, OpenSPIM L, OpenSPIM T, OpenSPIM X, etc.  Depending on the value of this property other properties are created that connect logical and physical devices like is done with MultiCamera and other Utility devices.  It is possible to specify "None" for the physical device setting, but many values of "None" indicate that a new possible value for "MicroscopeGeometry" should be added.  The microscope configuration and device mapping is relayed to the LightSheetManager plugin by populating these properties using Micro-Manager’s normal mechanisms (which are amenable to scripting).
 
 Some settings objects:
 - AcquisitionSettings contains things like number of images, step size, channels used, whether multi-position, file name, etc.
