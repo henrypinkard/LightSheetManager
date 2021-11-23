@@ -7,9 +7,23 @@ package org.micromanager.lightsheetmanager;
 public interface LightSheetManager {
 
    /**
-    * Access to an AutofocusSettingsBuilder.
+    * Access to a AutofocusSettingsBuilder.
     *
     * @return AutofocusSettings.Builder with default settings.
     */
-   public AutofocusSettings.Builder autofocusSettingsBuilder();
+   AutofocusSettings.Builder autofocusSettingsBuilder();
+   
+   /**
+    * Access to a VolumeSettingsBuilder.
+    *
+    * @return VolumeSettings.Builder with default settings.
+    */
+   VolumeSettings.Builder volumeSettingsBuilder();
+
+   /**
+    * Access to a TimingSettingsBuilder.
+    *
+    * @return TimingSettings.Builder with default settings.
+    */
+   TimingSettings.Builder timingSettingsBuilder();
 }
