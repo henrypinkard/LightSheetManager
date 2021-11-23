@@ -2,6 +2,8 @@ package org.micromanager.lightsheetmanager.internal;
 
 import org.micromanager.lightsheetmanager.AutofocusSettings;
 import org.micromanager.lightsheetmanager.LightSheetManager;
+import org.micromanager.lightsheetmanager.TimingSettings;
+import org.micromanager.lightsheetmanager.VolumeSettings;
 
 public class DefaultLightSheetManager implements LightSheetManager {
    
@@ -14,7 +16,7 @@ public class DefaultLightSheetManager implements LightSheetManager {
    public AutofocusSettings.Builder autofocusSettingsBuilder() {
       return new DefaultAutofocusSettings.Builder();
    }
-   
+
    /**
     * Access to a VolumeSettingsBuilder.
     *
@@ -23,6 +25,16 @@ public class DefaultLightSheetManager implements LightSheetManager {
    @Override
    public VolumeSettings.Builder volumeSettingsBuilder() {
       return new DefaultVolumeSettings.Builder();
+   }
+
+   /**
+    * Access to a TimingSettingsBuilder.
+    *
+    * @return TimingSettings.Builder with default settings.
+    */
+   @Override
+   public TimingSettings.Builder timingSettingsBuilder() {
+      return new DefaultTimingSettings.Builder();
    }
    
 }
