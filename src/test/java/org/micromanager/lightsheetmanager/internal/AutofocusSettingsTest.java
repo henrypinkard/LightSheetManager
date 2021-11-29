@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.micromanager.lightsheetmanager.AutofocusSettings;
 import org.micromanager.lightsheetmanager.LightSheetManager;
+import org.micromanager.lightsheetmanager.internal.DefaultLightSheetManager;
 
 public class AutofocusSettingsTest {
    private final int numImages_ = 14;
