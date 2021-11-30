@@ -23,14 +23,14 @@ public interface TimingSettings {
          *
          * @param numLineScans the number of scans
          */
-        Builder lineScansPerSlice(final int numLineScans);
+        Builder scansPerSlice(final int numLineScans); // TODO: rename to scansPerSlice
 
         /**
          * Sets the duration of a one way scan.
          *
          * @param durationMs the duration in milliseconds
          */
-        Builder lineScanDuration(final double durationMs);
+        Builder scanDuration(final double durationMs); // TODO: rename to scanDuration
 
         /**
          * Sets the delay time before the laser trigger.
@@ -108,14 +108,14 @@ public interface TimingSettings {
      *
      * @return the number of one way beam scans per slice
      */
-    int lineScansPerSlice();
+    int scansPerSlice();
 
     /**
      * Returns the time in milliseconds of one beam scan sweep.
      *
      * @return the time in milliseconds of one beam scan sweep
      */
-    double lineScanDuration();
+    double scanDuration();
 
     /**
      * Returns the delay time in milliseconds before the laser trigger.
