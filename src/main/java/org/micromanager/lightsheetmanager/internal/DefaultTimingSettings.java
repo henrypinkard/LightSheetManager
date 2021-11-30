@@ -60,7 +60,7 @@ public class DefaultTimingSettings implements TimingSettings {
          * @param numLineScans the number of scans
          */
         @Override
-        public TimingSettings.Builder lineScansPerSlice(int numLineScans) {
+        public TimingSettings.Builder scansPerSlice(int numLineScans) {
             scanNum_ = numLineScans;
             return this;
         }
@@ -71,7 +71,7 @@ public class DefaultTimingSettings implements TimingSettings {
          * @param durationMs the duration in milliseconds
          */
         @Override
-        public TimingSettings.Builder lineScanDuration(double durationMs) {
+        public TimingSettings.Builder scanDuration(double durationMs) {
             scanPeriod_ = durationMs;
             return this;
         }
@@ -254,7 +254,7 @@ public class DefaultTimingSettings implements TimingSettings {
      * @return the number of one way beam scans per slice
      */
     @Override
-    public int lineScansPerSlice() {
+    public int scansPerSlice() {
         return scanNum_;
     }
 
@@ -264,7 +264,7 @@ public class DefaultTimingSettings implements TimingSettings {
      * @return the time in milliseconds of one beam scan sweep
      */
     @Override
-    public double lineScanDuration() {
+    public double scanDuration() {
         return scanPeriod_;
     }
 
