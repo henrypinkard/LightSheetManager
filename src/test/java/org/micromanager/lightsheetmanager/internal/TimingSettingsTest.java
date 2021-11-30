@@ -25,11 +25,11 @@ public class TimingSettingsTest {
         LightSheetManager lsm = new DefaultLightSheetManager();
 
         TimingSettings.Builder tsb = lsm.timingSettingsBuilder();
-        tsb.lineScansPerSlice(scanNum_)
+        tsb.scansPerSlice(scanNum_)
                 .useAdvancedTiming(useAdvancedTiming_)
                 .delayBeforeScan(scanDelay_)
-                .lineScansPerSlice(scanNum_)
-                .lineScanDuration(scanPeriod_)
+                .scansPerSlice(scanNum_)
+                .scanDuration(scanPeriod_)
                 .delayBeforeLaser(laserDelay_)
                 .laserTriggerDuration(laserDuration_)
                 .delayBeforeCamera(cameraDelay_)
@@ -40,8 +40,8 @@ public class TimingSettingsTest {
         TimingSettings ts = tsb.build();
         assertEquals(ts.useAdvancedTiming(), useAdvancedTiming_);
         assertEquals(ts.delayBeforeScan(), scanDelay_, delta_);
-        assertEquals(ts.lineScansPerSlice(), scanNum_);
-        assertEquals(ts.lineScanDuration(), scanPeriod_, delta_);
+        assertEquals(ts.scansPerSlice(), scanNum_);
+        assertEquals(ts.scanDuration(), scanPeriod_, delta_);
         assertEquals(ts.delayBeforeLaser(), laserDelay_, delta_);
         assertEquals(ts.laserTriggerDuration(), laserDuration_, delta_);
         assertEquals(ts.delayBeforeCamera(), cameraDelay_, delta_);
@@ -52,8 +52,8 @@ public class TimingSettingsTest {
         ts = ts.copyBuilder().build();
         assertEquals(ts.useAdvancedTiming(), useAdvancedTiming_);
         assertEquals(ts.delayBeforeScan(), scanDelay_, delta_);
-        assertEquals(ts.lineScansPerSlice(), scanNum_);
-        assertEquals(ts.lineScanDuration(), scanPeriod_, delta_);
+        assertEquals(ts.scansPerSlice(), scanNum_);
+        assertEquals(ts.scanDuration(), scanPeriod_, delta_);
         assertEquals(ts.delayBeforeLaser(), laserDelay_, delta_);
         assertEquals(ts.laserTriggerDuration(), laserDuration_, delta_);
         assertEquals(ts.delayBeforeCamera(), cameraDelay_, delta_);
