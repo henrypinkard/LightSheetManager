@@ -5,55 +5,47 @@ import org.micromanager.lightsheetmanager.VolumeSettings;
 public class DefaultVolumeSettings implements VolumeSettings {
 
     public static class Builder implements VolumeSettings.Builder {
-        private String firstSide_ = "A";
-        private int numSides_ = 1;
+        private String firstView_ = "A";
+        private int numViews_ = 1;
         private int numSlices_ = 10;
-        private double sideDelayMs_ = 50;
+        private double viewDelayMs_ = 50;
         private double stepSizeUm_ = 1.0;
-        private double slicePeriodMs_ = 30;
-        private double sampleExposureMs_ = 10;
-        private boolean minimizeSlicePeriod_ = false;
 
         public Builder() {
         }
 
-        private Builder(String firstSide,
-                        int numSides,
+        private Builder(String firstView,
+                        int numViews,
                         int numSlices,
-                        double sideDelayMs,
-                        double stepSizeUm,
-                        double slicePeriodMs,
-                        double sampleExposureMs,
-                        boolean minimizeSlicePeriod) {
-            firstSide_ = firstSide;
-            numSides_ = numSides;
+                        double viewDelayMs,
+                        double stepSizeUm
+        ) {
+            firstView_ = firstView;
+            numViews_ = numViews;
             numSlices_ = numSlices;
-            sideDelayMs_ = sideDelayMs;
+            viewDelayMs_ = viewDelayMs;
             stepSizeUm_ = stepSizeUm;
-            slicePeriodMs_ = slicePeriodMs;
-            sampleExposureMs_ = sampleExposureMs;
-            minimizeSlicePeriod_ = minimizeSlicePeriod;
         }
 
         /**
          * Sets the imaging path to start the acquisition with.
          *
-         * @param firstSide the first side
+         * @param firstView the first view
          */
         @Override
-        public VolumeSettings.Builder firstSide(final String firstSide) {
-            firstSide_ = firstSide;
+        public VolumeSettings.Builder firstView(final String firstView) {
+            firstView_ = firstView;
             return this;
         }
 
         /**
-         * Sets the number of sides to use during an acquisition.
+         * Sets the number of view to use during an acquisition.
          *
-         * @param numSides the number of sides
+         * @param numViews the number of view
          */
         @Override
-        public VolumeSettings.Builder numSides(final int numSides) {
-            numSides_ = numSides;
+        public VolumeSettings.Builder numViews(final int numViews) {
+            numViews_ = numViews;
             return this;
         }
 
@@ -71,11 +63,11 @@ public class DefaultVolumeSettings implements VolumeSettings {
         /**
          * Sets the delay between switching imaging paths in an acquisition.
          *
-         * @param sideDelayMs the delay in milliseconds
+         * @param viewDelayMs the delay in milliseconds
          */
         @Override
-        public VolumeSettings.Builder delayBeforeSide(final double sideDelayMs) {
-            sideDelayMs_ = sideDelayMs;
+        public VolumeSettings.Builder delayBeforeView(final double viewDelayMs) {
+            viewDelayMs_ = viewDelayMs;
             return this;
         }
 
@@ -91,39 +83,6 @@ public class DefaultVolumeSettings implements VolumeSettings {
         }
 
         /**
-         * Sets the slice period in milliseconds.
-         *
-         * @param slicePeriodMs the slice period in milliseconds
-         */
-        @Override
-        public VolumeSettings.Builder slicePeriod(final double slicePeriodMs) {
-            slicePeriodMs_ = slicePeriodMs;
-            return this;
-        }
-
-        /**
-         * Sets the sample exposure time in milliseconds.
-         *
-         * @param exposureMs the exposure time in milliseconds
-         */
-        @Override
-        public VolumeSettings.Builder sampleExposure(final double exposureMs) {
-            sampleExposureMs_ = exposureMs;
-            return this;
-        }
-
-        /**
-         * Sets the slice period automatically.
-         *
-         * @param state true to minimize the slice period
-         */
-        @Override
-        public VolumeSettings.Builder minimizeSlicePeriod(final boolean state) {
-            minimizeSlicePeriod_ = state;
-            return this;
-        }
-
-        /**
          * Creates an immutable instance of VolumeSettings
          *
          * @return Immutable version of VolumeSettings
@@ -131,76 +90,61 @@ public class DefaultVolumeSettings implements VolumeSettings {
         @Override
         public VolumeSettings build() {
             return new DefaultVolumeSettings(
-                    firstSide_,
-                    numSides_,
+                    firstView_,
+                    numViews_,
                     numSlices_,
-                    sideDelayMs_,
-                    stepSizeUm_,
-                    slicePeriodMs_,
-                    sampleExposureMs_,
-                    minimizeSlicePeriod_
+                    viewDelayMs_,
+                    stepSizeUm_
             );
         }
     }
 
-    private final String firstSide_;
-    private final int numSides_;
+    private final String firstView_;
+    private final int numViews_;
     private final int numSlices_;
-    private final double sideDelayMs_;
+    private final double viewDelayMs_;
     private final double stepSizeUm_;
-    private final double slicePeriodMs_;
-    private final double sampleExposureMs_;
-    private final boolean minimizeSlicePeriod_;
 
-    private DefaultVolumeSettings(String firstSide,
-                                 int numSides,
+    private DefaultVolumeSettings(String firstView,
+                                 int numViews,
                                  int numSlices,
-                                 double sideDelayMs,
-                                 double stepSizeUm,
-                                 double slicePeriodMs,
-                                 double sampleExposureMs,
-                                 boolean minimizeSlicePeriod
+                                 double viewDelayMs,
+                                 double stepSizeUm
                                  ) {
-        firstSide_ = firstSide;
-        numSides_ = numSides;
+        firstView_ = firstView;
+        numViews_ = numViews;
         numSlices_ = numSlices;
-        sideDelayMs_ = sideDelayMs;
+        viewDelayMs_ = viewDelayMs;
         stepSizeUm_ = stepSizeUm;
-        slicePeriodMs_ = slicePeriodMs;
-        sampleExposureMs_ = sampleExposureMs;
-        minimizeSlicePeriod_ = minimizeSlicePeriod;
     }
 
     public Builder copyBuilder() {
         return new Builder(
-                firstSide_,
-                numSides_,
+                firstView_,
+                numViews_,
                 numSlices_,
-                sideDelayMs_,
-                stepSizeUm_,
-                slicePeriodMs_,
-                sampleExposureMs_,
-                minimizeSlicePeriod_
+                viewDelayMs_,
+                stepSizeUm_
         );
     }
 
     /**
      * Returns the imaging path that the acquisition starts on.
      *
-     * @return the first side
+     * @return the first view
      */
-    public String firstSide() {
-        return firstSide_;
+    public String firstView() {
+        return firstView_;
     }
 
     /**
-     * Return the number of sides to use during an acquisition.
+     * Return the number of views to use during an acquisition.
      *
-     * @return the number of sides
+     * @return the number of views
      */
 
-    public int numSides() {
-        return numSides_;
+    public int numViews() {
+        return numViews_;
     }
 
     /**
@@ -217,8 +161,8 @@ public class DefaultVolumeSettings implements VolumeSettings {
      *
      * @return the delay in milliseconds
      */
-    public double delayBeforeSide() {
-        return sideDelayMs_;
+    public double delayBeforeView() {
+        return viewDelayMs_;
     }
 
     /**
@@ -228,33 +172,6 @@ public class DefaultVolumeSettings implements VolumeSettings {
      */
     public double sliceStepSize() {
         return stepSizeUm_;
-    }
-
-    /**
-     * Returns the slice period in milliseconds.
-     *
-     * @return the slice period in milliseconds
-     */
-    public double slicePeriod() {
-        return slicePeriodMs_;
-    }
-
-    /**
-     * Returns the sample exposure time in milliseconds.
-     *
-     * @return the exposure time in milliseconds
-     */
-    public double sampleExposure() {
-        return sampleExposureMs_;
-    }
-
-    /**
-     * Returns true if the slice period is minimized.
-     *
-     * @return true if slice period is minimized
-     */
-    public boolean isSlicePeriodMinimized() {
-        return minimizeSlicePeriod_;
     }
 
 }
