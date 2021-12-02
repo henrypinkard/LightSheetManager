@@ -1,5 +1,7 @@
 package org.micromanager.lightsheetmanager;
 
+// TODO: some way of specifying the view order for systems with up to 8 cameras
+
 /**
  * Volume settings for microscope geometries that support volumetric imaging.
  */
@@ -12,35 +14,48 @@ public interface VolumeSettings {
          *
          * @param numViews the number of views
          */
-        Builder numViews(final int numViews); // TODO: rename to numViews
-
-        /**
-         * Sets the number of slices per volume.
-         *
-         * @param numSlices the number of slices
-         */
-        Builder slicesPerVolume(final int numSlices);
+        Builder numViews(final int numViews);
 
         /**
          * Sets the imaging path to start the acquisition with.
          *
          * @param firstView the first view
          */
-        Builder firstView(final String firstView); // TODO: rename to firstView
+        Builder firstView(final String firstView);
 
         /**
          * Sets the delay between switching imaging paths in milliseconds.
          *
          * @param viewDelayMs the delay in milliseconds
          */
-        Builder delayBeforeView(final double viewDelayMs); // TODO: rename to delayBeforeView
+        Builder delayBeforeView(final double viewDelayMs);
 
         /**
-         * Sets the step size between each slice in microns.
+         * Sets the volume bounds, automatically computing numSlices and centerPosition.
          *
+         * @param startPosition the start position
+         * @param endPosition the end position
+         * @param stepSizeUm the step size in micron
+         */
+        Builder volumeBounds(final double startPosition, final double endPosition, final double stepSizeUm);
+
+        /**
+         * Sets the volume bounds, automatically computing stepSizeUm and centerPosition.
+         *
+         * @param startPosition the start position
+         * @param endPosition the end position
+         * @param numSlices the number of slices
+         */
+        Builder volumeBounds(final double startPosition, final double endPosition, final int numSlices);
+
+        /**
+         * Sets the volume bounds, automatically computing startPosition and endPosition.
+         *
+         * @param centerPosition the center position
+         * @param numSlices the number of slices
          * @param stepSizeUm the step size in microns
          */
-        Builder sliceStepSize(final double stepSizeUm);
+        Builder volumeBounds(final double centerPosition, final int numSlices, final double stepSizeUm);
 
         /**
          * Creates an immutable instance of VolumeSettings
@@ -91,5 +106,26 @@ public interface VolumeSettings {
      * @return the step size in microns
      */
     double sliceStepSize();
+
+    /**
+     * Returns the start position of the volume.
+     *
+     * @return the start position
+     */
+    double startPosition();
+
+    /**
+     * Returns the center position of the volume.
+     *
+     * @return the center position
+     */
+    double centerPosition();
+
+    /**
+     * Returns the end position of the volume.
+     *
+     * @return the end position
+     */
+    double endPosition();
 
 }
