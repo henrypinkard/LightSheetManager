@@ -9,37 +9,41 @@ public class DefaultVolumeSettings implements VolumeSettings {
         private int numViews_ = 1;
         private int numSlices_ = 10;
         private double viewDelayMs_ = 50;
-        private double stepSizeUm_ = 1.0;
+        private double stepSizeUm_ = 0.5;
+        private double startPosition_ = 0.0;
+        private double centerPosition_ = 0.0;
+        private double endPosition_ = 0.0;
+
+//        public Builder(final double start, final double end, final int numImages) {
+//        }
+//
+//        public Builder(final double start, final double end, final double sliceStepSize) {
+//        }
 
         public Builder() {
         }
 
-        private Builder(String firstView,
-                        int numViews,
-                        int numSlices,
-                        double viewDelayMs,
-                        double stepSizeUm
+        private Builder(final String firstView,
+                        final int numViews,
+                        final int numSlices,
+                        final double viewDelayMs,
+                        final double stepSizeUm,
+                        final double startPosition,
+                        final double centerPosition,
+                        final double endPosition
         ) {
             firstView_ = firstView;
             numViews_ = numViews;
             numSlices_ = numSlices;
             viewDelayMs_ = viewDelayMs;
             stepSizeUm_ = stepSizeUm;
+            startPosition_ = startPosition;
+            centerPosition_ = centerPosition;
+            endPosition_ = endPosition;
         }
 
         /**
-         * Sets the imaging path to start the acquisition with.
-         *
-         * @param firstView the first view
-         */
-        @Override
-        public VolumeSettings.Builder firstView(final String firstView) {
-            firstView_ = firstView;
-            return this;
-        }
-
-        /**
-         * Sets the number of view to use during an acquisition.
+         * Sets the number of views to use during an acquisition.
          *
          * @param numViews the number of view
          */
@@ -50,13 +54,13 @@ public class DefaultVolumeSettings implements VolumeSettings {
         }
 
         /**
-         * Sets the number of slices per volume.
+         * Sets the imaging path to start the acquisition with.
          *
-         * @param numSlices the number of slices
+         * @param firstView the first view
          */
         @Override
-        public VolumeSettings.Builder slicesPerVolume(final int numSlices) {
-            numSlices_ = numSlices;
+        public VolumeSettings.Builder firstView(final String firstView) {
+            firstView_ = firstView;
             return this;
         }
 
@@ -72,13 +76,54 @@ public class DefaultVolumeSettings implements VolumeSettings {
         }
 
         /**
-         * Sets the step size between each slice in microns.
+         * Sets the volume bounds, automatically computing numSlices and centerPosition.
          *
+         * @param startPosition the start position
+         * @param endPosition the end position
+         * @param stepSizeUm the step size in micron
+         */
+        @Override
+        public VolumeSettings.Builder volumeBounds(final double startPosition, final double endPosition, final double stepSizeUm) {
+            startPosition_ = startPosition;
+            endPosition_ = endPosition;
+            stepSizeUm_ = stepSizeUm;
+            centerPosition_ = (startPosition + endPosition) / 2.0;
+            numSlices_ = (int)Math.floor((Math.abs(startPosition) + Math.abs(endPosition)) / stepSizeUm);
+            return this;
+        }
+
+        /**
+         * Sets the volume bounds, automatically computing stepSizeUm and centerPosition.
+         *
+         * @param startPosition the start position
+         * @param endPosition the end position
+         * @param numSlices the number of slices
+         */
+        @Override
+        public VolumeSettings.Builder volumeBounds(final double startPosition, final double endPosition, final int numSlices) {
+            startPosition_ = startPosition;
+            endPosition_ = endPosition;
+            numSlices_ = numSlices;
+            centerPosition_ = (startPosition + endPosition) / 2.0;
+            stepSizeUm_ = (Math.abs(startPosition) + Math.abs(endPosition)) / numSlices;
+            return this;
+        }
+
+        /**
+         * Sets the volume bounds, automatically computing startPosition and endPosition.
+         *
+         * @param centerPosition the center position
+         * @param numSlices the number of slices
          * @param stepSizeUm the step size in microns
          */
         @Override
-        public VolumeSettings.Builder sliceStepSize(final double stepSizeUm) {
+        public VolumeSettings.Builder volumeBounds(final double centerPosition, final int numSlices, final double stepSizeUm) {
+            final double halfDistance = (stepSizeUm * numSlices) / 2.0;
+            centerPosition_ = centerPosition;
             stepSizeUm_ = stepSizeUm;
+            numSlices_ = numSlices;
+            startPosition_ = centerPosition - halfDistance;
+            endPosition_ = centerPosition + halfDistance;
             return this;
         }
 
@@ -94,7 +139,10 @@ public class DefaultVolumeSettings implements VolumeSettings {
                     numViews_,
                     numSlices_,
                     viewDelayMs_,
-                    stepSizeUm_
+                    stepSizeUm_,
+                    startPosition_,
+                    centerPosition_,
+                    endPosition_
             );
         }
     }
@@ -104,18 +152,27 @@ public class DefaultVolumeSettings implements VolumeSettings {
     private final int numSlices_;
     private final double viewDelayMs_;
     private final double stepSizeUm_;
+    private final double startPosition_;
+    private final double centerPosition_;
+    private final double endPosition_;
 
-    private DefaultVolumeSettings(String firstView,
-                                 int numViews,
-                                 int numSlices,
-                                 double viewDelayMs,
-                                 double stepSizeUm
+    private DefaultVolumeSettings(final String firstView,
+                                  final int numViews,
+                                  final int numSlices,
+                                  final double viewDelayMs,
+                                  final double stepSizeUm,
+                                  final double startPosition,
+                                  final double centerPosition,
+                                  final double endPosition
                                  ) {
         firstView_ = firstView;
         numViews_ = numViews;
         numSlices_ = numSlices;
         viewDelayMs_ = viewDelayMs;
         stepSizeUm_ = stepSizeUm;
+        startPosition_ = startPosition;
+        centerPosition_ = centerPosition;
+        endPosition_ = endPosition;
     }
 
     public Builder copyBuilder() {
@@ -124,7 +181,10 @@ public class DefaultVolumeSettings implements VolumeSettings {
                 numViews_,
                 numSlices_,
                 viewDelayMs_,
-                stepSizeUm_
+                stepSizeUm_,
+                startPosition_,
+                centerPosition_,
+                endPosition_
         );
     }
 
@@ -172,6 +232,33 @@ public class DefaultVolumeSettings implements VolumeSettings {
      */
     public double sliceStepSize() {
         return stepSizeUm_;
+    }
+
+    /**
+     * Returns the start position of the volume.
+     *
+     * @return the start position
+     */
+    public double startPosition() {
+        return startPosition_;
+    }
+
+    /**
+     * Returns the center position of the volume.
+     *
+     * @return the center position
+     */
+    public double centerPosition() {
+        return centerPosition_;
+    }
+
+    /**
+     * Returns the end position of the volume.
+     *
+     * @return the end position
+     */
+    public double endPosition() {
+        return endPosition_;
     }
 
 }
