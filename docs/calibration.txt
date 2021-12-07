@@ -1,0 +1,45 @@
+// some ideas about splitting calibration settings into multiple objects
+
+// detection + illumination calibration => rename
+public interface SliceDetectionCalibration {
+
+    void setSliceUnitsPerMicron(final double units);
+    double getSliceUnitsPerMicron();
+
+    void setSliceOffset(final double offset);
+    double getSliceOffset();
+
+    // not the center of the acquisition ... resting position
+    void setNominalDetectionPosition(final double position); // um
+    double getNominalDetectionPosition();
+
+}
+
+// for light sheet mode on camera
+public interface SyncShutterCalibration {
+
+    void setScanSpeed(final double speed);
+    double getScanSpeed();
+
+    void setScanOffset(final double offset);
+    double getSheetOffset();
+}
+
+public interface ScanSheetCalibration {
+
+    void setSheetWidth(final double width);
+    double getSheetWidth();
+
+    void useAutoSheetWidth(final boolean state);
+    boolean isAutoSheetWidthEnabled();
+
+    // was slope
+    void setAutoSheetWidthPerPixel(final double widthPerPixel);
+    double getAutoSheetWidthPerPixel();
+
+    void setSheetOffset(final double offset);
+    double getSheetOffset();
+
+    void setLiveScanPeriodMs(final int milliseconds);
+    int getLiveScanPeriodMs();
+}
