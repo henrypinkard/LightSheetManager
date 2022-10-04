@@ -1,4 +1,4 @@
-package org.micromanager.lightsheetmanager.data;
+package org.micromanager.lightsheetmanager.gui.data;
 
 import java.net.URL;
 import java.util.Objects;

@@ -1,4 +1,4 @@
-package org.micromanager.lightsheetmanager.jplus;
+package org.micromanager.lightsheetmanager.model.utils.jplus;
 
 import java.util.Objects;
 import java.util.function.Predicate;

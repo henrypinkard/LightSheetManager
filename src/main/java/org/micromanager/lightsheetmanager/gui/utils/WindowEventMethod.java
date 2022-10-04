@@ -1,4 +1,4 @@
-package org.micromanager.lightsheetmanager.utils;
+package org.micromanager.lightsheetmanager.gui.utils;
 
 import java.util.EventObject;
 
