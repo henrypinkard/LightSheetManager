@@ -1,6 +1,6 @@
-package org.micromanager.lightsheetmanager.internal;
+package org.micromanager.lightsheetmanager.api.internal;
 
-import org.micromanager.lightsheetmanager.AutofocusSettings;
+import org.micromanager.lightsheetmanager.api.AutofocusSettings;
 
 public class DefaultAutofocusSettings implements AutofocusSettings {
 

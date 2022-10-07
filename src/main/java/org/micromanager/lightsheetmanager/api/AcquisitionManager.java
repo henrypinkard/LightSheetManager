@@ -1,4 +1,4 @@
-package org.micromanager.lightsheetmanager;
+package org.micromanager.lightsheetmanager.api;
 
 public interface AcquisitionManager {
 
@@ -23,5 +23,5 @@ public interface AcquisitionManager {
      * @return true if the acquisition is running
      */
     boolean isRunning();
-  
+
 }

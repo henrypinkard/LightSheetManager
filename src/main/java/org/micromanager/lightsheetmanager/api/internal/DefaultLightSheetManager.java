@@ -1,9 +1,10 @@
-package org.micromanager.lightsheetmanager.internal;
+package org.micromanager.lightsheetmanager.api.internal;
 
-import org.micromanager.lightsheetmanager.AutofocusSettings;
-import org.micromanager.lightsheetmanager.LightSheetManager;
-import org.micromanager.lightsheetmanager.TimingSettings;
-import org.micromanager.lightsheetmanager.VolumeSettings;
+
+import org.micromanager.lightsheetmanager.api.AutofocusSettings;
+import org.micromanager.lightsheetmanager.api.LightSheetManager;
+import org.micromanager.lightsheetmanager.api.TimingSettings;
+import org.micromanager.lightsheetmanager.api.VolumeSettings;
 
 public class DefaultLightSheetManager implements LightSheetManager {
    

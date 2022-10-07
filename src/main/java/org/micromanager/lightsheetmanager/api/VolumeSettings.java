@@ -1,4 +1,4 @@
-package org.micromanager.lightsheetmanager;
+package org.micromanager.lightsheetmanager.api;
 
 // TODO: some way of specifying the view order for systems with up to 8 cameras
 
@@ -21,7 +21,7 @@ public interface VolumeSettings {
          *
          * @param firstView the first view
          */
-        Builder firstView(final String firstView);
+        Builder firstView(final int firstView);
 
         /**
          * Sets the delay between switching imaging paths in milliseconds.
@@ -29,6 +29,10 @@ public interface VolumeSettings {
          * @param viewDelayMs the delay in milliseconds
          */
         Builder delayBeforeView(final double viewDelayMs);
+
+        Builder slicesPerVolume(final int n);
+
+        Builder sliceStepSize(final double um);
 
         /**
          * Sets the volume bounds, automatically computing numSlices and centerPosition.
@@ -91,7 +95,7 @@ public interface VolumeSettings {
      *
      * @return the first view
      */
-    String firstView();
+    int firstView();
 
     /**
      * Return the delay in milliseconds before switching imaging paths in an acquisitions.

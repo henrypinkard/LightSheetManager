@@ -1,4 +1,4 @@
-package org.micromanager.lightsheetmanager;
+package org.micromanager.lightsheetmanager.api;
 
 public interface TimingSettings {
 
@@ -23,14 +23,14 @@ public interface TimingSettings {
          *
          * @param numLineScans the number of scans
          */
-        Builder scansPerSlice(final int numLineScans); // TODO: rename to scansPerSlice
+        Builder scansPerSlice(final int numLineScans);
 
         /**
          * Sets the duration of a one way scan.
          *
          * @param durationMs the duration in milliseconds
          */
-        Builder scanDuration(final double durationMs); // TODO: rename to scanDuration
+        Builder scanDuration(final double durationMs);
 
         /**
          * Sets the delay time before the laser trigger.
@@ -67,6 +67,14 @@ public interface TimingSettings {
          */
         Builder cameraExposure(final double exposureMs);
 
+
+        /**
+         * Sets the slice duration of each slice.
+         *
+         * @param durationMs the duration in milliseconds
+         */
+        Builder sliceDuration(final double durationMs);
+
         /**
          * Sets the scan direction.
          *
@@ -87,7 +95,7 @@ public interface TimingSettings {
      *
      * @return TimingSettings.Builder pre-populated with settings of this instance.
      */
-    TimingSettings.Builder copyBuilder();
+    Builder copyBuilder();
 
     /**
      * Returns true if using custom timing settings.
@@ -151,6 +159,13 @@ public interface TimingSettings {
      * @return the duration in milliseconds that the camera shutter is open
      */
     double cameraExposure();
+
+    /**
+     * Returns the duration in milliseconds of each slice.
+     *
+     * @return the duration in milliseconds of each slice
+     */
+    double sliceDuration();
 
     /**
      * Returns true if the scan direction is inverted.

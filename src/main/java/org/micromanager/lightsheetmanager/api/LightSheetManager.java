@@ -1,4 +1,4 @@
-package org.micromanager.lightsheetmanager;
+package org.micromanager.lightsheetmanager.api;
 
 /**
  * Root interface to everything related to Light Sheet Microscope

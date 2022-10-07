@@ -1,4 +1,4 @@
-package org.micromanager.lightsheetmanager;
+package org.micromanager.lightsheetmanager.api;
 
 
 /**
@@ -29,6 +29,13 @@ public interface AutofocusSettings {
         Builder numImages(final int numImages);
 
         /**
+         * Set the channel to run the autofocus routine on.
+         *
+         * @param channel the channel to run autofocus on
+         */
+        Builder channel(final String channel);
+
+        /**
          * Sets the spacing between images in the autofocus routine.
          *
          * @param stepSize the step size in microns
@@ -47,14 +54,10 @@ public interface AutofocusSettings {
          *
          * @param type the scoring algorithm
          */
-        Builder type(final AutofocusType type);
+        Builder type(final AutofocusType type); // TODO: rename to scoringAlgorithm
 
-        /**
-         * Sets the coefficient of determination for the autofocus algorithm.
-         *
-         * @param value the coefficient of determination
-         */
-        Builder r2(final double value);
+
+        // TODO: maybe denote that these are related to acquisitions
 
         /**
          * Sets the number of images to capture before running an autofocus routine during an acquisition.
@@ -76,12 +79,14 @@ public interface AutofocusSettings {
          */
         Builder useBeforeAcquisition(final boolean state);
 
+        ///////////////////////////
+
         /**
-         * Set the channel to run the autofocus routine on.
+         * Sets the coefficient of determination for the autofocus algorithm.
          *
-         * @param channel the channel to run autofocus on
+         * @param value the coefficient of determination
          */
-        Builder channel(final String channel);
+        Builder r2(final double value); // TODO: add threshold to the name? does this belong here or not?
 
         Builder maxOffset(final double maxOffset); // +/- um
 
@@ -172,7 +177,7 @@ public interface AutofocusSettings {
     *
     * @return
     */
-    double maxOffset();
+    double maxOffset(); // used during acquisitions
 
     boolean autoUpdateOffset();
 

@@ -1,11 +1,12 @@
-package org.micromanager.lightsheetmanager.internal;
+package org.micromanager.lightsheetmanager.api.internal;
 
-import org.micromanager.lightsheetmanager.VolumeSettings;
+
+import org.micromanager.lightsheetmanager.api.VolumeSettings;
 
 public class DefaultVolumeSettings implements VolumeSettings {
 
     public static class Builder implements VolumeSettings.Builder {
-        private String firstView_ = "A";
+        private int firstView_ = 0;
         private int numViews_ = 1;
         private int numSlices_ = 10;
         private double viewDelayMs_ = 50;
@@ -23,7 +24,7 @@ public class DefaultVolumeSettings implements VolumeSettings {
         public Builder() {
         }
 
-        private Builder(final String firstView,
+        private Builder(final int firstView,
                         final int numViews,
                         final int numSlices,
                         final double viewDelayMs,
@@ -59,7 +60,7 @@ public class DefaultVolumeSettings implements VolumeSettings {
          * @param firstView the first view
          */
         @Override
-        public VolumeSettings.Builder firstView(final String firstView) {
+        public VolumeSettings.Builder firstView(final int firstView) {
             firstView_ = firstView;
             return this;
         }
@@ -75,6 +76,19 @@ public class DefaultVolumeSettings implements VolumeSettings {
             return this;
         }
 
+        @Override
+        public VolumeSettings.Builder slicesPerVolume(final int n) {
+            numSlices_ = n;
+            return this;
+        }
+
+        @Override
+        public VolumeSettings.Builder sliceStepSize(final double um) {
+            stepSizeUm_ = um;
+            return this;
+        }
+
+        // TODO: what happens when stepSize is not evenly divided by range? maybe just remove?
         /**
          * Sets the volume bounds, automatically computing numSlices and centerPosition.
          *
@@ -133,7 +147,7 @@ public class DefaultVolumeSettings implements VolumeSettings {
          * @return Immutable version of VolumeSettings
          */
         @Override
-        public VolumeSettings build() {
+        public DefaultVolumeSettings build() {
             return new DefaultVolumeSettings(
                     firstView_,
                     numViews_,
@@ -147,7 +161,7 @@ public class DefaultVolumeSettings implements VolumeSettings {
         }
     }
 
-    private final String firstView_;
+    private final int firstView_;
     private final int numViews_;
     private final int numSlices_;
     private final double viewDelayMs_;
@@ -156,7 +170,7 @@ public class DefaultVolumeSettings implements VolumeSettings {
     private final double centerPosition_;
     private final double endPosition_;
 
-    private DefaultVolumeSettings(final String firstView,
+    private DefaultVolumeSettings(final int firstView,
                                   final int numViews,
                                   final int numSlices,
                                   final double viewDelayMs,
@@ -193,7 +207,7 @@ public class DefaultVolumeSettings implements VolumeSettings {
      *
      * @return the first view
      */
-    public String firstView() {
+    public int firstView() {
         return firstView_;
     }
 
@@ -259,6 +273,17 @@ public class DefaultVolumeSettings implements VolumeSettings {
      */
     public double endPosition() {
         return endPosition_;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "%s[firstView=%s, numViews=%s, numSlices=%s, viewDelayMs=%s, stepSizeUm=%s, "
+                        + "startPosition=%s, centerPosition=%s, endPosition=%s]",
+                getClass().getSimpleName(),
+                firstView_, numViews_, numSlices_, viewDelayMs_, stepSizeUm_,
+                startPosition_, centerPosition_, endPosition_
+        );
     }
 
 }

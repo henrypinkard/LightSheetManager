@@ -1,44 +1,45 @@
-package org.micromanager.lightsheetmanager.internal;
+package org.micromanager.lightsheetmanager.api.internal;
 
-import org.micromanager.lightsheetmanager.TimingSettings;
+import org.micromanager.lightsheetmanager.api.TimingSettings;
 
 public class DefaultTimingSettings implements TimingSettings {
 
     public static class Builder implements TimingSettings.Builder {
-        int scanNum_ = 1;
-        double scanDelay_ = 0.0;
-        double scanPeriod_ = 10.0;
-        double laserDelay_ = 1.0;
-        double laserDuration_ = 1.0;
-        double cameraDelay_ = 0.0;
-        double cameraDuration_ = 1.0;
+        int scansPerSlice_ = 1;
+        double delayBeforeScan_ = 0.0;
+        double scanDuration_ = 10.0;
+        double delayBeforeLaser_ = 1.0;
+        double laserTriggerDuration_ = 1.0;
+        double delayBeforeCamera_ = 0.0;
+        double cameraTriggerDuration_ = 1.0;
         double cameraExposure_ = 1.0;
-        //double sliceDuration_ = 0.0; // TODO: uses formula? SliceTiming settings
+        double sliceDuration_ = 0.0;
         boolean alternateScanDirection_ = false;
         boolean useAdvancedTiming_ = false;
-        // boolean isValid_ = false;
 
         public Builder() {
         }
 
-        private Builder(final int scanNum,
-                        final double scanDelay,
-                        final double scanPeriod,
-                        final double laserDelay,
-                        final double laserDuration,
-                        final double cameraDelay,
+        private Builder(final int scansPerSlice,
+                        final double delayBeforeScan,
+                        final double scanDuration,
+                        final double delayBeforeLaser,
+                        final double laserTriggerDuration,
+                        final double delayBeforeCamera,
                         final double cameraDuration,
                         final double cameraExposure,
+                        final double sliceDuration,
                         final boolean alternateScanDirection,
                         final boolean useAdvancedTiming) {
-            scanNum_ = scanNum;
-            scanDelay_ = scanDelay;
-            scanPeriod_ = scanPeriod;
-            laserDelay_ = laserDelay;
-            laserDuration_ = laserDuration;
-            cameraDelay_ = cameraDelay;
-            cameraDuration_ = cameraDuration;
+            scansPerSlice_ = scansPerSlice;
+            delayBeforeScan_ = delayBeforeScan;
+            scanDuration_ = scanDuration;
+            delayBeforeLaser_ = delayBeforeLaser;
+            laserTriggerDuration_ = laserTriggerDuration;
+            delayBeforeCamera_ = delayBeforeCamera;
+            cameraTriggerDuration_ = cameraDuration;
             cameraExposure_ = cameraExposure;
+            sliceDuration_ = sliceDuration;
             alternateScanDirection_ = alternateScanDirection;
             useAdvancedTiming_ = useAdvancedTiming;
         }
@@ -50,18 +51,18 @@ public class DefaultTimingSettings implements TimingSettings {
          */
         @Override
         public TimingSettings.Builder delayBeforeScan(double delayMs) {
-            scanDelay_ = delayMs;
+            delayBeforeScan_ = delayMs;
             return this;
         }
 
         /**
          * Sets the number of one way beam scans per slice
          *
-         * @param numLineScans the number of scans
+         * @param numScans the number of scans
          */
         @Override
-        public TimingSettings.Builder scansPerSlice(int numLineScans) {
-            scanNum_ = numLineScans;
+        public TimingSettings.Builder scansPerSlice(int numScans) {
+            scansPerSlice_ = numScans;
             return this;
         }
 
@@ -72,7 +73,7 @@ public class DefaultTimingSettings implements TimingSettings {
          */
         @Override
         public TimingSettings.Builder scanDuration(double durationMs) {
-            scanPeriod_ = durationMs;
+            scanDuration_ = durationMs;
             return this;
         }
 
@@ -83,7 +84,7 @@ public class DefaultTimingSettings implements TimingSettings {
          */
         @Override
         public TimingSettings.Builder delayBeforeLaser(double delayMs) {
-            laserDelay_ = delayMs;
+            delayBeforeLaser_ = delayMs;
             return this;
         }
 
@@ -94,7 +95,7 @@ public class DefaultTimingSettings implements TimingSettings {
          */
         @Override
         public TimingSettings.Builder laserTriggerDuration(double durationMs) {
-            laserDuration_ = durationMs;
+            laserTriggerDuration_ = durationMs;
             return this;
         }
 
@@ -105,7 +106,7 @@ public class DefaultTimingSettings implements TimingSettings {
          */
         @Override
         public TimingSettings.Builder delayBeforeCamera(double delayMs) {
-            cameraDelay_ = delayMs;
+            delayBeforeCamera_ = delayMs;
             return this;
         }
 
@@ -116,7 +117,7 @@ public class DefaultTimingSettings implements TimingSettings {
          */
         @Override
         public TimingSettings.Builder cameraTriggerDuration(double durationMs) {
-            cameraDuration_ = durationMs;
+            cameraTriggerDuration_ = durationMs;
             return this;
         }
 
@@ -128,6 +129,17 @@ public class DefaultTimingSettings implements TimingSettings {
         @Override
         public TimingSettings.Builder cameraExposure(double exposureMs) {
             cameraExposure_ = exposureMs;
+            return this;
+        }
+
+        /**
+         * Sets the slice duration of each slice.
+         *
+         * @param durationMs the duration in milliseconds
+         */
+        @Override
+        public TimingSettings.Builder sliceDuration(double durationMs) {
+            sliceDuration_ = durationMs;
             return this;
         }
 
@@ -159,54 +171,58 @@ public class DefaultTimingSettings implements TimingSettings {
          * @return Immutable version of TimingSettings
          */
         @Override
-        public TimingSettings build() {
+        public DefaultTimingSettings build() {
             return new DefaultTimingSettings(
-                    useAdvancedTiming_,
-                    scanNum_,
-                    scanDelay_,
-                    scanPeriod_,
-                    laserDelay_,
-                    laserDuration_,
-                    cameraDelay_,
-                    cameraDuration_,
+                    scansPerSlice_,
+                    delayBeforeScan_,
+                    scanDuration_,
+                    delayBeforeLaser_,
+                    laserTriggerDuration_,
+                    delayBeforeCamera_,
+                    cameraTriggerDuration_,
                     cameraExposure_,
-                    alternateScanDirection_
+                    sliceDuration_,
+                    alternateScanDirection_,
+                    useAdvancedTiming_
             );
         }
     }
 
-    final boolean useAdvancedTiming_;
-    final int scanNum_;
-    final double scanDelay_;
-    final double scanPeriod_;
-    final double laserDelay_;
-    final double laserDuration_;
-    final double cameraDelay_;
-    final double cameraDuration_;
+    final int scansPerSlice_;
+    final double delayBeforeScan_;
+    final double scanDuration_;
+    final double delayBeforeLaser_;
+    final double laserTriggerDuration_;
+    final double delayBeforeCamera_;
+    final double cameraTriggerDuration_;
     final double cameraExposure_;
-    //final double sliceDuration_;
+    final double sliceDuration_;
     final boolean alternateScanDirection_;
+    final boolean useAdvancedTiming_;
 
-    private DefaultTimingSettings(final boolean useAdvancedTiming,
-                    final int scanNum,
-                    final double scanDelay,
-                    final double scanPeriod,
-                    final double laserDelay,
-                    final double laserDuration,
-                    final double cameraDelay,
-                    final double cameraDuration,
-                    final double cameraExposure,
-                    final boolean alternateScanDirection) {
-        useAdvancedTiming_ = useAdvancedTiming;
-        scanNum_ = scanNum;
-        scanDelay_ = scanDelay;
-        scanPeriod_ = scanPeriod;
-        laserDelay_ = laserDelay;
-        laserDuration_ = laserDuration;
-        cameraDelay_ = cameraDelay;
-        cameraDuration_ = cameraDuration;
+    private DefaultTimingSettings(
+                final int scansPerSlice,
+                final double delayBeforeScan,
+                final double scanDuration,
+                final double delayBeforeLaser,
+                final double laserTriggerDuration,
+                final double delayBeforeCamera,
+                final double cameraTriggerDuration,
+                final double cameraExposure,
+                final double sliceDuration,
+                final boolean alternateScanDirection,
+                final boolean useAdvancedTiming) {
+        scansPerSlice_ = scansPerSlice;
+        delayBeforeScan_ = delayBeforeScan;
+        scanDuration_ = scanDuration;
+        delayBeforeLaser_ = delayBeforeLaser;
+        laserTriggerDuration_ = laserTriggerDuration;
+        delayBeforeCamera_ = delayBeforeCamera;
+        cameraTriggerDuration_ = cameraTriggerDuration;
         cameraExposure_ = cameraExposure;
+        sliceDuration_ = sliceDuration;
         alternateScanDirection_ = alternateScanDirection;
+        useAdvancedTiming_ = useAdvancedTiming;
     }
 
     /**
@@ -216,14 +232,16 @@ public class DefaultTimingSettings implements TimingSettings {
      */
     @Override
     public TimingSettings.Builder copyBuilder() {
-        return new Builder(scanNum_,
-                scanDelay_,
-                scanPeriod_,
-                laserDelay_,
-                laserDuration_,
-                cameraDelay_,
-                cameraDuration_,
+        return new Builder(
+                scansPerSlice_,
+                delayBeforeScan_,
+                scanDuration_,
+                delayBeforeLaser_,
+                laserTriggerDuration_,
+                delayBeforeCamera_,
+                cameraTriggerDuration_,
                 cameraExposure_,
+                sliceDuration_,
                 alternateScanDirection_,
                 useAdvancedTiming_);
     }
@@ -245,7 +263,7 @@ public class DefaultTimingSettings implements TimingSettings {
      */
     @Override
     public double delayBeforeScan() {
-        return scanDelay_;
+        return delayBeforeScan_;
     }
 
     /**
@@ -255,7 +273,7 @@ public class DefaultTimingSettings implements TimingSettings {
      */
     @Override
     public int scansPerSlice() {
-        return scanNum_;
+        return scansPerSlice_;
     }
 
     /**
@@ -265,7 +283,7 @@ public class DefaultTimingSettings implements TimingSettings {
      */
     @Override
     public double scanDuration() {
-        return scanPeriod_;
+        return scanDuration_;
     }
 
     /**
@@ -275,7 +293,7 @@ public class DefaultTimingSettings implements TimingSettings {
      */
     @Override
     public double delayBeforeLaser() {
-        return laserDelay_;
+        return delayBeforeLaser_;
     }
 
     /**
@@ -285,7 +303,7 @@ public class DefaultTimingSettings implements TimingSettings {
      */
     @Override
     public double laserTriggerDuration() {
-        return laserDuration_;
+        return laserTriggerDuration_;
     }
 
     /**
@@ -295,7 +313,7 @@ public class DefaultTimingSettings implements TimingSettings {
      */
     @Override
     public double delayBeforeCamera() {
-        return cameraDelay_;
+        return delayBeforeCamera_;
     }
 
     /**
@@ -305,7 +323,7 @@ public class DefaultTimingSettings implements TimingSettings {
      */
     @Override
     public double cameraTriggerDuration() {
-        return cameraDuration_;
+        return cameraTriggerDuration_;
     }
 
     /**
@@ -319,6 +337,16 @@ public class DefaultTimingSettings implements TimingSettings {
     }
 
     /**
+     * Returns the duration in milliseconds of each slice.
+     *
+     * @return the duration in milliseconds of each slice
+     */
+    @Override
+    public double sliceDuration() {
+        return sliceDuration_;
+    }
+
+    /**
      * Returns true if the scan direction is inverted.
      *
      * @return true if the scan direction is inverted
@@ -327,4 +355,27 @@ public class DefaultTimingSettings implements TimingSettings {
     public boolean useAlternateScanDirection() {
         return alternateScanDirection_;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "%s[scansPerSlice=%s, delayBeforeScan=%s, scanDuration=%s,"
+                        + " delayBeforeLaser=%s, laserTriggerDuration=%s,"
+                        + " delayBeforeCamera=%s, cameraTriggerDuration=%s, cameraExposure=%s,"
+                        + " sliceDuration=%s, alternateScanDirection=%s, useAdvancedTiming=%s]",
+                getClass().getSimpleName(),
+                scansPerSlice_, delayBeforeScan_, scanDuration_, delayBeforeLaser_, laserTriggerDuration_,
+                delayBeforeCamera_, cameraTriggerDuration_, cameraExposure_,
+                sliceDuration_, alternateScanDirection_, useAdvancedTiming_
+        );
+    }
+
+//    public double getSliceDuration() {
+//        // slice duration is the max out of the scan time, laser time, and camera time
+//        return Math.max(Math.max(
+//                scanDelay_ + (scanDuration_ * scanNum_),    // scan time
+//                laserDelay_ + laserDuration_),              // laser time
+//            cameraDelay_ + cameraDuration_                  // camera time
+//        );
+//    }
 }

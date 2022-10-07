@@ -1,6 +1,8 @@
-package org.micromanager.lightsheetmanager;
+package org.micromanager.lightsheetmanager.api;
+
+import org.micromanager.data.Image;
 
 public interface DataSink {
 
-    void putImage();
+    void putImage(final Image image);
 }
