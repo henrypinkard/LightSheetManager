@@ -11,7 +11,7 @@ import org.micromanager.events.LiveModeEvent;
 import org.micromanager.lightsheetmanager.LightSheetManagerPlugin;
 import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.data.Icons;
-import org.micromanager.lightsheetmanager.gui.navigation.NavigationTab;
+import org.micromanager.lightsheetmanager.gui.navigation.NavigationPanel;
 import org.micromanager.lightsheetmanager.gui.utils.WindowUtils;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
@@ -31,7 +31,7 @@ public class LightSheetManagerFrame extends JFrame {
     private LightSheetManagerModel model_;
 
     private TabPanel tabPanel_;
-    private NavigationTab navigationPanel_;
+    private NavigationPanel navigationPanel_;
 
     public LightSheetManagerFrame(final Studio studio, final LightSheetManagerModel model) {
         studio_ = Objects.requireNonNull(studio);
@@ -94,7 +94,7 @@ public class LightSheetManagerFrame extends JFrame {
 //            System.out.println(s + " " + m.get(s));
 
         tabPanel_ = new TabPanel(studio_, model_, model_.getDeviceManager());
-        navigationPanel_ = new NavigationTab(studio_, model_.getDeviceManager());
+        navigationPanel_ = new NavigationPanel(studio_, model_.getDeviceManager());
 
         createUserInterface();
 
