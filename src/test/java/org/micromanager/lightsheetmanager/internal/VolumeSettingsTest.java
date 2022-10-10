@@ -4,11 +4,13 @@ package org.micromanager.lightsheetmanager.internal;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.micromanager.lightsheetmanager.VolumeSettings;
-import org.micromanager.lightsheetmanager.LightSheetManager;
+import org.micromanager.lightsheetmanager.api.LightSheetManager;
+import org.micromanager.lightsheetmanager.api.VolumeSettings;
+import org.micromanager.lightsheetmanager.api.internal.DefaultLightSheetManager;
 
 public class VolumeSettingsTest {
-    private final String firstView_ = "B";
+    //TODO: Is firstview supposed to be Stirng or int?
+    private final int firstView_ = 0;
     private final double viewDelayMs_ = 100;
     private final int numViews_ = 2;
 

@@ -1,0 +1,207 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.micro-manager.lightsheetmanager</groupId>
+    <artifactId>LightSheetManager</artifactId>
+    <version>0.1.0</version>
+    <packaging>jar</packaging>
+    <name>LightSheetManager plugin</name>
+    <description>Java-based Micro-Manager plugin for controlling light sheet microscopes</description>
+    <url>https://github.com/micro-manager/LightSheetManager</url>
+
+  
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <developers>
+       <developer>
+          <id>bls337</id>
+          <name>Brandon Simpson</name>
+          <organization>ASI</organization>
+       </developer>
+       <developer>
+          <id>jondaniels</id>
+          <name>Jon Daniels</name>
+          <organization>ASI</organization>
+       </developer>
+       <developer>
+          <id>nicost</id>
+          <name>Nico Stuurman</name>
+          <organization>Altos Labs</organization>
+       </developer>
+    </developers>
+
+   <scm>
+      <url>https://github.com/micro-manager/LightSheetManager</url>
+    <connection>scm:git:git://github.com/micro-manager/LightSheetManager.git</connection>
+    <developerConnection>scm:git:git@github.com:micro-manager/LightSheetManager.git</developerConnection>
+   </scm>
+
+   
+   <licenses>
+      <license>
+         <name>BSD-3</name>
+         <url>https://github.com/micro-manager/LightSheetManager/blob/master/LICENSE</url>
+       </license>
+   </licenses>
+
+
+	<dependencies>
+		<dependency>
+			<groupId>org.micro-manager.mmcorej</groupId>
+			<artifactId>MMCoreJ</artifactId>
+			<version>10.1.1.0</version>
+		</dependency>
+
+      <!-- TODO: switch to a remote repo for MMJ once it is mavenized -->
+<!--       <dependency>
+         <groupId>org.micro-manager</groupId>
+         <artifactId>MMJ_</artifactId>
+         <version>10.1.1.0</version>
+      </dependency> -->
+
+   <dependency>
+       <groupId>com.sample</groupId>
+       <artifactId>sample</artifactId>
+       <version>1.0</version>
+       <scope>system</scope>
+       <systemPath>${project.basedir}/lib/MMJ_.jar</systemPath>
+   </dependency>
+
+
+   <dependency>
+       <groupId>com.miglayout</groupId>
+       <artifactId>miglayout-swing</artifactId>
+       <version>4.2</version>
+   </dependency>
+
+<dependency>
+    <groupId>com.google.code.gson</groupId>
+    <artifactId>gson</artifactId>
+    <version>2.2.4</version>
+</dependency>
+
+<dependency>
+    <groupId>org.scijava</groupId>
+    <artifactId>scijava-common</artifactId>
+    <version>2.77.0</version>
+</dependency>
+
+<dependency>
+    <groupId>com.google.guava</groupId>
+    <artifactId>guava</artifactId>
+    <version>17.0</version>
+</dependency>
+
+<dependency>
+    <groupId>commons-io</groupId>
+    <artifactId>commons-io</artifactId>
+    <version>2.11.0</version>
+</dependency>
+
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-math3</artifactId>
+    <version>3.6.1</version>
+</dependency>
+
+<dependency>
+    <groupId>com.sun.activation</groupId>
+    <artifactId>javax.activation</artifactId>
+    <version>1.2.0</version>
+</dependency>
+
+<dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.12</version>
+    <scope>test</scope>
+</dependency>
+
+	</dependencies>
+
+
+    <build>
+
+      <plugins>
+       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.2.1</version>
+        <executions>
+         <execution>
+          <id>attach-sources</id>
+          <goals>
+           <goal>jar-no-fork</goal>
+          </goals>
+         </execution>
+        </executions>
+       </plugin>
+       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+         <execution>
+          <id>attach-javadocs</id>
+          <goals>
+           <goal>jar</goal>
+          </goals>
+         </execution>
+        </executions>
+       </plugin>
+       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+         <execution>
+          <id>sign-artifacts</id>
+          <phase>verify</phase>
+          <goals>
+           <goal>sign</goal>
+          </goals>
+		 
+		<configuration>
+             	<gpgArguments>
+			<arg>--pinentry-mode</arg>
+			<arg>loopback</arg>
+		</gpgArguments>
+	     </configuration>
+		 
+		 
+         </execution>
+        </executions>
+       </plugin>
+       <plugin>
+      <groupId>org.sonatype.plugins</groupId>
+      <artifactId>nexus-staging-maven-plugin</artifactId>
+      <version>1.6.7</version>
+      <extensions>true</extensions>
+      <configuration>
+         <serverId>ossrh</serverId>
+         <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+         <autoReleaseAfterClose>true</autoReleaseAfterClose>
+      </configuration>
+    </plugin>
+      </plugins>
+     </build>
+
+
+
+    <distributionManagement>
+      <snapshotRepository>
+        <id>ossrh</id>
+        <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+      </snapshotRepository>
+      <repository>
+        <id>ossrh</id>
+        <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      </repository>
+   </distributionManagement>
+
+
+</project>
