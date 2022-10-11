@@ -3,8 +3,9 @@ package org.micromanager.lightsheetmanager.internal;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.micromanager.lightsheetmanager.LightSheetManager;
-import org.micromanager.lightsheetmanager.TimingSettings;
+import org.micromanager.lightsheetmanager.api.LightSheetManager;
+import org.micromanager.lightsheetmanager.api.TimingSettings;
+import org.micromanager.lightsheetmanager.api.internal.DefaultLightSheetManager;
 
 public class TimingSettingsTest {
     private final boolean useAdvancedTiming_ = true;
