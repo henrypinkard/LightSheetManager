@@ -23,6 +23,7 @@ public class BeamSheetControlPanel extends Panel {
     private Panel secondPanel_; // all other camera trigger modes
 
     public BeamSheetControlPanel() {
+        super("Light Sheet Synchronization");
         init();
     }
 
@@ -74,6 +75,19 @@ public class BeamSheetControlPanel extends Panel {
     }
 
     private void createEventHandlers() {
+        // first panel
+        btnPlotProfile_.registerListener(e -> {
+
+        });
+
+        // second panel
+        chkAutoSheetWidth_.registerListener(e -> {
+
+        });
+
+        btnCenterOffset_.registerListener(e -> {
+
+        });
 
     }
 

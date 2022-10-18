@@ -28,6 +28,12 @@ public class Button extends JButton {
         setFocusPainted(false); // remove highlight when clicked
     }
 
+    public Button(final String text, final Icon icon) {
+        super(text, icon);
+        setAbsoluteSize(defaultWidth, defaultHeight);
+        setFocusPainted(false); // remove highlight when clicked
+    }
+
     public Button(final String text, final int width, final int height) {
         super(text);
         setAbsoluteSize(width, height);

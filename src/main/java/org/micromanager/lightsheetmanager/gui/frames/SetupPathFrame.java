@@ -3,11 +3,9 @@ package org.micromanager.lightsheetmanager.gui.frames;
 import net.miginfocom.swing.MigLayout;
 import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.data.Icons;
-import org.micromanager.lightsheetmanager.gui.setup.ExcitationPanel;
 import org.micromanager.lightsheetmanager.gui.setup.SetupPanel;
 
 import javax.swing.JFrame;
-import java.awt.Dimension;
 import java.awt.Font;
 
 public class SetupPathFrame extends JFrame {
@@ -26,7 +24,6 @@ public class SetupPathFrame extends JFrame {
         final String title = "Setup Path " + pathNum_;
 
         setTitle(title);
-        setSize(new Dimension(600, 400));
 
         final Label lblTitle = new Label(title, Font.BOLD, 16);
 
@@ -36,6 +33,9 @@ public class SetupPathFrame extends JFrame {
 
         add(lblTitle, "wrap");
         add(setupPanel_, "wrap");
+
+        // call after adding ui elements
+        pack();
     }
 
     public int getPathNum() {
