@@ -40,8 +40,18 @@ public class LightSheetManagerModel implements LightSheetManager {
 
     }
 
-    // TODO: private and in constructor?
-    public void setup() {
+    /**
+     * Returns true when the model is loaded correctly.
+     *
+     * @return true if the model loads with no errors
+     */
+    public boolean setup() {
+
+        if (!hasLightSheetManagerDeviceAdapter()) {
+
+            return false;
+        }
+
         // get info about devices
         deviceManager_ = new DeviceManager(studio_);
         deviceManager_.setup();
@@ -51,6 +61,9 @@ public class LightSheetManagerModel implements LightSheetManager {
 
         //boolean isUsingPLogic = deviceManager_.isUsingPLogic();
         //System.out.println("isUsingPLogic: " + isUsingPLogic);
+
+        // if we made it here then everything loaded correctly
+        return true;
     }
 
     public AcquisitionEngine getAcquisitionEngine() {

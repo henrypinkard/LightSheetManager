@@ -40,8 +40,8 @@ public class LightSheetManagerPlugin implements MenuPlugin, SciJavaPlugin {
         // TODO: capture all errors like this?
         try {
             model_ = new LightSheetManagerModel(studio_);
-            model_.setup();
-            frame_ = new LightSheetManagerFrame(studio_, model_);
+            final boolean isLoaded = model_.setup();
+            frame_ = new LightSheetManagerFrame(studio_, model_, isLoaded);
             frame_.setVisible(true);
             frame_.toFront();
         } catch (Exception e) {
