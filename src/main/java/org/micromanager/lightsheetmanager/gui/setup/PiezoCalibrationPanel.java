@@ -32,13 +32,13 @@ public class PiezoCalibrationPanel extends Panel {
         final JLabel lblSlope = new JLabel("Slope:");
         final JLabel lblOffset = new JLabel("Offset:");
         final JLabel lblStepSize = new JLabel("Step Size:");
-        final JLabel lblMicrons = new JLabel("μm");
+        //final JLabel lblMicrons = new JLabel("μm");
         final JLabel lblMicronsPerDeg = new JLabel("μm/°");
 
-        Button.setDefaultSize(120, 20);
+        Button.setDefaultSize(80, 26);
         btnTwoPoint_ = new Button("2-point");
         btnUpdate_ = new Button("Update");
-        btnRunAutofocus_ = new Button("Run Autofocus");
+        btnRunAutofocus_ = new Button("Run Autofocus", 120, 26);
 
         txtSlope_ = new TextField();
         txtOffset_ = new TextField();
@@ -50,20 +50,20 @@ public class PiezoCalibrationPanel extends Panel {
 
         createEventHandlers();
 
-        add(lblSlope, "split 3");
+        add(lblSlope, "");
         add(txtSlope_, "");
         add(lblMicronsPerDeg, "");
         add(btnTwoPoint_, "wrap");
-        add(lblOffset, "split 3");
+        add(lblOffset, "");
         add(txtOffset_, "");
         add(new JLabel("μm"), "");
         add(btnUpdate_, "wrap");
-        add(lblStepSize, "split 3");
+        add(lblStepSize, "");
         add(txtStepSize_, "");
         add(new JLabel("μm"), "");
         add(btnStepDown_, "split 2");
         add(btnStepUp_, "wrap");
-        add(btnRunAutofocus_, "");
+        add(btnRunAutofocus_, "span 3");
     }
 
     private void createEventHandlers() {
@@ -96,6 +96,9 @@ public class PiezoCalibrationPanel extends Panel {
 
         });
 
+        btnRunAutofocus_.registerListener(e -> {
+
+        });
     }
 
 }

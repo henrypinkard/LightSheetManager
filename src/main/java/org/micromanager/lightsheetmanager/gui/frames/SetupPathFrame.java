@@ -24,6 +24,7 @@ public class SetupPathFrame extends JFrame {
         final String title = "Setup Path " + pathNum_;
 
         setTitle(title);
+        setResizable(false);
 
         final Label lblTitle = new Label(title, Font.BOLD, 16);
 

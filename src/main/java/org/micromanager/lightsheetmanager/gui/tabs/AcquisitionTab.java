@@ -38,6 +38,10 @@ public class AcquisitionTab extends Panel {
     private Label lblVolumeTime_;
     private Label lblTotalTime_;
 
+    private Label lblSliceTimeValue_;
+    private Label lblVolumeTimeValue_;
+    private Label lblTotalTimeValue_;
+
     // time points
     private Label lblNumTimePoints_;
     private Label lblInterval_;
@@ -109,6 +113,10 @@ public class AcquisitionTab extends Panel {
         lblVolumeTime_ = new Label("Volume:");
         lblTotalTime_ = new Label("Total:");
 
+        lblSliceTimeValue_ = new Label("0.0");
+        lblVolumeTimeValue_ = new Label("0.0");
+        lblTotalTimeValue_ = new Label("0.0");
+
         // time points
         lblNumTimePoints_ = new Label("Number:");
         lblInterval_ = new Label("Interval [s]:");
@@ -144,9 +152,12 @@ public class AcquisitionTab extends Panel {
         createEventHandlers();
 
         // durations
-        panelDurations_.add(lblSliceTime_, "wrap");
-        panelDurations_.add(lblVolumeTime_, "wrap");
+        panelDurations_.add(lblSliceTime_, "");
+        panelDurations_.add(lblSliceTimeValue_, "wrap");
+        panelDurations_.add(lblVolumeTime_, "");
+        panelDurations_.add(lblVolumeTimeValue_, "wrap");
         panelDurations_.add(lblTotalTime_, "");
+        panelDurations_.add(lblTotalTimeValue_, "");
 
         // time points
         panelTimePoints_.add(lblNumTimePoints_, "");

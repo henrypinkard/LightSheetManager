@@ -21,13 +21,13 @@ public class CameraPanel extends Panel {
     }
 
     private void init() {
-        Button.setDefaultSize(75, 26);
+        Button.setDefaultSize(80, 26);
         btnImagingPath_ = new Button("Imaging");
         btnMultiPath_ = new Button("Multi");
         btnEpiPath_ = new Button("Epi");
         btnInvertedPath_ = new Button("Inverted");
 
-        Button.setDefaultSize(155, 26);
+        Button.setDefaultSize(165, 26);
         btnLiveMode_ = new Button("Live", Icons.CAMERA);
 
         createEventHandlers();
