@@ -1,5 +1,6 @@
 package org.micromanager.lightsheetmanager.model;
 
+import mmcorej.StrVector;
 import org.micromanager.lightsheetmanager.api.data.CameraLibrary;
 import mmcorej.CMMCore;
 import mmcorej.DeviceType;
@@ -39,11 +40,18 @@ public class DeviceManager {
     private Map<String, DeviceBase> deviceMap_;
     private Map<String, DeviceBase> devicesAdded_;
 
-   // private static final String deviceName = "LightSheetDeviceManager";
+    private LightSheetManagerModel model_;
 
-    public DeviceManager(final Studio studio) {
+    private static String deviceAdapterName_;
+    public static final String LSM_DEVICE_LIBRARY = "LightSheetManager";
+
+    public DeviceManager(final Studio studio, final LightSheetManagerModel model) {
         studio_ = Objects.requireNonNull(studio);
+        model_ = Objects.requireNonNull(model);
         core_ = studio_.core();
+
+        // set by hasDeviceAdapter
+        deviceAdapterName_ = "";
 
         // TODO: ConcurrentHashMap or HashMap?
         deviceMap_ = new ConcurrentHashMap<>();
@@ -62,7 +70,7 @@ public class DeviceManager {
         devicesAdded_.clear();
 
         // always add an entry for the device adapter
-        LightSheetDeviceManager lsm = new LightSheetDeviceManager(studio_);
+        LightSheetDeviceManager lsm = new LightSheetDeviceManager(studio_, deviceAdapterName_);
         lsm.getPreInitProperties();
 
         deviceMap_.put("LightSheetDeviceManager", lsm);
@@ -180,7 +188,7 @@ public class DeviceManager {
                 addDevice(propertyName, deviceName, demoCamera);
                 break;
             default:
-                studio_.logs().showError("No device type match!");
+                studio_.logs().showError("No device type matches!");
                 // TODO: error "Camera library not supported"
                 break;
         }
@@ -248,6 +256,52 @@ public class DeviceManager {
         } catch (Exception e) {
             return DeviceType.UnknownType;
         }
+    }
+
+    public String[] getLoadedDevices() {
+        StrVector loadedDevices = new StrVector();
+        try {
+            loadedDevices = core_.getLoadedDevices();
+        } catch (Exception e) {
+            studio_.logs().logError(e.getMessage());
+        }
+        return loadedDevices.toArray();
+    }
+
+    /**
+     * Returns true if the hardware configuration has the LightSheetManager device adapter. The user can
+     * change the device name of the adapter, but not the device library so that's what we detect. Also,
+     * the name of the device adapter is cached for later usage. This also set the error text on the model
+     * when an error is encountered, this is used in the error user interface.
+     *
+     * @return true if the hardware configuration has the device adapter
+     */
+    public boolean hasDeviceAdapter() {
+        int count = 0;
+        final String[] devices = getLoadedDevices();
+        for (String device : devices) {
+            try {
+                final String deviceLibrary = core_.getDeviceLibrary(device);
+                if (deviceLibrary.equals(LSM_DEVICE_LIBRARY)) {
+                    deviceAdapterName_ = device;
+                    count++;
+                    if (count > 1) {
+                        model_.setErrorText("You have multiple instances of the LightSheetManager " +
+                                "device adapter in your hardware configuration.");
+                        break; // exit loop because this a failure condition
+                    }
+                }
+            } catch (Exception e) {
+                studio_.logs().logError("could not get the device " +
+                        "library for the device \"" + device + "\".");
+            }
+        }
+        // no device adapters found
+        if (count == 0) {
+            model_.setErrorText("Please add the LightSheetManager device adapter to your " +
+                    "hardware configuration to use this plugin.");
+        }
+        return count == 1;
     }
 
 }

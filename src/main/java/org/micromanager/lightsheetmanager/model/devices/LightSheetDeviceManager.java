@@ -1,7 +1,6 @@
 package org.micromanager.lightsheetmanager.model.devices;
 
 import mmcorej.DeviceType;
-import mmcorej.StrVector;
 import org.micromanager.Studio;
 import org.micromanager.lightsheetmanager.api.data.GeometryType;
 import org.micromanager.lightsheetmanager.api.data.LightSheetType;
@@ -30,10 +29,8 @@ public class LightSheetDeviceManager extends DeviceBase {
     private int numIlluminationPaths_;
     private int numSimultaneousCameras_;
 
-    private static final String deviceName_ = "LightSheetDeviceManager";
-
-    public LightSheetDeviceManager(final Studio studio) {
-        super(studio, deviceName_);
+    public LightSheetDeviceManager(final Studio studio, final String deviceName) {
+        super(studio, deviceName);
     }
 
     // TODO: safely use Integer.parseInt
@@ -49,7 +46,6 @@ public class LightSheetDeviceManager extends DeviceBase {
         // convert pre-init property strings to enum constants
         geometryType_ = GeometryType.fromString(getProperty("MicroscopeGeometry"));
         lightSheetType_ = LightSheetType.fromString(getProperty("LightSheetType"));
-        //System.out.println("geometryType_: " + geometryType_);
     }
 
     // TODO: is this needed?

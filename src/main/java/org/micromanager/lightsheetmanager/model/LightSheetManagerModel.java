@@ -1,7 +1,6 @@
 package org.micromanager.lightsheetmanager.model;
 
 import mmcorej.CMMCore;
-import mmcorej.StrVector;
 import org.micromanager.LogManager;
 import org.micromanager.Studio;
 import org.micromanager.lightsheetmanager.api.AutofocusSettings;
@@ -10,7 +9,6 @@ import org.micromanager.lightsheetmanager.api.TimingSettings;
 import org.micromanager.lightsheetmanager.api.VolumeSettings;
 import org.micromanager.lightsheetmanager.model.playlist.AcquisitionTableData;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -21,6 +19,8 @@ public class LightSheetManagerModel implements LightSheetManager {
     private final Studio studio_;
     private final CMMCore core_;
     private final LogManager logs_;
+
+    private String errorText_;
 
     private UserSettings settings_;
 
@@ -34,10 +34,12 @@ public class LightSheetManagerModel implements LightSheetManager {
         core_ = studio_.core();
         logs_ = studio_.logs();
 
+        // set during setup if there is an error
+        // displayed in the error ui
+        errorText_ = "";
+
         settings_ = new UserSettings(studio_, this);
-
         acqEngine_ = new AcquisitionEngine(studio_, this);
-
     }
 
     /**
@@ -47,23 +49,34 @@ public class LightSheetManagerModel implements LightSheetManager {
      */
     public boolean setup() {
 
-        if (!hasLightSheetManagerDeviceAdapter()) {
+        deviceManager_ = new DeviceManager(studio_, this);
 
+        // first we check to see if the device adapter is present
+        if (!deviceManager_.hasDeviceAdapter()) {
             return false;
         }
 
-        // get info about devices
-        deviceManager_ = new DeviceManager(studio_);
+        // setup devices
         deviceManager_.setup();
 
-        // load settings from JSON
+        // load settings
         settings_.load();
-
-        //boolean isUsingPLogic = deviceManager_.isUsingPLogic();
-        //System.out.println("isUsingPLogic: " + isUsingPLogic);
 
         // if we made it here then everything loaded correctly
         return true;
+    }
+
+    /**
+     * This sets the text to be displayed in the error ui when an error occurs during setup.
+     *
+     * @param text the error message
+     */
+    public void setErrorText(final String text) {
+        errorText_ = text;
+    }
+
+    public String getErrorText() {
+        return errorText_;
     }
 
     public AcquisitionEngine getAcquisitionEngine() {
@@ -84,21 +97,6 @@ public class LightSheetManagerModel implements LightSheetManager {
 
     public UserSettings getUserSettings() {
         return settings_;
-    }
-
-    public String[] getLoadedDevices() {
-        StrVector loadedDevices = new StrVector();
-        try {
-            loadedDevices = core_.getLoadedDevices();
-        } catch (Exception e) {
-            studio_.logs().logError(e.getMessage());
-        }
-        return loadedDevices.toArray();
-    }
-
-    public boolean hasLightSheetManagerDeviceAdapter() {
-        final String[] devices = getLoadedDevices();
-        return Arrays.asList(devices).contains("LightSheetDeviceManager");
     }
 
     @Override

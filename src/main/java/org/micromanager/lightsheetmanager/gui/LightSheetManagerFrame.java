@@ -61,9 +61,11 @@ public class LightSheetManagerFrame extends JFrame {
                 "[]10[]",
                 "[]10[]"
         ));
-        final String warning = "Please add LightSheetDeviceManager to your hardware configuration to use this plugin.";
-        final Label lblTitle = new Label(warning, Font.BOLD, 16);
-        add(lblTitle, "");
+        final Label lblTitle = new Label("Light Sheet Manager", Font.BOLD, 16);
+        final Label lblError = new Label("Error: " + model_.getErrorText(), Font.BOLD, 14);
+
+        add(lblTitle, "wrap");
+        add(lblError, "");
 
         pack(); // fit window size to layout
         setIconImage(Icons.MICROSCOPE.getImage());
