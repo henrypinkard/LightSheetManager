@@ -8,6 +8,7 @@ import mmcorej.CMMCore;
 import mmcorej.DeviceType;
 import org.micromanager.Studio;
 
+import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 import javax.swing.border.TitledBorder;
 import java.util.ArrayList;
@@ -56,8 +57,8 @@ public class NavigationPanel extends Panel {
 
         //LightSheetDeviceManager lsm = devices_.getDeviceAdapter();
 
-        btnHaltDevices_ = new Button("HALT", 100, 20);
-        btnRefreshNavPanel_ = new Button("Refresh", 100, 20);
+        btnHaltDevices_ = new Button("HALT", 120, 30);
+        btnRefreshNavPanel_ = new Button("Refresh", 120, 30);
         chkPollPositions_ = new CheckBox("Poll Positions", true);
 
         final int numImagingPaths = devices_.getDeviceAdapter().getNumImagingPaths();
@@ -85,6 +86,7 @@ public class NavigationPanel extends Panel {
         System.out.println("img props: " + imagingProperties.size());
         System.out.println("ill props: " + illumProperties.size());
 
+        int devicesFound = 0;
         for (String propertyName : deviceMap.keySet()) {
             final String deviceName = deviceMap.get(propertyName);
             if (deviceName.equals("Undefined")) {
@@ -142,6 +144,15 @@ public class NavigationPanel extends Panel {
                     System.out.println(propertyName + " NOT added to misc properties");
                 }
             }
+            devicesFound++;
+        }
+
+        if (devicesFound == 0) {
+            add(new JLabel("No devices or device adapter properties are not set."), "wrap");
+            add(btnHaltDevices_, "wrap");
+            add(btnRefreshNavPanel_, "wrap");
+            add(chkPollPositions_, "");
+            return;
         }
 
         miscProperties.sort(Comparator.comparing(ControlPanel::getPropertyName));
@@ -206,8 +217,7 @@ public class NavigationPanel extends Panel {
         btnHaltDevices_.registerListener(e -> haltAllDevices());
         chkPollPositions_.registerListener(e -> {
             isPollingPositions = !isPollingPositions;
-
-            System.out.println(isPollingPositions);
+            System.out.println("isPollingPositions: " + isPollingPositions);
         });
     }
 

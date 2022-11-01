@@ -42,19 +42,19 @@ public class TabPanel extends Panel {
 
         //tabbedPane_ = new TabbedPane();
         tabbedPane_ = new TabbedPane(800, 600);
-        init();
+        createUserInterface();
     }
 
     /**
      * Create the panel.
      */
-    private void init() {
+    private void createUserInterface() {
         // create panels
         acquisitionPanel_ = new AcquisitionTab(studio_, model_);
         autofocusPanel_ = new AutofocusTab();
         cameraPanel_ = new CameraTab();
         dataPanel_ = new DataTab();
-        devicePanel_ = new DeviceTab(devices_);
+        devicePanel_ = new DeviceTab(devices_, model_);
         settingsPanel_ = new SettingsTab();
         helpPanel_ = new HelpTab();
 

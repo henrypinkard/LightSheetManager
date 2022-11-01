@@ -92,13 +92,13 @@ public class LightSheetManagerFrame extends JFrame {
         lblTitle.setFont(new Font(Font.MONOSPACED, Font.BOLD, 20));
 
         tabPanel_ = new TabPanel(studio_, model_, model_.getDeviceManager());
-        navigationPanel_ = new NavigationPanel(studio_, model_.getDeviceManager());
+        //navigationPanel_ = new NavigationPanel(studio_, model_.getDeviceManager());
 
         // add ui elements to the panel
         add(lblTitle, "wrap");
 
         // build the navigation panel
-        navigationPanel_.init();
+        //navigationPanel_.init();
 
         // GeometryType geometryType = model_.devices().getDeviceAdapter().getMicroscopeGeometry();
 

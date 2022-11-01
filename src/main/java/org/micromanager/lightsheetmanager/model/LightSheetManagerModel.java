@@ -99,6 +99,14 @@ public class LightSheetManagerModel implements LightSheetManager {
         return settings_;
     }
 
+    public CMMCore getCore() {
+        return core_;
+    }
+
+    public Studio getStudio() {
+        return studio_;
+    }
+
     @Override
     public AutofocusSettings.Builder autofocusSettingsBuilder() {
         return null;
