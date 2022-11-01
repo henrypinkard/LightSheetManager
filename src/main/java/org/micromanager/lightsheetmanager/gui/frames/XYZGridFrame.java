@@ -6,6 +6,7 @@ import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.components.Spinner;
+import org.micromanager.internal.utils.WindowPositioning;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -32,6 +33,7 @@ public class XYZGridFrame extends JFrame {
     private Spinner spnZDelta_;
 
     public XYZGridFrame() {
+        WindowPositioning.setUpBoundsMemory(this, this.getClass(), this.getClass().getSimpleName());
         createUserInterface();
         createEventHandlers();
     }

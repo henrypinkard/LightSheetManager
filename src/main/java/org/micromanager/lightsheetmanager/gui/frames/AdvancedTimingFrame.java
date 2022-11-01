@@ -7,6 +7,7 @@ import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;
 import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.components.Spinner;
+import org.micromanager.internal.utils.WindowPositioning;
 
 import javax.swing.JFrame;
 import java.util.Objects;
@@ -39,6 +40,7 @@ public class AdvancedTimingFrame extends JFrame {
 
     public AdvancedTimingFrame(final LightSheetManagerModel model) {
         model_ = Objects.requireNonNull(model);
+        WindowPositioning.setUpBoundsMemory(this, this.getClass(), this.getClass().getSimpleName());
         tsb_ = model_.acquisitions().getTimingSettingsBuilder();
         createUserInterface();
         createEventHandlers();
@@ -47,7 +49,6 @@ public class AdvancedTimingFrame extends JFrame {
     private void createUserInterface() {
         setTitle("Advanced Timing Settings");
         setIconImage(Icons.MICROSCOPE.getImage());
-        setLocation(150, 150);
         setResizable(false);
         setLayout(new MigLayout(
                 "insets 20 20 20 20",

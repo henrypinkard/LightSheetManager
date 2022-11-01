@@ -4,6 +4,7 @@ import net.miginfocom.swing.MigLayout;
 import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.data.Icons;
 import org.micromanager.lightsheetmanager.gui.setup.SetupPanel;
+import org.micromanager.internal.utils.WindowPositioning;
 
 import javax.swing.JFrame;
 import java.awt.Font;
@@ -17,6 +18,7 @@ public class SetupPathFrame extends JFrame {
     public SetupPathFrame(final int pathNum) {
         setLayout(new MigLayout("", "", ""));
         pathNum_ = pathNum;
+        WindowPositioning.setUpBoundsMemory(this, this.getClass(), this.getClass().getSimpleName() + pathNum_);
         createUserInterface();
     }
 

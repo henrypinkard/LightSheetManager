@@ -14,6 +14,7 @@ import org.micromanager.lightsheetmanager.gui.data.Icons;
 import org.micromanager.lightsheetmanager.gui.navigation.NavigationPanel;
 import org.micromanager.lightsheetmanager.gui.utils.WindowUtils;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
+import org.micromanager.internal.utils.WindowPositioning;
 
 import javax.swing.JFrame;
 import java.awt.Font;
@@ -38,6 +39,8 @@ public class LightSheetManagerFrame extends JFrame {
         model_ = Objects.requireNonNull(model);
         core_ = studio_.core();
 
+        WindowPositioning.setUpBoundsMemory(this, this.getClass(), this.getClass().getSimpleName());
+
         if (isLoaded) {
             createUserInterface();
         } else {
@@ -52,8 +55,6 @@ public class LightSheetManagerFrame extends JFrame {
     private void createErrorUserInterface() {
         setTitle(LightSheetManagerPlugin.menuName);
         setResizable(false);
-        //setSize(600, 100);
-        setLocation(200, 200);
 
         // use MigLayout as the layout manager
         setLayout(new MigLayout(
@@ -77,7 +78,7 @@ public class LightSheetManagerFrame extends JFrame {
     private void createUserInterface() {
         setTitle(LightSheetManagerPlugin.menuName);
         setResizable(false);
-        setLocation(200, 200);
+        //setLocation(200, 200);
         //setSize(600, 400);
 
         // use MigLayout as the layout manager
