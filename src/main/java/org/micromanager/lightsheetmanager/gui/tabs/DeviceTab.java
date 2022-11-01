@@ -18,6 +18,7 @@ import java.util.Objects;
  */
 public class DeviceTab extends Panel {
 
+    private Button btnCreateConfigGroup_;
     private Button btnOpenNavigationFrame_;
 
     private ArrayList<Button> setupPanelButtons_;
@@ -45,6 +46,8 @@ public class DeviceTab extends Panel {
 
         navFrame_ = new NavigationFrame(model_.getStudio(), model_);
         navFrame_.init();
+
+        btnCreateConfigGroup_ = new Button("Create System Configuration Group", 220, 30);
 
         final GeometryType geometryType = devices_.getDeviceAdapter().getMicroscopeGeometry();
         final int numImagingPaths = devices_.getDeviceAdapter().getNumImagingPaths();
@@ -84,6 +87,8 @@ public class DeviceTab extends Panel {
         for (Button button : setupPanelButtons_) {
             add(button, "wrap");
         }
+
+        add(btnCreateConfigGroup_, "gaptop 100");
     }
 
     private void createEventHandlers() {
@@ -100,5 +105,9 @@ public class DeviceTab extends Panel {
                 setupPathFrames_.get(index).setVisible(true);
             });
         }
+
+        btnCreateConfigGroup_.registerListener(e -> {
+            devices_.createConfigGroup();
+        });
     }
 }

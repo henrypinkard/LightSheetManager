@@ -72,8 +72,9 @@ public class DeviceManager {
         // always add an entry for the device adapter
         LightSheetDeviceManager lsm = new LightSheetDeviceManager(studio_, deviceAdapterName_);
         lsm.getPreInitProperties();
-
         deviceMap_.put("LightSheetDeviceManager", lsm);
+
+        //(); // TODO: maybe find a better place for this object?
 
         // keep track of device we have already added to the map
         // used when multiple properties are mapped to the same device
@@ -302,6 +303,41 @@ public class DeviceManager {
                     "hardware configuration to use this plugin.");
         }
         return count == 1;
+    }
+
+    /**
+     * Creates a configuration group named "System" that includes all device properties
+     * the Light Sheet Manager device adapter.
+     */
+    public void createConfigGroup() {
+        final String groupName = "System";
+        final String configName = "Startup";
+
+        if (core_.isGroupDefined(groupName)) {
+            studio_.logs().showError("\"System\" configuration group is already defined.");
+            return; // already defined => early exit
+        }
+
+        try {
+            core_.defineConfigGroup(groupName);
+        } catch (Exception e) {
+            studio_.logs().logError("Could not create the \"System\" configuration group.");
+            return; // error => early exit
+        }
+
+        String[] props = getDeviceAdapter().getDevicePropertyNames();
+        String[] properties = getDeviceAdapter().getEditableProperties(props);
+
+        for (String propertyName : properties) {
+            try {
+                core_.defineConfig(groupName, configName, deviceAdapterName_, propertyName, LightSheetDeviceManager.UNDEFINED);
+            } catch (Exception e) {
+                studio_.logs().logError("Could not create the \"" + propertyName + "\" property the \"System\" configuration group.");
+            }
+        }
+
+        // update MM ui
+        studio_.getApplication().refreshGUI();
     }
 
 }

@@ -1,6 +1,7 @@
 package org.micromanager.lightsheetmanager.model.devices;
 
 import mmcorej.DeviceType;
+import org.micromanager.Application;
 import org.micromanager.Studio;
 import org.micromanager.lightsheetmanager.api.data.GeometryType;
 import org.micromanager.lightsheetmanager.api.data.LightSheetType;
@@ -110,5 +111,4 @@ public class LightSheetDeviceManager extends DeviceBase {
         return deviceMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> getDeviceType(e.getValue())));
     }
-
 }
