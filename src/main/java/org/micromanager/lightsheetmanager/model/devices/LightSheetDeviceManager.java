@@ -1,7 +1,6 @@
 package org.micromanager.lightsheetmanager.model.devices;
 
 import mmcorej.DeviceType;
-import org.micromanager.Application;
 import org.micromanager.Studio;
 import org.micromanager.lightsheetmanager.api.data.GeometryType;
 import org.micromanager.lightsheetmanager.api.data.LightSheetType;
@@ -40,13 +39,19 @@ public class LightSheetDeviceManager extends DeviceBase {
      * using the getters for pre-init properties.
      */
     public void getPreInitProperties() {
-        // convert pre-init property strings to ints
-        numImagingPaths_ = Integer.parseInt(getProperty("ImagingPaths"));
-        numIlluminationPaths_ = Integer.parseInt(getProperty("IlluminationPaths"));
-        numSimultaneousCameras_ = Integer.parseInt(getProperty("SimultaneousCameras"));
-        // convert pre-init property strings to enum constants
-        geometryType_ = GeometryType.fromString(getProperty("MicroscopeGeometry"));
-        lightSheetType_ = LightSheetType.fromString(getProperty("LightSheetType"));
+        try {
+            // convert pre-init property strings to ints
+            numImagingPaths_ = Integer.parseInt(getProperty("ImagingPaths"));
+            numIlluminationPaths_ = Integer.parseInt(getProperty("IlluminationPaths"));
+            numSimultaneousCameras_ = Integer.parseInt(getProperty("SimultaneousCameras"));
+            // convert pre-init property strings to enum constants
+            geometryType_ = GeometryType.fromString(getProperty("MicroscopeGeometry"));
+            lightSheetType_ = LightSheetType.fromString(getProperty("LightSheetType"));
+            //System.out.println("geometryType_: " + geometryType_);
+        } catch (NumberFormatException nfe) {
+            throw new NumberFormatException("Please first add the LightSheetDeviceManager in the "
+                  + "Hardware Configuration Wizard.");
+        }
     }
 
     // TODO: is this needed?
@@ -111,4 +116,5 @@ public class LightSheetDeviceManager extends DeviceBase {
         return deviceMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> getDeviceType(e.getValue())));
     }
+
 }
