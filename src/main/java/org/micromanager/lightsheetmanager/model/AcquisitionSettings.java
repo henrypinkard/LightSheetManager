@@ -41,6 +41,7 @@ public class AcquisitionSettings {
 
     private boolean isStageScanning_;
     private boolean isUsingHardwareTimePoints_;
+    private boolean useSeparateTimepoints_;
 
     private int numChannels_;
     private int numTimePoints_;
@@ -52,6 +53,7 @@ public class AcquisitionSettings {
         channelGroup_ = "";
         cameraExposure_ = 10.0f;
         isStageScanning_ = false;
+        useSeparateTimepoints_ = false;
         spimMode_ = AcquisitionModes.NONE;
         cameraModes_ = CameraModes.EDGE;
         channelMode_ = MultiChannelModes.VOLUME_HW;
@@ -73,7 +75,6 @@ public class AcquisitionSettings {
     }
 
     public DefaultVolumeSettings getVolumeSettings() {
-        System.out.println("volumeSettings_: " + volumeSettings_);
         return volumeSettings_;
     }
 
@@ -139,6 +140,10 @@ public class AcquisitionSettings {
 
     public boolean isUsingTimePoints() {
         return useTimepoints_;
+    }
+
+    public boolean isUsingSeparateTimepoints() {
+        return useSeparateTimepoints_;
     }
 
     public ChannelSpec[] getChannels() {

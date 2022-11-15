@@ -540,6 +540,11 @@ public class PLogicDISPIM {
         return false;
     }
 
+    public double getActualStepSizeUm() {
+        return actualStepSizeUm_;
+    }
+
+
 }
 
 
