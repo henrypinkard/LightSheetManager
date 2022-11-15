@@ -7,7 +7,9 @@ import org.micromanager.PositionList;
 import org.micromanager.Studio;
 import org.micromanager.data.Coordinates;
 import org.micromanager.data.Coords;
+import org.micromanager.data.Datastore;
 import org.micromanager.data.Image;
+import org.micromanager.display.DisplayWindow;
 import org.micromanager.lightsheetmanager.api.AcquisitionManager;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettings;
@@ -19,6 +21,7 @@ import org.micromanager.lightsheetmanager.model.devices.cameras.AndorCamera;
 import org.micromanager.lightsheetmanager.model.devices.vendor.ASIScanner;
 import org.micromanager.lightsheetmanager.model.utils.MyNumberUtils;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -126,6 +129,8 @@ public class AcquisitionEngine implements AcquisitionManager {
 
     private boolean runAcquisitionDISPIM() {
         // validate settings
+        Datastore datastore = data_.getDatastore();
+
 
         Coords.CoordsBuilder builder = Coordinates.builder();
 
@@ -141,13 +146,7 @@ public class AcquisitionEngine implements AcquisitionManager {
             }
         }
 
-        // TODO: get this from model
-        boolean minSlicePeriod = false;
-
         // make sure slice timings are up-to-date
-        // do this automatically; we used to prompt user if they were out of date
-        // do this before getting snapshot of sliceTiming_ in acqSettings
-        //recalculateSliceTiming(!minSlicePeriodCB_.isSelected());
         recalculateSliceTiming(acqSettings_);
         System.out.println(acqSettings_.getTimingSettings());
 
@@ -205,7 +204,8 @@ public class AcquisitionEngine implements AcquisitionManager {
         }
 
         // setup
-        studio_.displays().createDisplay(data_.getDatastore());
+        studio_.displays().createDisplay(datastore);
+        studio_.displays().manage(datastore);
         Coords.CoordsBuilder cb = Coordinates.builder();
 
         try {
@@ -303,7 +303,7 @@ public class AcquisitionEngine implements AcquisitionManager {
             // try to close last acquisition viewer if there could be one open (only in single acquisition per timepoint mode)
             if (acqSettings_.isUsingSeparateTimepoints() && !isRunning_.get()) {
                 try {
-                    studio_.displays().closeDisplaysFor(data_.getDatastore());
+                    studio_.displays().closeDisplaysFor(datastore);
                 } catch (Exception ex) {
                     // ignore => do nothing on failure
                 }
@@ -493,7 +493,7 @@ public class AcquisitionEngine implements AcquisitionManager {
                                             // an image is ready
                                             TaggedImage taggedImage = core_.popNextTaggedImage();
                                             Image image = studio_.data().convertTaggedImage(taggedImage, builder.time(numTimePointsDone).build(), null);
-                                            data_.getDatastore().putImage(image);
+                                            datastore.putImage(image);
                                             totalImages++;
                                         } else {
                                             // image not ready yet
@@ -553,6 +553,13 @@ public class AcquisitionEngine implements AcquisitionManager {
         // cleanup
         studio_.logs().logMessage("diSPIM plugin acquisition " + //+ acqName_ +
                 " took: " + (System.currentTimeMillis() - acqButtonStart) + "ms");
+
+        // prevent acquisition data from being modified
+        try {
+            datastore.freeze();
+        } catch (IOException e) {
+            studio_.logs().logError("could not freeze the datastore!");
+        }
 
         // clean up controller settings after acquisition
         // want to do this, even with demo cameras, so we can test everything else
