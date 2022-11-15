@@ -110,4 +110,9 @@ public class DeviceTab extends Panel {
             devices_.createConfigGroup();
         });
     }
+
+    public NavigationFrame getNavigationFrame() {
+        return navFrame_;
+    }
+
 }

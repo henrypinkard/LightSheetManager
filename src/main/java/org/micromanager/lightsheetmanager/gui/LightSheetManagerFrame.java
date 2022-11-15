@@ -92,16 +92,9 @@ public class LightSheetManagerFrame extends JFrame {
         lblTitle.setFont(new Font(Font.MONOSPACED, Font.BOLD, 20));
 
         tabPanel_ = new TabPanel(studio_, model_, model_.getDeviceManager());
-        //navigationPanel_ = new NavigationPanel(studio_, model_.getDeviceManager());
 
         // add ui elements to the panel
         add(lblTitle, "wrap");
-
-        // build the navigation panel
-        //navigationPanel_.init();
-
-        // GeometryType geometryType = model_.devices().getDeviceAdapter().getMicroscopeGeometry();
-
         add(tabPanel_, "wrap");
 
         pack(); // fit window size to layout
@@ -114,7 +107,7 @@ public class LightSheetManagerFrame extends JFrame {
         studio_.events().registerForEvents(this);
 
         WindowUtils.registerWindowClosingEvent(this, event -> {
-                navigationPanel_.stopTimer();
+                tabPanel_.getDeviceTab().getNavigationFrame().stopTimer();
                 model_.getAcquisitionEngine().setSettingsFromBuilders();
                 model_.getUserSettings().save();
                 System.out.println("main window closed!");

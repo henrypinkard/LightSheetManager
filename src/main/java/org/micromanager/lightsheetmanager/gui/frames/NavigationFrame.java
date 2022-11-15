@@ -22,4 +22,8 @@ public class NavigationFrame extends JFrame {
     public void init() {
         navigationPanel_.init();
     }
+
+    public void stopTimer() {
+        navigationPanel_.stopTimer();
+    }
 }

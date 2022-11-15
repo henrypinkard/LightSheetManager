@@ -22,13 +22,13 @@ import java.util.Objects;
 public class TabPanel extends Panel {
 
     private Studio studio_;
-    private AcquisitionTab acquisitionPanel_;
-    private AutofocusTab autofocusPanel_;
-    private DataTab dataPanel_;
-    private DeviceTab devicePanel_;
-    private CameraTab cameraPanel_;
-    private SettingsTab settingsPanel_;
-    private HelpTab helpPanel_;
+    private AcquisitionTab acquisitionTab_;
+    private AutofocusTab autofocusTab_;
+    private DataTab dataTab_;
+    private DeviceTab deviceTab_;
+    private CameraTab cameraTab_;
+    private SettingsTab settingsTab_;
+    private HelpTab helpTab_;
 
     private final TabbedPane tabbedPane_;
 
@@ -40,7 +40,6 @@ public class TabPanel extends Panel {
         devices_ = Objects.requireNonNull(devices);
         model_ = Objects.requireNonNull(model);
 
-        //tabbedPane_ = new TabbedPane();
         tabbedPane_ = new TabbedPane(800, 600);
         createUserInterface();
     }
@@ -50,22 +49,22 @@ public class TabPanel extends Panel {
      */
     private void createUserInterface() {
         // create panels
-        acquisitionPanel_ = new AcquisitionTab(studio_, model_);
-        autofocusPanel_ = new AutofocusTab();
-        cameraPanel_ = new CameraTab();
-        dataPanel_ = new DataTab();
-        devicePanel_ = new DeviceTab(devices_, model_);
-        settingsPanel_ = new SettingsTab();
-        helpPanel_ = new HelpTab();
+        acquisitionTab_ = new AcquisitionTab(studio_, model_);
+        autofocusTab_ = new AutofocusTab();
+        cameraTab_ = new CameraTab();
+        dataTab_ = new DataTab();
+        deviceTab_ = new DeviceTab(devices_, model_);
+        settingsTab_ = new SettingsTab();
+        helpTab_ = new HelpTab();
 
         // add tabs to the pane
-        tabbedPane_.addTab(createTabTitle("Acquisition"), acquisitionPanel_);
-        tabbedPane_.addTab(createTabTitle("Autofocus"), autofocusPanel_);
-        tabbedPane_.addTab(createTabTitle("Cameras"), cameraPanel_);
-        tabbedPane_.addTab(createTabTitle("Data"), dataPanel_);
-        tabbedPane_.addTab(createTabTitle("Devices"), devicePanel_);
-        tabbedPane_.addTab(createTabTitle("Settings"), settingsPanel_);
-        tabbedPane_.addTab(createTabTitle("Help"), helpPanel_);
+        tabbedPane_.addTab(createTabTitle("Acquisition"), acquisitionTab_);
+        tabbedPane_.addTab(createTabTitle("Autofocus"), autofocusTab_);
+        tabbedPane_.addTab(createTabTitle("Cameras"), cameraTab_);
+        tabbedPane_.addTab(createTabTitle("Data"), dataTab_);
+        tabbedPane_.addTab(createTabTitle("Devices"), deviceTab_);
+        tabbedPane_.addTab(createTabTitle("Settings"), settingsTab_);
+        tabbedPane_.addTab(createTabTitle("Help"), helpTab_);
 //        tabbedPane.addTab(createTabTitle("Main"), mainPanel);
 //        tabbedPane.addTab(createTabTitle("Camera"), cameraPanel);
 //        tabbedPane.addTab(createTabTitle("Data"), dataPanel);
@@ -79,4 +78,7 @@ public class TabPanel extends Panel {
         return "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5><b><font size=4>" + title + "</font></b></body></html>";
     }
 
+    public DeviceTab getDeviceTab() {
+        return deviceTab_;
+    }
 }
