@@ -1,21 +1,23 @@
 package org.micromanager.lightsheetmanager.model;
 
+import java.util.concurrent.Future;
+import java.util.function.Function;
 import mmcorej.CMMCore;
 import mmcorej.TaggedImage;
 import org.micromanager.MultiStagePosition;
 import org.micromanager.PositionList;
 import org.micromanager.Studio;
-import org.micromanager.data.Coordinates;
-import org.micromanager.data.Coords;
-import org.micromanager.data.Datastore;
-import org.micromanager.data.Image;
-import org.micromanager.display.DisplayWindow;
+import org.micromanager.acqj.api.AcquisitionHook;
+import org.micromanager.acqj.main.Acquisition;
+import org.micromanager.acqj.main.AcquisitionEvent;
+import org.micromanager.internal.MMStudio;
 import org.micromanager.lightsheetmanager.api.AcquisitionManager;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettings;
 import org.micromanager.lightsheetmanager.api.internal.DefaultTimingSettings;
 import org.micromanager.lightsheetmanager.api.data.GeometryType;
 import org.micromanager.lightsheetmanager.api.internal.DefaultVolumeSettings;
+import org.micromanager.lightsheetmanager.model.data.AcquisitionModes;
 import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 import org.micromanager.lightsheetmanager.model.devices.cameras.AndorCamera;
 import org.micromanager.lightsheetmanager.model.devices.vendor.ASIScanner;
@@ -26,6 +28,9 @@ import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.micromanager.remote.RemoteAcquisition;
+import org.micromanager.remote.RemoteEventSource;
+import org.micromanager.remote.RemoteViewerStorageAdapter;
 
 public class AcquisitionEngine implements AcquisitionManager {
 
@@ -129,10 +134,8 @@ public class AcquisitionEngine implements AcquisitionManager {
 
     private boolean runAcquisitionDISPIM() {
         // validate settings
-        Datastore datastore = data_.getDatastore();
+        isRunning_.set(true);
 
-
-        Coords.CoordsBuilder builder = Coordinates.builder();
 
         int numTimePointsDone = 0;
         int numPositionsDone = 0;
@@ -160,17 +163,7 @@ public class AcquisitionEngine implements AcquisitionManager {
         int nrSlicesSoftware = acqSettings_.getVolumeSettings().slicesPerVolume();
         // TODO: channels
 
-        // set up XY positions
-        int nrPositions = 1;
-        PositionList positionList = new PositionList();
-        if (acqSettings_.isUsingMultiplePositions()) {
-            positionList = studio_.positions().getPositionList();
-            nrPositions = positionList.getNumberOfPositions();
-            if (nrPositions < 1) {
-                studio_.logs().showError("\"Positions\" is checked, but no positions are in position list");
-                // TODO: failure => return AcquisitionStatus.FATAL_ERROR;
-            }
-        }
+
 
         AndorCamera camera = (AndorCamera)model_.devices().getDevice("Imaging1Camera");
         CameraModes camMode = camera.getTriggerMode();
@@ -203,29 +196,10 @@ public class AcquisitionEngine implements AcquisitionManager {
             }
         }
 
-        // setup
-        studio_.displays().createDisplay(datastore);
-        studio_.displays().manage(datastore);
-        Coords.CoordsBuilder cb = Coordinates.builder();
-
-        try {
-            core_.clearCircularBuffer();
-        } catch (Exception ex) {
-            studio_.logs().showError(ex, "Error emptying out the circular buffer");
-            return false;
-        }
 
         // TODO: make sure position updater is turned off!
 
-        int nrFrames;   // how many Micro-manager "frames" = time points to take
-        int nrRepeats;
-        if (acqSettings_.isUsingSeparateTimepoints()) {
-            nrFrames = 1;
-            nrRepeats = acqSettings_.getNumTimePoints();
-        } else {
-            nrFrames = acqSettings_.getNumTimePoints();
-            nrRepeats = 1;
-        }
+
 
         double sliceDuration = acqSettings_.getTimingSettings().sliceDuration();
         if (exposureTime + cameraReadoutTime > sliceDuration) {
@@ -239,6 +213,174 @@ public class AcquisitionEngine implements AcquisitionManager {
             return false;
         }
 
+
+        // TODO: diSPIM has the following code, which is apparently needed for autofocusing
+//        boolean sideActiveA, sideActiveB;
+//        final boolean twoSided = acqSettingsOrig.numSides > 1;
+//        if (twoSided) {
+//            sideActiveA = true;
+//            sideActiveB = true;
+//        } else {
+//            if (!acqSettingsOrig.acquireBothCamerasSimultaneously) {
+//                secondCamera = null;
+//            }
+//            if (firstSideA) {
+//                sideActiveA = true;
+//                sideActiveB = false;
+//            } else {
+//                sideActiveA = false;
+//                sideActiveB = true;
+//            }
+//        }
+
+
+
+
+        // TODO: make static?
+        PLogicDISPIM controller = new PLogicDISPIM(studio_, model_.devices());
+
+        double extraChannelOffset = 0.0;
+        controller.prepareControllerForAquisition(acqSettings_, extraChannelOffset);
+
+
+        // Create and NDViewer and NDTiffStorage wrapped in a package that implements
+        // the org.micromanager.acqj.api.DataSink interface that the acquisition engine
+        // requires
+        boolean showViewer = true;
+        NDTiffAndViewerAdapter adapter = new NDTiffAndViewerAdapter(showViewer,
+              acqSettings_.getSaveDirectoryRoot(), acqSettings_.getSaveNamePrefix(),  50);
+
+        //////////////////////////////////////
+        // Begin AcqEngJ integration
+        //      The acqSettings object should be static at this point, it will now
+        //      be parsed and used to create acquisition events, each of which
+        //      will "order" the acquisiton of 1 image (per each camera)
+        //////////////////////////////////////
+        // Create acquisition
+        Acquisition acquisition = new Acquisition(adapter);
+
+        long acqButtonStart = System.currentTimeMillis();
+
+
+        ////////////  Acquisition hooks ////////////////////
+        // These functions will be run on different threads during the acquisiton process
+        //    Hooks will run on the Acquisition Engine thread--the one that controls all hardware
+
+        // TODO add any code that needs to be executed on the acquisition thread (i.e. the one
+        //  that controls hardware)
+
+        // TODO: autofocus
+        acquisition.addHook(new AcquisitionHook() {
+            @Override
+            public AcquisitionEvent run(AcquisitionEvent event) {
+                // TODO: does the Tiger controller need to be cleared and/or checked for errors here?
+
+
+                // Translate event to timeIndex/channel/etc
+                AcquisitionEvent firstAcqEvent = event.getSequence().get(0);
+                int timePoint = firstAcqEvent.getTIndex();
+
+                ////////////////////////////////////
+                ///////// Run autofocus ////////////
+                ///////////////////////////////////
+
+                // TODO: where should these come from? In diSPIM they appear to come from preferences,
+                //  not settings...
+                boolean autofocusAtT0 = false;
+                // TODO: this is where they come from in diSPIM?
+//                prefs_.getBoolean(org.micromanager.asidispim.Data.MyStrings.PanelNames.AUTOFOCUS.toString(),
+//                      org.micromanager.asidispim.Data.Properties.Keys.PLUGIN_AUTOFOCUS_ACQBEFORESTART, false);
+                boolean autofocusEveryStagePass = false;
+                boolean autofocusEachNFrames = false;
+                boolean autofocusChannel = false;
+
+                  // TODO: this is the diSPIM plugin's autofocus code, which needs to be reimplemented
+                  //   and translated. There are also currently no autofocus related things in the acqSettings_
+//                if (acqSettings_.isUsingAutofocus()) {
+//                    // (Copied from diSPIM): Note that we will not autofocus as expected when using hardware
+//                    // timing.  Seems OK, since hardware timing will result in short
+//                    // acquisition times that do not need autofocus.
+//                    if ( (autofocusAtT0 && timePoint == 0) || ( (timePoint > 0) &&
+//                          (timePoint % autofocusEachNFrames == 0 ) ) ) {
+//                        if (acqSettings.useChannels) {
+//                            multiChannelPanel_.selectChannel(autofocusChannel);
+//                        }
+//                        if (sideActiveA) {
+//                            if (acqSettings.usePathPresets) {
+//                                controller_.setPathPreset(org.micromanager.asidispim.Data.Devices.Sides.A);
+//                                // blocks until all devices done
+//                            }
+//                            org.micromanager.asidispim.Utils.AutofocusUtils.FocusResult score = autofocus_.runFocus(
+//                                  this, org.micromanager.asidispim.Data.Devices.Sides.A, false,
+//                                  sliceTiming_, false);
+//                            updateCalibrationOffset(org.micromanager.asidispim.Data.Devices.Sides.A, score);
+//                        }
+//                        if (sideActiveB) {
+//                            if (acqSettings.usePathPresets) {
+//                                controller_.setPathPreset(org.micromanager.asidispim.Data.Devices.Sides.B);
+//                                // blocks until all devices done
+//                            }
+//                            org.micromanager.asidispim.Utils.AutofocusUtils.FocusResult score = autofocus_.runFocus(
+//                                  this, org.micromanager.asidispim.Data.Devices.Sides.B, false,
+//                                  sliceTiming_, false);
+//                            updateCalibrationOffset(org.micromanager.asidispim.Data.Devices.Sides.B, score);
+//                        }
+//                        // Restore settings of the controller
+//                        controller_.prepareControllerForAquisition(acqSettings, extraChannelOffset_);
+//                        if (acqSettings.useChannels && acqSettings.channelMode != org.micromanager.asidispim.Data.MultichannelModes.Keys.VOLUME) {
+//                            controller_.setupHardwareChannelSwitching(acqSettings, hideErrors);
+//                        }
+//                    }
+//                }
+
+                return event;
+            }
+
+            @Override
+            public void close() {
+
+            }
+        }, Acquisition.BEFORE_HARDWARE_HOOK);
+
+
+
+        // TODO This after camera hook is called after the camera has been readied to acquire a
+        //  sequence. I assume we want to tell the Tiger to start sending TTLs etc here
+        acquisition.addHook(new AcquisitionHook() {
+            @Override
+            public AcquisitionEvent run(AcquisitionEvent event) {
+                // TODO: Cameras are now ready to recieve triggers, so we can send (software) trigger
+                //  to the tiger to tell it to start outputting TTLs
+
+                return event;
+            }
+
+            @Override
+            public void close() {
+
+            }
+        }, Acquisition.AFTER_CAMERA_HOOK);
+
+
+        ///////////// Event monitor /////////////////////////
+        //    The event monitor will be run on the thread that gets successive acquisition
+        //    events from the lazy sequences produced by Iterator<AcquisitonEvent> objects created
+        //    below. This can be used to keeps tabs on the acquisition process. The monitor
+        //    will not fire until the AcquisitonEvent is supplied by the Iterator in preparation
+        //    for the hardware being set up to execute it.
+        Function<AcquisitionEvent, AcquisitionEvent> eventMonitor = new Function<AcquisitionEvent, AcquisitionEvent>() {
+            @Override
+            public AcquisitionEvent apply(AcquisitionEvent acquisitionEvent) {
+                // TODO: this will execute as each acquisition event is generated. Add code here
+                //  can be used, for example, to provide status updates to the GUI about what is
+                //  happening, by reading the contect of each acquisiton event
+
+                return acquisitionEvent;
+            }
+        };
+
+
+        ///////////// Turn off autoshutter /////////////////
         final boolean isShutterOpen;
         try {
             isShutterOpen = core_.getShutterOpen();
@@ -246,7 +388,8 @@ public class AcquisitionEngine implements AcquisitionManager {
             throw new RuntimeException(e);
         }
 
-        boolean shutterOpen = false; // read later
+        // TODO: should the shutter be left open for the full duratio of acquisition?
+        //  because that's what this code currently does
         boolean autoShutter = core_.getAutoShutter();
         if (autoShutter) {
             core_.setAutoShutter(false);
@@ -259,313 +402,76 @@ public class AcquisitionEngine implements AcquisitionManager {
             }
         }
 
-        // TODO: make static?
-        PLogicDISPIM controller = new PLogicDISPIM(studio_, model_.devices());
 
-        double extraChannelOffset = 0.0;
-        controller.prepareControllerForAquisition(acqSettings_, extraChannelOffset);
-        final double zStepUm = controller.getActualStepSizeUm();
+        ////////////  Create and submit acquisition events ////////////////////
+        // Create iterators of acquisition events and submit them to the engine for execution
+        // The engine will (try to) automatically iterate over the AcquisitionEvents of each
+        // iterator, but not over multiple iterators. So there should be one iterator submitted for
+        // each expected triggering of the Tiger controller.
 
-
-        // run acq
-        boolean nonfatalError = false;
-        long acqButtonStart = System.currentTimeMillis();
-
-        String acqName = "";
         // TODO: execute any start-acquisition runnables
 
-        // do not want to return from within this loop => throw exception instead
-        // loop is executed once per acquisition (i.e. once if separate viewers isn't selected
-        //   or once per time point if separate viewers is selected)
-        long repeatStart = System.currentTimeMillis();
-        for (int acqNum = 0; !isRunning_.get() && acqNum < nrRepeats; acqNum++) {
-            // handle intervals between (software-timed) repeats
-            // only applies when doing separate viewers for each timepoint
-            // and have multiple timepoints
-            long repeatNow = System.currentTimeMillis();
-            long repeatdelay = repeatStart + acqNum * timepointIntervalMs - repeatNow;
-            while (repeatdelay > 0 && !isRunning_.get()) {
-                // TODO: updateAcquisitionStatus(AcquisitionStatus.WAITING, (int) (repeatdelay / 1000));
-                long sleepTime = Math.min(1000, repeatdelay);
-                try {
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException e) {
-                    // TODO: report error
-                    //MyDialogUtils.showError(e, hideErrors);
-                }
-                repeatNow = System.currentTimeMillis();
-                repeatdelay = repeatStart + acqNum * timepointIntervalMs - repeatNow;
+
+        // Loop 1: XY positions
+        PositionList pl = MMStudio.getInstance().positions().getPositionList();
+        if (acqSettings_.isUsingMultiplePositions() && (pl.getNumberOfPositions() == 0)) {
+            throw new RuntimeException("XY positions expected but position list is empty");
+        }
+        for (int positionIndex = 0; positionIndex < (acqSettings_.isUsingMultiplePositions() ?
+              pl.getNumberOfPositions() : 1); positionIndex++) {
+            AcquisitionEvent baseEvent = new AcquisitionEvent(acquisition);
+            if (acqSettings_.isUsingMultiplePositions()) {
+                baseEvent.setAxisPosition(LSMAcquisitionEvents.POSITION_AXIS, positionIndex);
             }
+            // TODO: what to do if multiple positions not defined: acquire at current stage position?
+            //  If yes, then nothing more to do here.
 
-            BlockingQueue<TaggedImage> bq = new LinkedBlockingQueue<>(40);  // increased from original 10
-            // TODO: MM2 equivalent to => ImageCache imageCache = null; (datastore)
-
-            // try to close last acquisition viewer if there could be one open (only in single acquisition per timepoint mode)
-            if (acqSettings_.isUsingSeparateTimepoints() && !isRunning_.get()) {
-                try {
-                    studio_.displays().closeDisplaysFor(datastore);
-                } catch (Exception ex) {
-                    // ignore => do nothing on failure
-                }
-            }
-
-            // TODO: set acq name?
-
-            // TODO: dump errors on ASI hardware (call DU Y and then DU X)
-
-            long extraStageScanTimeout = 0;
-
-            isRunning_.set(true);
-            studio_.logs().logMessage("diSPIM plugin starting acquisition with: " + acqSettings_.toPrettyJson());
-
-            // TODO: deal with channels
-
-            // TODO: refreshXYZPositions();
-
-            // get circular buffer ready
-            // do once here but not per-trigger; need to ensure ROI changes registered
-            try {
-                core_.initializeCircularBuffer();
-            } catch (Exception e) {
-                studio_.logs().logError("Error initializing the circular buffer!");
-            }
-
-            try {
-                core_.waitForSystem();
-            } catch (Exception e) {
-                studio_.logs().logError("Error waiting for system!");
-            }
-
-            // check if we are raising the SPIM head to the load position between every acquisition
-            final boolean raiseSPIMHead = false; // TODO: implement
-
-
-            // Loop over all the times we trigger the controller's acquisition
-            //  (although if multichannel with volume switching is selected there
-            //   is inner loop to trigger once per channel)
-            // remember acquisition start time for software-timed timepoints
-            // For hardware-timed timepoints we only trigger the controller once
-
-            long acqStart = System.currentTimeMillis();
-            if (raiseSPIMHead) {
-                //ASIdiSPIM.getFrame().getNavigationPanel().raiseSPIMHead();
-                //core_.waitForDevice(devices_.getMMDevice(Devices.Keys.UPPERZDRIVE));
-            }
-            for (int trigNum = 0; trigNum < nrFrames; trigNum++) {
-                // handle intervals between (software-timed) time points
-                // when we are within the same acquisition
-                // (if separate viewer is selected then nothing bad happens here
-                // but waiting during interval handled elsewhere)
-                long acqNow = System.currentTimeMillis();
-                long delay = acqStart + trigNum * timepointIntervalMs - acqNow;
-                while (delay > 0 && !isRunning_.get()) {
-                    // TODO: updateAcquisitionStatus(AcquisitionStatus.WAITING, (int) (delay / 1000));
-                    long sleepTime = Math.min(1000, delay);
-                    try {
-                        Thread.sleep(sleepTime);
-                    } catch (InterruptedException e) {
-                        studio_.logs().logError("error sleeping");
-                    }
-                    acqNow = System.currentTimeMillis();
-                    delay = acqStart + trigNum * timepointIntervalMs - acqNow;
-                }
-
-                int timePoint = acqSettings_.isUsingSeparateTimepoints() ? acqNum : trigNum;
-
-                // TODO: execute any start of time point runnables
-
-                // TODO: this is where we autofocus if requested
-
-                numTimePointsDone++;
-
-                // loop over all positions
-                for (int positionNum = 0; positionNum < nrPositions; positionNum++) {
-                    numPositionsDone = positionNum + 1;
-                    // TODO: updateAcquisitionStatus(AcquisitionStatus.ACQUIRING);
-
-                    // TODO: execute any start of position point runnables (different from above)
-
-                    if (acqSettings_.isUsingMultiplePositions()) {
-                        // TODO: check for stage scanning
-
-                        final MultiStagePosition nextPosition = positionList.getPosition(positionNum);
-
-                        // move to the next position
-                        if (raiseSPIMHead && positionNum == 0) {
-                            // TODO: raise diSPIM head
-//                            // move to the XY position first
-//                            StagePosition posXY = nextPosition.get(devices_.getMMDevice(Devices.Keys.XYSTAGE));
-//                            if (posXY != null) {
-//                                //core_.setXYPosition(posXY.stageName, posXY.x, posXY.y);
-//                                //core_.waitForDevice(devices_.getMMDevice(Devices.Keys.XYSTAGE));
-//                            }
-//                            // lower SPIM head after we move into position
-//                            StagePosition posZ = nextPosition.get(devices_.getMMDevice(Devices.Keys.UPPERZDRIVE));
-//                            if (posZ != null) {
-//                                //core_.setPosition(posZ.stageName, posZ.x);
-//                               //core_.waitForDevice(devices_.getMMDevice(Devices.Keys.UPPERZDRIVE));
-//                            }
-//                            // handle all remaining stage motion
-//                            try {
-//                                MultiStagePosition.goToPosition(nextPosition, core_);
-//                            } catch (Exception e) {
-//                                //throw new RuntimeException(e);
-//                            }
-                        } else {
-                            // blocking call; will wait for stages to move
-                            // NB: assume planar correction is handled by marked Z position; this seems better
-                            //   than making it impossible for user to select different Z positions e.g. for YZ grid
-                            try {
-                                MultiStagePosition.goToPosition(nextPosition, core_);
-                            } catch (Exception e) {
-                                //throw new RuntimeException(e);
-                            }
-                        }
-
-                        // update local stage positions after move (xPositionUm_, yPositionUm_, zPositionUm_)
-                        // TODO: refreshXYZPositions();
-
-                        // TODO: ASI stage scanning
-
-                        final int nrCameras = 2; // TODO: hardcoded to 2 for now
-                        final int expectedNrImages = nrSlicesSoftware * nrCameras;
-                        int totalImages = 0;
-
-                        int nrOuterLoop = 1;
-                        // TODO: can change based on path presets
-
-                        // loop over all the times we trigger the controller for each position
-                        // usually just once, but will be the number of channels if we have
-                        //  multiple channels and aren't using PLogic to change between them
-                        // if we are using path presets then trigger controller for each side and do that in "outer loop"
-                        //   (i.e. the channels will run subsequent to each other, then switch sides and run through them again
-                        for (int outerLoop = 0; outerLoop < nrOuterLoop; ++outerLoop) {
-
-                            for (int channelNum = 0; channelNum < nrChannelsSoftware; channelNum++) {
-                                try {
-
-                                    // deal with shutter before starting acquisition
-                                    shutterOpen = core_.getShutterOpen();
-                                    if (autoShutter) {
-                                        core_.setAutoShutter(false);
-                                        if (!shutterOpen) {
-                                            core_.setShutterOpen(true);
-                                        }
-                                    }
-
-
-                                    studio_.logs().logDebugMessage("Starting time point " + (timePoint+1) + " of " + nrFrames
-                                            + " with (software) channel number " + channelNum);
-
-                                    // Wait for first image to create ImageWindow, so that we can be sure about image size
-                                    // Do not actually grab first image here, just make sure it is there
-                                    long start = System.currentTimeMillis();
-                                    long now = start;
-                                    final long timeout = Math.max(3000, Math.round(
-                                            10*sliceDuration + 2*acqSettings_.getVolumeSettings().delayBeforeView())) + extraStageScanTimeout; //  + extraMultiXYTimeout;
-                                    while (core_.getRemainingImageCount() == 0 && (now - start < timeout) && !isRunning_.get()) {
-                                        now = System.currentTimeMillis();
-                                        Thread.sleep(5);
-                                    }
-                                    if (now - start >= timeout) {
-                                        String msg = "Camera did not send first image within a reasonable time.\n";
-                                        studio_.logs().showError(msg);
-//                                        if (acqSettings.isStageScanning) {
-//                                            msg += "Make sure jumpers are correct on XY card and also micro-micromirror card.";
-//                                            ReportingUtils.logMessage("Stage speed is " + props_.getPropValueFloat(Devices.Keys.XYSTAGE, Properties.Keys.STAGESCAN_MOTOR_SPEED_X));
-//                                            positions_.getUpdatedPosition(Devices.Keys.XYSTAGE, Directions.X);
-//                                        } else {
-//                                            msg += "Make sure camera trigger cables are connected properly.";
-//                                        }
-//                                        throw new Exception(msg);
-                                    }
-
-                                    boolean done = false;
-                                    long timeout2 = Math.max(1000, Math.round(5*sliceDuration));
-                                    totalImages = 0;
-                                    start = System.currentTimeMillis();
-                                    long last = start;
-
-                                    // TODO: handle multiple cameras
-                                    while (core_.getRemainingImageCount() > 0 && core_.isSequenceRunning() && !done) {
-                                        now = System.currentTimeMillis();
-                                        if (core_.getRemainingImageCount() > 0) {
-                                            // an image is ready
-                                            TaggedImage taggedImage = core_.popNextTaggedImage();
-                                            Image image = studio_.data().convertTaggedImage(taggedImage, builder.time(numTimePointsDone).build(), null);
-                                            datastore.putImage(image);
-                                            totalImages++;
-                                        } else {
-                                            // image not ready yet
-                                            done = isRunning_.get();
-                                            Thread.sleep(1);
-                                            if (now - last >= timeout2) {
-                                                studio_.logs().logError("Camera did not send all expected images within" +
-                                                        " a reasonable period for timepoint " + numTimePointsDone + " and "
-                                                        + "position " + numPositionsDone + " .  Continuing anyway.");
-                                                done = true;
-                                            }
-
-                                        }
-                                    }
-
-                                } catch (Exception e) {
-
-                                } finally {
-                                    // cleanup at the end of each time we trigger the controller
-
-                                    // put shutter back to original state
-                                    core_.setAutoShutter(autoShutter);
-                                    try {
-                                        core_.setShutterOpen(shutterOpen);
-                                    } catch (Exception e) {
-                                        studio_.logs().logError("could not set the shutter open state!");
-                                    }
-
-                                    // make sure SPIM state machine on micromirror and SCAN of XY card are stopped (should normally be but sanity check)
-                                    stopSPIMStateMachines(acqSettings_);
-
-                                    // write message with final results of our counters for debugging
-                                    String msg = "Finished acquisition (controller trigger cycle) with counters at Channels: ";
-//                                    for (int i=0; i<4*acqSettings.numChannels; ++i) {
-//                                        msg += channelImageNr[i] + ", ";
-//                                    }
-//                                    msg += ",   Cameras: ";
-//                                    for (int i=0; i<4; ++i) {
-//                                        msg += cameraImageNr[i] + ", ";
-//                                    }
-//                                    msg += ",   TimePoints: ";
-//                                    for (int i=0; i<2*acqSettings.numChannels; ++i) {
-//                                        msg += tpNumber[i] + ", ";
-//                                    }
-                                    studio_.logs().logMessage(msg);
-
-                                }
-                            }
-                        }
-
-                        // TODO: execute any end-position runnables
-                    }
+            if (acqSettings_.isUsingHardwareTimePoints()) {
+                // create a full iterator of TCZ acquisition events, and Tiger controller
+                // will handle everything else
+                acquisition.submitEventIterator(
+                      LSMAcquisitionEvents.createTimelapseMultiChannelVolumeAcqEvents(
+                      baseEvent, acquisition, acqSettings_, eventMonitor));
+            } else {
+                // Loop 2: Multiple time points
+                for (int timeIndex = 0; timeIndex < (acqSettings_.isUsingMultiplePositions() ?
+                      acqSettings_.getNumTimePoints() : 1); timeIndex++) {
+                    baseEvent.setTimeIndex(timeIndex);
+                    // Loop 3: Channels; Loop 4: Z slices (non-interleaved)
+                    // Loop 3: Channels; Loop 4: Z slices (interleaved)
+                    acquisition.submitEventIterator(
+                              LSMAcquisitionEvents.createMultiChannelVolumeAcqEvents(
+                                    baseEvent, acquisition, acqSettings_, eventMonitor,
+                                    acqSettings_.getSPIMMode() == AcquisitionModes.STAGE_SCAN_INTERLEAVED));
                 }
             }
         }
+
+
+        // No more instructions (i.e. AcquisitionEvents); tell the acquisition to initiate shutdown
+        // once everything finishes
+        acquisition.finish();
+        acquisition.waitForCompletion();
 
         // cleanup
-        studio_.logs().logMessage("diSPIM plugin acquisition " + //+ acqName_ +
-                " took: " + (System.currentTimeMillis() - acqButtonStart) + "ms");
+        studio_.logs().logMessage("diSPIM plugin acquisition " +
+              " took: " + (System.currentTimeMillis() - acqButtonStart) + "ms");
 
-        // prevent acquisition data from being modified
-        try {
-            datastore.freeze();
-        } catch (IOException e) {
-            studio_.logs().logError("could not freeze the datastore!");
-        }
 
         // clean up controller settings after acquisition
         // want to do this, even with demo cameras, so we can test everything else
         // TODO: figure out if we really want to return piezos to 0 position (maybe center position,
         //   maybe not at all since we move when we switch to setup tab, something else??)
         controller.cleanUpControllerAfterAcquisition(acqSettings_, true);
+
+        // Restore shutter/autoshutter to original state
+        try {
+            core_.setShutterOpen(isShutterOpen);
+            core_.setAutoShutter(autoShutter);
+        } catch (Exception e) {
+            throw new RuntimeException("Couldn't restore shutter to original state");
+        }
+
 
         // TODO: execute any end-acquisition runnables
 
