@@ -179,7 +179,7 @@ public class NDTiffAndViewerAdapter implements DataSourceInterface, DataSink {
 
    ///////////// Data sink interface required by acq eng /////////////
    @Override
-   public void finished() {
+   public void finish() {
       if (storage_ != null) {
          if (!storage_.isFinished()) {
             //Get most up to date display settings
