@@ -402,6 +402,7 @@ public class AcquisitionEngine implements AcquisitionManager {
             }
         }
 
+        acquisition.start();
 
         ////////////  Create and submit acquisition events ////////////////////
         // Create iterators of acquisition events and submit them to the engine for execution
