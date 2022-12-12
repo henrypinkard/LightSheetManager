@@ -1,5 +1,7 @@
 package org.micromanager.lightsheetmanager.gui.tabs;
 
+import java.io.File;
+import java.util.EventObject;
 import org.micromanager.lightsheetmanager.model.DataStorage;
 import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;
@@ -76,7 +78,18 @@ public class DataTab extends Panel {
         add(datastorePanel, "growx");
     }
 
+    public String getSaveDir() {
+        return txtSaveDirectory_.getText();
+    }
+
+    public String getSaveName() {
+        return txtSaveFileName_.getText();
+    }
+
     private void createEventHandlers() {
-        //btnBrowse_.registerListener(e -> fileSelect_.openDialogBox(this, new File("")));
+        btnBrowse_.registerListener((EventObject e) -> {
+            String path = fileSelect_.openDialogBox(this, new File(""));
+            txtSaveDirectory_.setText(path);
+        });
     }
 }

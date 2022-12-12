@@ -44,6 +44,22 @@ public class TabPanel extends Panel {
         createUserInterface();
     }
 
+    public AcquisitionTab getAcquisitionTab() {
+        return acquisitionTab_;
+    }
+
+    public DataTab getDataTab() {
+        return dataTab_;
+    }
+
+    public DeviceTab getDeviceTab() {
+        return deviceTab_;
+    }
+
+    public CameraTab getCameraTab() {
+        return cameraTab_;
+    }
+
     /**
      * Create the panel.
      */
@@ -78,7 +94,4 @@ public class TabPanel extends Panel {
         return "<html><body leftmargin=15 topmargin=8 marginwidth=15 marginheight=5><b><font size=4>" + title + "</font></b></body></html>";
     }
 
-    public DeviceTab getDeviceTab() {
-        return deviceTab_;
-    }
 }

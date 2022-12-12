@@ -13,6 +13,7 @@ import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.data.Icons;
 import org.micromanager.lightsheetmanager.gui.navigation.NavigationPanel;
 import org.micromanager.lightsheetmanager.gui.utils.WindowUtils;
+import org.micromanager.lightsheetmanager.model.AcquisitionSettings;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 import org.micromanager.internal.utils.WindowPositioning;
 
@@ -47,6 +48,18 @@ public class LightSheetManagerFrame extends JFrame {
             createErrorUserInterface();
         }
 
+    }
+
+    /**
+     * Read acquisition settings currently set in the GUI
+     * @return
+     */
+    public AcquisitionSettings getAcquisitionSettings() {
+        //TODO fill this out with all settings
+        AcquisitionSettings settings = new AcquisitionSettings();
+        settings.setSaveDirectoryRoot(tabPanel_.getDataTab().getSaveDir());
+        settings.setSaveDirectoryRoot(tabPanel_.getDataTab().getSaveName());
+        return settings;
     }
 
     /**
