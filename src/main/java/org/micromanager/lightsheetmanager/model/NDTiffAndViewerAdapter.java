@@ -98,7 +98,35 @@ public class NDTiffAndViewerAdapter implements DataSourceInterface, DataSink {
       displayCommunicationExecutor_ = Executors.newSingleThreadExecutor((Runnable r)
             -> new Thread(r, "Image viewer communication thread"));
 
-      viewer_ = new NDViewer(this, (ViewerAcquisitionInterface) acq_,
+      // simple class that allows viewer to start and stop acquisition
+      ViewerAcquisitionInterface vai = new ViewerAcquisitionInterface() {
+         @Override
+         public boolean isFinished() {
+            return acq_.areEventsFinished();
+         }
+
+         @Override
+         public void abort() {
+            acq_.abort();
+         }
+
+         @Override
+         public void togglePaused() {
+            acq_.setPaused(!acq_.isPaused());
+         }
+
+         @Override
+         public boolean isPaused() {
+            return acq_.isPaused();
+         }
+
+         @Override
+         public void waitForCompletion() {
+            acq_.waitForCompletion();
+         }
+      };
+
+      viewer_ = new NDViewer(this, vai,
             summaryMetadata, AcqEngMetadata.getPixelSizeUm(summaryMetadata), AcqEngMetadata.isRGB(summaryMetadata));
 
       viewer_.setWindowTitle(name_ + (acq_ != null

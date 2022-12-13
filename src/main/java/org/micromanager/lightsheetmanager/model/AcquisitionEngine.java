@@ -62,7 +62,6 @@ public class AcquisitionEngine implements AcquisitionManager {
         //System.out.println(data_.getSavePath());
 
         acqSettings_ = new AcquisitionSettings();
-        System.out.println(acqSettings_.getTimingSettings());
 
         // true if the acquisition is running or paused
         isRunning_ = new AtomicBoolean(false);
@@ -132,26 +131,17 @@ public class AcquisitionEngine implements AcquisitionManager {
         return false;
     }
 
-    private boolean runAcquisitionDISPIM() {
-        // validate settings
-        isRunning_.set(true);
-
-
-        int numTimePointsDone = 0;
-        int numPositionsDone = 0;
-
-        final boolean isLiveModeOn = studio_.live().isLiveModeOn();
-        if (isLiveModeOn) {
-            studio_.live().setLiveModeOn(false);
-            // close the live mode window if it exists
-            if (studio_.live().getDisplay() != null) {
-                studio_.live().getDisplay().close();
-            }
-        }
+    /**
+     * This is a bunch of logic copied from the diSPIM plugin
+     * @return
+     */
+    private PLogicDISPIM doHardwareCalculations() {
 
         // make sure slice timings are up-to-date
+
         recalculateSliceTiming(acqSettings_);
         System.out.println(acqSettings_.getTimingSettings());
+
 
         // TODO: was only checked in light sheet mode
 //        if (core_.getPixelSizeUm() < 1e-6) {
@@ -181,16 +171,16 @@ public class AcquisitionEngine implements AcquisitionManager {
         // cannot do this in getCurrentAcquisitionSettings because of mutually recursive
         // call with computeActualVolumeDuration()
         if (acqSettings_.isUsingTimePoints()
-                && acqSettings_.getNumTimePoints() > 1
-                && timepointIntervalMs < (timepointDuration + 750)
-                && !acqSettings_.isStageScanning()) {
+              && acqSettings_.getNumTimePoints() > 1
+              && timepointIntervalMs < (timepointDuration + 750)
+              && !acqSettings_.isStageScanning()) {
             acqSettings_.setHardwareTimesPoints(true);
         }
 
         if (acqSettings_.isUsingMultiplePositions()) {
             if ((acqSettings_.isUsingHardwareTimePoints()
-                    || acqSettings_.getNumTimePoints() > 1)
-                    && (timepointIntervalMs < timepointDuration*1.2)) {
+                  || acqSettings_.getNumTimePoints() > 1)
+                  && (timepointIntervalMs < timepointDuration*1.2)) {
                 acqSettings_.setHardwareTimesPoints(false);
                 // TODO: WARNING
             }
@@ -206,11 +196,11 @@ public class AcquisitionEngine implements AcquisitionManager {
             // should only possible to mess this up using advanced timing settings
             // or if there are errors in our own calculations
             studio_.logs().showError("Exposure time of " + exposureTime +
-                    " is longer than time needed for a line scan with" +
-                    " readout time of " + cameraReadoutTime + "\n" +
-                    "This will result in dropped frames. " +
-                    "Please change input");
-            return false;
+                  " is longer than time needed for a line scan with" +
+                  " readout time of " + cameraReadoutTime + "\n" +
+                  "This will result in dropped frames. " +
+                  "Please change input");
+            return null;
         }
 
 
@@ -241,14 +231,43 @@ public class AcquisitionEngine implements AcquisitionManager {
 
         double extraChannelOffset = 0.0;
         controller.prepareControllerForAquisition(acqSettings_, extraChannelOffset);
+        return controller;
+    }
 
+    private boolean runAcquisitionDISPIM() {
+        // validate settings
+        isRunning_.set(true);
+
+        //TODO remove
+        acqSettings_.setDemoMode(true);
+
+        final boolean isLiveModeOn = studio_.live().isLiveModeOn();
+        if (isLiveModeOn) {
+            studio_.live().setLiveModeOn(false);
+            // close the live mode window if it exists
+            if (studio_.live().getDisplay() != null) {
+                studio_.live().getDisplay().close();
+            }
+        }
+
+        PLogicDISPIM controller = null;
+        if (!acqSettings_.getDemoMode()) {
+            controller = doHardwareCalculations();
+        }
 
         // Create and NDViewer and NDTiffStorage wrapped in a package that implements
         // the org.micromanager.acqj.api.DataSink interface that the acquisition engine
         // requires
+//        String saveDir = acqSettings_.getSaveDirectoryRoot();
+//        String saveName = acqSettings_.getSaveNamePrefix();
+
+        //TODO delete this, just for testing
+        String saveName = "test";
+        String saveDir = "C:\\Users\\henry\\Desktop\\datadump";
+
         boolean showViewer = true;
-        NDTiffAndViewerAdapter adapter = new NDTiffAndViewerAdapter(showViewer,
-              acqSettings_.getSaveDirectoryRoot(), acqSettings_.getSaveNamePrefix(),  50);
+        NDTiffAndViewerAdapter adapter = new NDTiffAndViewerAdapter(showViewer, saveDir, saveName
+              ,  50);
 
         //////////////////////////////////////
         // Begin AcqEngJ integration
@@ -402,6 +421,7 @@ public class AcquisitionEngine implements AcquisitionManager {
             }
         }
 
+        acquisition.start();
 
         ////////////  Create and submit acquisition events ////////////////////
         // Create iterators of acquisition events and submit them to the engine for execution
@@ -434,7 +454,7 @@ public class AcquisitionEngine implements AcquisitionManager {
                       baseEvent, acquisition, acqSettings_, eventMonitor));
             } else {
                 // Loop 2: Multiple time points
-                for (int timeIndex = 0; timeIndex < (acqSettings_.isUsingMultiplePositions() ?
+                for (int timeIndex = 0; timeIndex < (acqSettings_.isUsingTimePoints() ?
                       acqSettings_.getNumTimePoints() : 1); timeIndex++) {
                     baseEvent.setTimeIndex(timeIndex);
                     // Loop 3: Channels; Loop 4: Z slices (non-interleaved)
@@ -462,7 +482,9 @@ public class AcquisitionEngine implements AcquisitionManager {
         // want to do this, even with demo cameras, so we can test everything else
         // TODO: figure out if we really want to return piezos to 0 position (maybe center position,
         //   maybe not at all since we move when we switch to setup tab, something else??)
-        controller.cleanUpControllerAfterAcquisition(acqSettings_, true);
+        if (controller != null) {
+            controller.cleanUpControllerAfterAcquisition(acqSettings_, true);
+        }
 
         // Restore shutter/autoshutter to original state
         try {
@@ -514,6 +536,10 @@ public class AcquisitionEngine implements AcquisitionManager {
         ASIScanner scanner2 = (ASIScanner) model_.devices().getDevice("Illum2Beam");
 
         AndorCamera camera = (AndorCamera)model_.devices().getDevice("Imaging1Camera"); //.getImagingCamera(0);
+        if (camera == null) {
+            // just a dummy to test demo mode
+            return new DefaultTimingSettings.Builder().build();
+        }
         System.out.println(camera.getDeviceName());
         CameraModes camMode = camera.getTriggerMode();
         System.out.println(camMode);

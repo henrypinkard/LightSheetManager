@@ -47,7 +47,10 @@ public class AcquisitionSettings {
     private int numTimePoints_;
     private int timepointIntervalMs_;
 
+    private boolean demoMode_;
+
     public AcquisitionSettings() {
+        demoMode_ = false;
         saveNamePrefix_ = "";
         saveDirectoryRoot_ = "";
         channelGroup_ = "";
@@ -84,6 +87,12 @@ public class AcquisitionSettings {
 
     public ScanSettings getScanSettings() {
         return scanSettings_;
+    }
+
+    public boolean getDemoMode() {return demoMode_;}
+
+    public void setDemoMode(boolean demoMode) {
+        demoMode_ = demoMode;
     }
 
     public int getPostMoveDelay() {
