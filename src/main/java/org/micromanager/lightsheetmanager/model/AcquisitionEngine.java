@@ -136,7 +136,7 @@ public class AcquisitionEngine implements AcquisitionManager {
         // validate settings
         isRunning_.set(true);
 
-
+        // for updateing gui
         int numTimePointsDone = 0;
         int numPositionsDone = 0;
 
@@ -150,21 +150,30 @@ public class AcquisitionEngine implements AcquisitionManager {
         }
 
         // make sure slice timings are up-to-date
+        // for calculating timing for hardware triggering etc
+        // maybe should be generalized to non ASI hardware
+        //convert settings from gui to tiger ettings
         recalculateSliceTiming(acqSettings_);
         System.out.println(acqSettings_.getTimingSettings());
 
         // TODO: was only checked in light sheet mode
+        // in light sheet camera mode, forced to know the pixel size
+        // if user hasn't set a pixel size, tell them that they should
+        // better to have it pop up in GUI rather than runtime
 //        if (core_.getPixelSizeUm() < 1e-6) {
 //            studio_.logs().showError("Need to set the pixel size in Micro-Manager.");
 //        }
 
         // setup channels
+        // this should be tied to the hardware
+        // if in overlap camera mode, need to send on extra final trigger
         int nrChannelsSoftware = acqSettings_.getNumChannels();  // how many times we trigger the controller per stack
         int nrSlicesSoftware = acqSettings_.getVolumeSettings().slicesPerVolume();
         // TODO: channels
 
 
-
+        // TODO move to a hardware sectoin of the code
+        // TODO make ImagingCamera static final
         AndorCamera camera = (AndorCamera)model_.devices().getDevice("Imaging1Camera");
         CameraModes camMode = camera.getTriggerMode();
         final float cameraReadoutTime = camera.getReadoutTime(camMode);
@@ -180,6 +189,7 @@ public class AcquisitionEngine implements AcquisitionManager {
         // experimentally need ~0.5 sec to set up acquisition, this gives a bit of cushion
         // cannot do this in getCurrentAcquisitionSettings because of mutually recursive
         // call with computeActualVolumeDuration()
+        // Making the determinatin to offload timing to controller or not
         if (acqSettings_.isUsingTimePoints()
                 && acqSettings_.getNumTimePoints() > 1
                 && timepointIntervalMs < (timepointDuration + 750)
@@ -198,9 +208,14 @@ public class AcquisitionEngine implements AcquisitionManager {
 
 
         // TODO: make sure position updater is turned off!
+        // Navigation panel in LSM gui is constantly polling hardware to get positions etc
+        // similar mechanism in MM GUI in the stage controller, there is a check box in there,
+        // which also need to be temporarily disabled
+        //  add API call for disabling this
 
 
-
+        // Error check
+        // TODO: put this in a runtime validation check
         double sliceDuration = acqSettings_.getTimingSettings().sliceDuration();
         if (exposureTime + cameraReadoutTime > sliceDuration) {
             // should only possible to mess this up using advanced timing settings
@@ -214,31 +229,11 @@ public class AcquisitionEngine implements AcquisitionManager {
         }
 
 
-        // TODO: diSPIM has the following code, which is apparently needed for autofocusing
-//        boolean sideActiveA, sideActiveB;
-//        final boolean twoSided = acqSettingsOrig.numSides > 1;
-//        if (twoSided) {
-//            sideActiveA = true;
-//            sideActiveB = true;
-//        } else {
-//            if (!acqSettingsOrig.acquireBothCamerasSimultaneously) {
-//                secondCamera = null;
-//            }
-//            if (firstSideA) {
-//                sideActiveA = true;
-//                sideActiveB = false;
-//            } else {
-//                sideActiveA = false;
-//                sideActiveB = true;
-//            }
-//        }
-
-
 
 
         // TODO: make static?
+        // TODO abstract out
         PLogicDISPIM controller = new PLogicDISPIM(studio_, model_.devices());
-
         double extraChannelOffset = 0.0;
         controller.prepareControllerForAquisition(acqSettings_, extraChannelOffset);
 
@@ -284,18 +279,16 @@ public class AcquisitionEngine implements AcquisitionManager {
                 ///////// Run autofocus ////////////
                 ///////////////////////////////////
 
-                // TODO: where should these come from? In diSPIM they appear to come from preferences,
-                //  not settings...
+                // TODO: there should be getters for acquisition settings for this info
                 boolean autofocusAtT0 = false;
-                // TODO: this is where they come from in diSPIM?
-//                prefs_.getBoolean(org.micromanager.asidispim.Data.MyStrings.PanelNames.AUTOFOCUS.toString(),
-//                      org.micromanager.asidispim.Data.Properties.Keys.PLUGIN_AUTOFOCUS_ACQBEFORESTART, false);
                 boolean autofocusEveryStagePass = false;
                 boolean autofocusEachNFrames = false;
                 boolean autofocusChannel = false;
 
                   // TODO: this is the diSPIM plugin's autofocus code, which needs to be reimplemented
                   //   and translated. There are also currently no autofocus related things in the acqSettings_
+                // This autofocus code collects new data: either collecting data with just moving the galvo or
+                // just moving the piezo. then compare to previous time points, do a curve fit
 //                if (acqSettings_.isUsingAutofocus()) {
 //                    // (Copied from diSPIM): Note that we will not autofocus as expected when using hardware
 //                    // timing.  Seems OK, since hardware timing will result in short
@@ -424,8 +417,7 @@ public class AcquisitionEngine implements AcquisitionManager {
             if (acqSettings_.isUsingMultiplePositions()) {
                 baseEvent.setAxisPosition(LSMAcquisitionEvents.POSITION_AXIS, positionIndex);
             }
-            // TODO: what to do if multiple positions not defined: acquire at current stage position?
-            //  If yes, then nothing more to do here.
+            //  acquire at current stage position
 
             if (acqSettings_.isUsingHardwareTimePoints()) {
                 // create a full iterator of TCZ acquisition events, and Tiger controller
