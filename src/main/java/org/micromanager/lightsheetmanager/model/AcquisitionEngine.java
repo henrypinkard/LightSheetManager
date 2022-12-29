@@ -28,9 +28,6 @@ import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.micromanager.remote.RemoteAcquisition;
-import org.micromanager.remote.RemoteEventSource;
-import org.micromanager.remote.RemoteViewerStorageAdapter;
 
 public class AcquisitionEngine implements AcquisitionManager {
 

@@ -43,7 +43,6 @@ public class NDTiffAndViewerAdapter implements DataSourceInterface, DataSink {
    private volatile ViewerInterface viewer_;
    private volatile Acquisition acq_;
    private volatile MultiresNDTiffAPI storage_;
-   private CopyOnWriteArrayList<String> channelNames_ = new CopyOnWriteArrayList<String>();
 
    private final boolean showViewer_, storeData_;
    private String dir_;
@@ -137,35 +136,22 @@ public class NDTiffAndViewerAdapter implements DataSourceInterface, DataSink {
    }
 
    public void putImage(final TaggedImage taggedImg) {
-      HashMap<String, Integer> axes = AcqEngMetadata.getAxes(taggedImg.tags);
+      HashMap<String, Object> axes = AcqEngMetadata.getAxes(taggedImg.tags);
 
       storage_.putImage(taggedImg.pix, taggedImg.tags, axes,
                AcqEngMetadata.isRGB(taggedImg.tags),
+               AcqEngMetadata.getBitDepth(taggedImg.tags),
                AcqEngMetadata.getHeight(taggedImg.tags),
                AcqEngMetadata.getWidth(taggedImg.tags));
 
 
       if (showViewer_) {
-         //Check if new viewer to init display settings
-         String channelName = AcqEngMetadata.getChannelName(taggedImg.tags);
-         boolean newChannel = !channelNames_.contains(channelName);
-         if (newChannel) {
-            channelNames_.add(channelName);
-         }
-
          //put on different thread to not slow down acquisition
          displayCommunicationExecutor_.submit(new Runnable() {
             @Override
             public void run() {
-               if (newChannel) {
-                  //Insert a preferred color. Make a copy just in case concurrency issues
-                  String chName = AcqEngMetadata.getChannelName(taggedImg.tags);
-//                  Color c = Color.white; //TODO could add color memory here (or maybe viewer already handles it...)
-                  int bitDepth = AcqEngMetadata.getBitDepth(taggedImg.tags);
-                  viewer_.setChannelDisplaySettings(chName, null, bitDepth);
-               }
-               HashMap<String, Integer> axes = AcqEngMetadata.getAxes(taggedImg.tags);
-               viewer_.newImageArrived(axes, AcqEngMetadata.getChannelName(taggedImg.tags));
+               HashMap<String, Object> axes = AcqEngMetadata.getAxes(taggedImg.tags);
+               viewer_.newImageArrived(axes);
             }
          });
       }
@@ -178,7 +164,7 @@ public class NDTiffAndViewerAdapter implements DataSourceInterface, DataSink {
    }
 
    @Override
-   public TaggedImage getImageForDisplay(HashMap<String, Integer> axes, int resolutionindex,
+   public TaggedImage getImageForDisplay(HashMap<String, Object> axes, int resolutionindex,
                                          double xOffset, double yOffset, int imageWidth, int imageHeight) {
 
       return storage_.getDisplayImage(
@@ -187,7 +173,7 @@ public class NDTiffAndViewerAdapter implements DataSourceInterface, DataSink {
    }
 
    @Override
-   public Set<HashMap<String, Integer>> getStoredAxes() {
+   public Set<HashMap<String, Object>> getImageKeys() {
       return storage_.getAxesSet();
    }
 
@@ -203,6 +189,11 @@ public class NDTiffAndViewerAdapter implements DataSourceInterface, DataSink {
 
    public void close() {
       storage_.close();
+   }
+
+   @Override
+   public int getImageBitDepth(HashMap<String, Object> axesPositions) {
+      return storage_.getEssentialImageMetadata(axesPositions).bitDepth;
    }
 
    ///////////// Data sink interface required by acq eng /////////////
