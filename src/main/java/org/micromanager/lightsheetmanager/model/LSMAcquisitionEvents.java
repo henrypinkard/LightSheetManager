@@ -168,8 +168,9 @@ public class LSMAcquisitionEvents {
             @Override
             public AcquisitionEvent next() {
                AcquisitionEvent channelEvent = event.copy();
-               channelEvent.setChannelGroup(channelList[index].getGroup());
-               channelEvent.setChannelConfig(channelList[index].getName());
+               channelEvent.setConfigGroup(channelList[index].getGroup());
+               channelEvent.setConfigPreset(channelList[index].getName());
+               channelEvent.setChannelName(channelList[index].getName());
 
                Double zPos;
                if (channelEvent.getZPosition() == null) {
