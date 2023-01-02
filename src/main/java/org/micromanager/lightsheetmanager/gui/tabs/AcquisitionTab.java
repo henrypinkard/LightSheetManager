@@ -18,7 +18,6 @@ import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.components.Spinner;
 import org.micromanager.lightsheetmanager.gui.components.ToggleButton;
 import org.micromanager.lightsheetmanager.model.data.AcquisitionModes;
-import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 
 import javax.swing.JLabel;
 import java.util.Objects;
@@ -47,7 +46,7 @@ public class AcquisitionTab extends Panel {
 
     // time points
     private Label lblNumTimePoints_;
-    private Label lblInterval_;
+    private Label lblTimePointInterval_;
     private Spinner spnNumTimePoints_;
     private Spinner spnTimePointInterval_;
     private CheckBox chkUseTimePoints_;
@@ -125,15 +124,21 @@ public class AcquisitionTab extends Panel {
         // TODO: is there a reasonable max value for these spinners?
         // time points
         lblNumTimePoints_ = new Label("Number:");
-        lblInterval_ = new Label("Interval [s]:");
+        lblTimePointInterval_ = new Label("Interval [s]:");
         spnNumTimePoints_ = Spinner.createIntegerSpinner(acqSettings.getNumTimePoints(), 1, Integer.MAX_VALUE,1);
         spnTimePointInterval_ = Spinner.createIntegerSpinner(acqSettings.getTimePointInterval(), 1, Integer.MAX_VALUE, 10);
+
+        // disable elements based on acqSettings
+        setTimePointSpinnersEnabled(acqSettings.isUsingTimePoints());
 
         // multiple positions
         lblPostMoveDelay_ = new Label("Post-move delay [ms]:");
         spnPostMoveDelay_ = Spinner.createIntegerSpinner(acqSettings.getPostMoveDelay(), 0, Integer.MAX_VALUE, 100);
         btnEditPositionList_ = new Button("Edit Position List", 120, 20);
         btnOpenXYZGrid_ = new Button("XYZ Grid", 80, 20);
+
+        // disable elements based on acqSettings
+        setMultiPositionsEnabled(acqSettings.isUsingMultiplePositions());
 
         ToggleButton.setDefaultSize(120, 30);
         btnRunAcquisition_ = new ToggleButton(
@@ -151,6 +156,10 @@ public class AcquisitionTab extends Panel {
         btnOpenPlaylist_ = new Button("Playlist...");
 
         channelTablePanel_ = new ChannelTablePanel(model_, chkUseChannels_);
+        // disable elements based on acqSettings
+        if (!acqSettings.isUsingChannels()) {
+            channelTablePanel_.setItemsEnabled(false);
+        }
 
         cmbAcquisitionModes_ = new ComboBox(AcquisitionModes.toArray(),
                 model_.acquisitions().getAcquisitionSettings().getAcquisitionMode().toString());
@@ -166,7 +175,7 @@ public class AcquisitionTab extends Panel {
         // time points
         panelTimePoints_.add(lblNumTimePoints_, "");
         panelTimePoints_.add(spnNumTimePoints_, "wrap");
-        panelTimePoints_.add(lblInterval_, "");
+        panelTimePoints_.add(lblTimePointInterval_, "");
         panelTimePoints_.add(spnTimePointInterval_, "");
 
         // multiple positions
@@ -227,8 +236,11 @@ public class AcquisitionTab extends Panel {
         btnOpenXYZGrid_.registerListener(e -> xyzGridFrame_.setVisible(true));
         btnEditPositionList_.registerListener(e -> studio_.app().showPositionList());
 
-        chkUseMultiplePositions_.registerListener(e ->
-                model_.acquisitions().getAcquisitionSettings().setUsingMultiplePositions(chkUseMultiplePositions_.isSelected()));
+        chkUseMultiplePositions_.registerListener(e -> {
+            final boolean isSelected = chkUseMultiplePositions_.isSelected();
+            model_.acquisitions().getAcquisitionSettings().setUsingMultiplePositions(isSelected);
+            setMultiPositionsEnabled(isSelected);
+        });
 
         spnPostMoveDelay_.registerListener(e -> {
             model_.acquisitions().getAcquisitionSettings().setPostMoveDelay(spnPostMoveDelay_.getInt());
@@ -237,8 +249,11 @@ public class AcquisitionTab extends Panel {
 
         // time points
 
-        chkUseTimePoints_.registerListener(e ->
-                model_.acquisitions().getAcquisitionSettings().setUsingTimepoints(chkUseTimePoints_.isSelected()));
+        chkUseTimePoints_.registerListener(e -> {
+            final boolean selected = chkUseTimePoints_.isSelected();
+            model_.acquisitions().getAcquisitionSettings().setUsingTimepoints(selected);
+            setTimePointSpinnersEnabled(selected);
+        });
 
         spnNumTimePoints_.registerListener(e -> {
             model_.acquisitions().getAcquisitionSettings().setNumTimePoints(spnNumTimePoints_.getInt());
@@ -262,5 +277,18 @@ public class AcquisitionTab extends Panel {
             model_.acquisitions().getAcquisitionSettings().setAcquisitionMode(AcquisitionModes.getByIndex(index));
             System.out.println("getAcquisitionMode: " + model_.acquisitions().getAcquisitionSettings().getAcquisitionMode());
         });
+    }
+
+    private void setTimePointSpinnersEnabled(final boolean state) {
+        lblNumTimePoints_.setEnabled(state);
+        lblTimePointInterval_.setEnabled(state);
+        spnNumTimePoints_.setEnabled(state);
+        spnTimePointInterval_.setEnabled(state);
+    }
+
+    private void setMultiPositionsEnabled(final boolean state) {
+        lblPostMoveDelay_.setEnabled(state);
+        spnPostMoveDelay_.setEnabled(state);
+        btnEditPositionList_.setEnabled(state);
     }
 }
