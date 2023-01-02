@@ -41,11 +41,10 @@ public class AcquisitionSettings {
 
     private boolean isStageScanning_;
     private boolean isUsingHardwareTimePoints_;
-    private boolean useSeparateTimepoints_;
 
     private int numChannels_;
     private int numTimePoints_;
-    private int timepointIntervalMs_;
+    private int timepointInterval_;
 
     private boolean demoMode_;
 
@@ -56,7 +55,7 @@ public class AcquisitionSettings {
         channelGroup_ = "";
         cameraExposure_ = 10.0f;
         isStageScanning_ = false;
-        useSeparateTimepoints_ = false;
+        useChannels_ = false;
         spimMode_ = AcquisitionModes.NONE;
         cameraModes_ = CameraModes.EDGE;
         channelMode_ = MultiChannelModes.VOLUME_HW;
@@ -71,6 +70,10 @@ public class AcquisitionSettings {
 
     public void setVolumeSettings(final DefaultVolumeSettings settings) {
         volumeSettings_ = settings;
+    }
+
+    public void setSliceSettings(final DefaultSliceSettings settings) {
+        sliceSettings_ = settings;
     }
 
     public DefaultTimingSettings getTimingSettings() {
@@ -89,18 +92,29 @@ public class AcquisitionSettings {
         return scanSettings_;
     }
 
-    public boolean getDemoMode() {return demoMode_;}
+    public boolean getDemoMode() {
+        return demoMode_;
+    }
 
     public void setDemoMode(boolean demoMode) {
         demoMode_ = demoMode;
+    }
+
+    public void setPostMoveDelay(final int milliseconds) {
+        postMoveDelayMs_ = milliseconds;
     }
 
     public int getPostMoveDelay() {
         return postMoveDelayMs_;
     }
 
-    public int getTimepointInterval() {
-        return timepointIntervalMs_;
+    // TODO: should this be milliseconds instead?
+    public void setTimePointInterval(final int seconds) {
+        timepointInterval_ = seconds;
+    }
+
+    public int getTimePointInterval() {
+        return timepointInterval_;
     }
 
     public String getSaveNamePrefix() {
@@ -123,6 +137,10 @@ public class AcquisitionSettings {
         return numChannels_;
     }
 
+    public void setNumTimePoints(final int numTimePoints) {
+        numTimePoints_ = numTimePoints;
+    }
+
     public int getNumTimePoints() {
         return numTimePoints_;
     }
@@ -143,6 +161,10 @@ public class AcquisitionSettings {
         return isStageScanning_;
     }
 
+    public void setUsingMultiplePositions(final boolean state) {
+        useMultiplePositions_ = state;
+    }
+
     public boolean isUsingMultiplePositions() {
         return useMultiplePositions_;
     }
@@ -151,8 +173,12 @@ public class AcquisitionSettings {
         return useTimepoints_;
     }
 
-    public boolean isUsingSeparateTimepoints() {
-        return useSeparateTimepoints_;
+    public void setUsingChannels(final boolean state) {
+        useChannels_ = state;
+    }
+
+    public boolean isUsingChannels() {
+        return useChannels_;
     }
 
     public ChannelSpec[] getChannels() {
@@ -165,6 +191,10 @@ public class AcquisitionSettings {
 
     public double getCameraExposure() {
         return cameraExposure_;
+    }
+
+    public void setUsingTimepoints(final boolean state) {
+        useTimepoints_ = state;
     }
 
     public void setHardwareTimesPoints(final boolean state) {

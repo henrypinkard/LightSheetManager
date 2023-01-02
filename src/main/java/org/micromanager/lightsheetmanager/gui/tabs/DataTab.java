@@ -19,7 +19,6 @@ public class DataTab extends Panel {
     private TextField txtSaveFileName_;
 
     private CheckBox chkSaveWhileAcquiring_;
-    private CheckBox chkFileForEachTimepoint_;
     private Button btnBrowse_;
     private FileSelect fileSelect_;
     private RadioButton radSaveMode_;
@@ -57,7 +56,6 @@ public class DataTab extends Panel {
         txtSaveFileName_.setForeground(Color.BLACK);
 
         chkSaveWhileAcquiring_ = new CheckBox("Save images during acquisition", false);
-        chkFileForEachTimepoint_ = new CheckBox("Separate viewer/file for each time point", false);
 
         btnBrowse_ = new Button("Browse...", 80, 20);
 
@@ -69,7 +67,6 @@ public class DataTab extends Panel {
         savePanel.add(lblSaveFileName, "");
         savePanel.add(txtSaveFileName_, "wrap");
         savePanel.add(chkSaveWhileAcquiring_, "span 2, wrap");
-        savePanel.add(chkFileForEachTimepoint_, "span 2");
 
         datastorePanel.add(radSaveMode_, "");
 

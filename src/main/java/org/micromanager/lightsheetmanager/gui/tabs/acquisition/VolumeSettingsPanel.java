@@ -35,6 +35,7 @@ public class VolumeSettingsPanel extends Panel {
         model_ = Objects.requireNonNull(model);
         vsb_ = model_.acquisitions().getVolumeSettingsBuilder();
         createUserInterface();
+        createEventHandlers();
     }
 
     private void createUserInterface() {
@@ -64,8 +65,6 @@ public class VolumeSettingsPanel extends Panel {
         spnViewDelay_ = Spinner.createDoubleSpinner(volumeSettings.delayBeforeView(), 0.0, Double.MAX_VALUE, 0.25);
         spnSliceStepSize_ = Spinner.createDoubleSpinner(volumeSettings.sliceStepSize(), 0.0, 100.0, 0.1);
         spnSlicesPerSide_ = Spinner.createIntegerSpinner(volumeSettings.slicesPerVolume(), 0, 100, 1);
-
-        createEventHandlers();
 
         add(lblNumViews_, "");
         add(cmbNumViews_, "wrap");

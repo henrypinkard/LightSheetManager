@@ -1,10 +1,7 @@
 package org.micromanager.lightsheetmanager.model;
 
-import java.util.concurrent.Future;
 import java.util.function.Function;
 import mmcorej.CMMCore;
-import mmcorej.TaggedImage;
-import org.micromanager.MultiStagePosition;
 import org.micromanager.PositionList;
 import org.micromanager.Studio;
 import org.micromanager.acqj.api.AcquisitionHook;
@@ -23,10 +20,7 @@ import org.micromanager.lightsheetmanager.model.devices.cameras.AndorCamera;
 import org.micromanager.lightsheetmanager.model.devices.vendor.ASIScanner;
 import org.micromanager.lightsheetmanager.model.utils.MyNumberUtils;
 
-import java.io.IOException;
 import java.util.Objects;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AcquisitionEngine implements AcquisitionManager {
@@ -66,7 +60,8 @@ public class AcquisitionEngine implements AcquisitionManager {
         // true if the acquisition is paused
         isPaused_ = new AtomicBoolean(false);
 
-        // TODO: put into acqSettings?
+        // TODO: these are not related to acqSettings, probably needs to be clarified
+        // (used to get builder objects for acqSettings related objects)
         // diSPIM builders
         tsb_ = new DefaultTimingSettings.Builder();
         vsb_ = new DefaultVolumeSettings.Builder();
@@ -78,10 +73,10 @@ public class AcquisitionEngine implements AcquisitionManager {
     }
 
     // TODO: slice settings as well
-    public void setSettingsFromBuilders() {
-        acqSettings_.setTimingSettings(tsb_.build());
-        acqSettings_.setVolumeSettings(vsb_.build());
-    }
+//    public void setSettingsFromBuilders() {
+//        acqSettings_.setTimingSettings(tsb_.build());
+//        acqSettings_.setVolumeSettings(vsb_.build());
+//    }
 
     @Override
     public void requestRun() {
@@ -89,6 +84,11 @@ public class AcquisitionEngine implements AcquisitionManager {
             studio_.logs().showError("Acquisition is already running.");
             return;
         }
+
+        // TODO: build the settings objects here...
+        // build settings objects
+        //model_.acquisitions().getAcquisitionSettings().build
+
         GeometryType geometryType = model_.devices().getDeviceAdapter().getMicroscopeGeometry();
         switch (geometryType) {
             case DISPIM:
@@ -161,7 +161,7 @@ public class AcquisitionEngine implements AcquisitionManager {
 
         double volumeDuration = computeActualVolumeDuration(acqSettings_);
         double timepointDuration = computeTimepointDuration();
-        long timepointIntervalMs = Math.round(acqSettings_.getTimepointInterval()*1000);
+        long timepointIntervalMs = Math.round(acqSettings_.getTimePointInterval()*1000);
 
         // use hardware timing if < 1 second between time points
         // experimentally need ~0.5 sec to set up acquisition, this gives a bit of cushion

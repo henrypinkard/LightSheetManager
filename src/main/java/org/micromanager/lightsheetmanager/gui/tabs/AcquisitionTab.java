@@ -46,7 +46,7 @@ public class AcquisitionTab extends Panel {
     private Label lblNumTimePoints_;
     private Label lblInterval_;
     private Spinner spnNumTimePoints_;
-    private Spinner spnInterval_;
+    private Spinner spnTimePointInterval_;
     private CheckBox chkUseTimePoints_;
 
     // multiple positions
@@ -80,6 +80,7 @@ public class AcquisitionTab extends Panel {
         advTimingFrame_ = new AdvancedTimingFrame(model_);
         xyzGridFrame_ = new XYZGridFrame();
         createUserInterface();
+        createEventHandlers();
     }
 
     private void createUserInterface() {
@@ -117,11 +118,12 @@ public class AcquisitionTab extends Panel {
         lblVolumeTimeValue_ = new Label("0.0");
         lblTotalTimeValue_ = new Label("0.0");
 
+        // TODO: is are a reasonable max value for these spinners?
         // time points
         lblNumTimePoints_ = new Label("Number:");
         lblInterval_ = new Label("Interval [s]:");
-        spnNumTimePoints_ = Spinner.createIntegerSpinner(1, 1, 1,1);
-        spnInterval_ = Spinner.createFloatSpinner(1.0f, 1.0f, 1.0f, 1.0f);
+        spnNumTimePoints_ = Spinner.createIntegerSpinner(1, 1, Integer.MAX_VALUE,1);
+        spnTimePointInterval_ = Spinner.createIntegerSpinner(1, 1, Integer.MAX_VALUE, 10);
 
         // multiple positions
         lblPostMoveDelay_ = new Label("Post-move delay [ms]:");
@@ -149,8 +151,6 @@ public class AcquisitionTab extends Panel {
         String[] labels = {"Mode 1", "Mode 2"};
         cmbAcquisitionModes_ = new ComboBox(labels, labels[0]);
 
-        createEventHandlers();
-
         // durations
         panelDurations_.add(lblSliceTime_, "");
         panelDurations_.add(lblSliceTimeValue_, "wrap");
@@ -163,7 +163,7 @@ public class AcquisitionTab extends Panel {
         panelTimePoints_.add(lblNumTimePoints_, "");
         panelTimePoints_.add(spnNumTimePoints_, "wrap");
         panelTimePoints_.add(lblInterval_, "");
-        panelTimePoints_.add(spnInterval_, "");
+        panelTimePoints_.add(spnTimePointInterval_, "");
 
         // multiple positions
         panelMultiplePositions_.add(btnEditPositionList_, "");
@@ -223,25 +223,34 @@ public class AcquisitionTab extends Panel {
         btnOpenXYZGrid_.registerListener(e -> xyzGridFrame_.setVisible(true));
         btnEditPositionList_.registerListener(e -> studio_.app().showPositionList());
 
-        chkUseMultiplePositions_.registerListener(e -> {
+        chkUseMultiplePositions_.registerListener(e ->
+                model_.acquisitions().getAcquisitionSettings().setUsingMultiplePositions(chkUseMultiplePositions_.isSelected()));
 
+        spnPostMoveDelay_.registerListener(e -> {
+            model_.acquisitions().getAcquisitionSettings().setPostMoveDelay(spnPostMoveDelay_.getInt());
+            System.out.println("getPostMoveDelay: " + model_.acquisitions().getAcquisitionSettings().getPostMoveDelay());
         });
 
-        chkUseTimePoints_.registerListener(e -> {
-            //model_.acquisitions().getAcquisitionSettings().
-        });
+        // time points
 
-        // use channel checkbox
-        chkUseChannels_.registerListener(e -> {
-            channelTablePanel_.setItemsEnabled(chkUseChannels_.isSelected());
-        });
+        chkUseTimePoints_.registerListener(e ->
+                model_.acquisitions().getAcquisitionSettings().setUsingTimepoints(chkUseTimePoints_.isSelected()));
 
         spnNumTimePoints_.registerListener(e -> {
-
+            model_.acquisitions().getAcquisitionSettings().setNumTimePoints(spnNumTimePoints_.getInt());
+            System.out.println("getNumTimePoints: " + model_.acquisitions().getAcquisitionSettings().getNumTimePoints());
         });
 
-        spnInterval_.registerListener(e -> {
+        spnTimePointInterval_.registerListener(e -> {
+            model_.acquisitions().getAcquisitionSettings().setTimePointInterval(spnTimePointInterval_.getInt());
+            System.out.println("getTimePointInterval: " + model_.acquisitions().getAcquisitionSettings().getTimePointInterval());
+        });
 
+        // use channels
+        chkUseChannels_.registerListener(e -> {
+            final boolean state = chkUseChannels_.isSelected();
+            model_.acquisitions().getAcquisitionSettings().setUsingChannels(state);
+            channelTablePanel_.setItemsEnabled(state);
         });
     }
 }

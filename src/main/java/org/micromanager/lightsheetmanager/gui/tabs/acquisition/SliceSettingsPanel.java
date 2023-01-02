@@ -23,6 +23,7 @@ public class SliceSettingsPanel extends Panel {
         super("Slice Settings");
         advTimingFrame_ = Objects.requireNonNull(advTimingFrame);
         createUserInterface();
+        createEventHandlers();
     }
 
     private void createUserInterface() {
@@ -32,8 +33,6 @@ public class SliceSettingsPanel extends Panel {
         chkUseAdvancedTiming_ = new CheckBox("Use advanced timing settings", 12, false, CheckBox.RIGHT);
         spnSlicePeriod_ = Spinner.createFloatSpinner(30.0f, 0.0f, Float.MAX_VALUE, 0.25f);
         spnSampleExposure_ = Spinner.createFloatSpinner(10.0f, 0.0f, Float.MAX_VALUE, 0.25f);
-
-        createEventHandlers();
 
         add(chkMinimizeSlicePeriod_, "wrap");
         add(lblSlicePeriod_, "");
