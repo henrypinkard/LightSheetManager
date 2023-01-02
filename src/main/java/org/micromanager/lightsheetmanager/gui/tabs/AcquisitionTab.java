@@ -124,12 +124,12 @@ public class AcquisitionTab extends Panel {
         // time points
         lblNumTimePoints_ = new Label("Number:");
         lblInterval_ = new Label("Interval [s]:");
-        spnNumTimePoints_ = Spinner.createIntegerSpinner(1, 1, Integer.MAX_VALUE,1);
-        spnTimePointInterval_ = Spinner.createIntegerSpinner(1, 1, Integer.MAX_VALUE, 10);
+        spnNumTimePoints_ = Spinner.createIntegerSpinner(model_.acquisitions().getAcquisitionSettings().getNumTimePoints(), 1, Integer.MAX_VALUE,1);
+        spnTimePointInterval_ = Spinner.createIntegerSpinner(model_.acquisitions().getAcquisitionSettings().getTimePointInterval(), 1, Integer.MAX_VALUE, 10);
 
         // multiple positions
         lblPostMoveDelay_ = new Label("Post-move delay [ms]:");
-        spnPostMoveDelay_ = Spinner.createIntegerSpinner(0, 0, Integer.MAX_VALUE, 100);
+        spnPostMoveDelay_ = Spinner.createIntegerSpinner(model_.acquisitions().getAcquisitionSettings().getPostMoveDelay(), 0, Integer.MAX_VALUE, 100);
         btnEditPositionList_ = new Button("Edit Position List", 120, 20);
         btnOpenXYZGrid_ = new Button("XYZ Grid", 80, 20);
 
@@ -152,7 +152,7 @@ public class AcquisitionTab extends Panel {
 
         cmbAcquisitionModes_ = new ComboBox(AcquisitionModes.toArray(),
                 model_.acquisitions().getAcquisitionSettings().getAcquisitionMode().toString());
-        
+
         // durations
         panelDurations_.add(lblSliceTime_, "");
         panelDurations_.add(lblSliceTimeValue_, "wrap");
