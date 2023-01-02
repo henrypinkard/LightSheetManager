@@ -2,6 +2,7 @@ package org.micromanager.lightsheetmanager.gui.tabs;
 
 import org.micromanager.Studio;
 import org.micromanager.lightsheetmanager.gui.data.Icons;
+import org.micromanager.lightsheetmanager.model.AcquisitionSettings;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 import org.micromanager.lightsheetmanager.gui.channels.ChannelTablePanel;
 import org.micromanager.lightsheetmanager.gui.tabs.acquisition.SliceSettingsPanel;
@@ -87,6 +88,7 @@ public class AcquisitionTab extends Panel {
 
     private void createUserInterface() {
         //JLabel lblTitle = new JLabel("Acquisitions");
+        final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
 
         Panel.setMigLayoutDefault(
                 "",
@@ -101,9 +103,9 @@ public class AcquisitionTab extends Panel {
         sliceSettingsPanel_ = new SliceSettingsPanel(advTimingFrame_);
 
         // check boxes for panels
-        chkUseMultiplePositions_ = new CheckBox("Multiple positions (XY)", false);
-        chkUseTimePoints_ = new CheckBox("Time Points", false);
-        chkUseChannels_ = new CheckBox("Channels", false);
+        chkUseMultiplePositions_ = new CheckBox("Multiple positions (XY)", acqSettings.isUsingMultiplePositions());
+        chkUseTimePoints_ = new CheckBox("Time Points", acqSettings.isUsingTimePoints());
+        chkUseChannels_ = new CheckBox("Channels", acqSettings.isUsingChannels());
 
         // panels
         panelButtons_ = new Panel();
@@ -120,16 +122,16 @@ public class AcquisitionTab extends Panel {
         lblVolumeTimeValue_ = new Label("0.0");
         lblTotalTimeValue_ = new Label("0.0");
 
-        // TODO: is are a reasonable max value for these spinners?
+        // TODO: is there a reasonable max value for these spinners?
         // time points
         lblNumTimePoints_ = new Label("Number:");
         lblInterval_ = new Label("Interval [s]:");
-        spnNumTimePoints_ = Spinner.createIntegerSpinner(model_.acquisitions().getAcquisitionSettings().getNumTimePoints(), 1, Integer.MAX_VALUE,1);
-        spnTimePointInterval_ = Spinner.createIntegerSpinner(model_.acquisitions().getAcquisitionSettings().getTimePointInterval(), 1, Integer.MAX_VALUE, 10);
+        spnNumTimePoints_ = Spinner.createIntegerSpinner(acqSettings.getNumTimePoints(), 1, Integer.MAX_VALUE,1);
+        spnTimePointInterval_ = Spinner.createIntegerSpinner(acqSettings.getTimePointInterval(), 1, Integer.MAX_VALUE, 10);
 
         // multiple positions
         lblPostMoveDelay_ = new Label("Post-move delay [ms]:");
-        spnPostMoveDelay_ = Spinner.createIntegerSpinner(model_.acquisitions().getAcquisitionSettings().getPostMoveDelay(), 0, Integer.MAX_VALUE, 100);
+        spnPostMoveDelay_ = Spinner.createIntegerSpinner(acqSettings.getPostMoveDelay(), 0, Integer.MAX_VALUE, 100);
         btnEditPositionList_ = new Button("Edit Position List", 120, 20);
         btnOpenXYZGrid_ = new Button("XYZ Grid", 80, 20);
 
