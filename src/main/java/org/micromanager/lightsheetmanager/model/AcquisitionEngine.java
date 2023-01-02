@@ -459,7 +459,7 @@ public class AcquisitionEngine implements AcquisitionManager {
                     acquisition.submitEventIterator(
                               LSMAcquisitionEvents.createMultiChannelVolumeAcqEvents(
                                     baseEvent, acquisition, acqSettings_, eventMonitor,
-                                    acqSettings_.getSPIMMode() == AcquisitionModes.STAGE_SCAN_INTERLEAVED));
+                                    acqSettings_.getAcquisitionMode() == AcquisitionModes.STAGE_SCAN_INTERLEAVED));
                 }
             }
         }

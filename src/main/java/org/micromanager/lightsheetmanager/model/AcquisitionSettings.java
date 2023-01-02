@@ -20,7 +20,7 @@ public class AcquisitionSettings {
     private DefaultSliceSettings sliceSettings_;
 
     private ScanSettings scanSettings_;
-    private AcquisitionModes spimMode_;
+    private AcquisitionModes acquisitionMode_;
     private MultiChannelModes channelMode_;
 
     private CameraModes cameraModes_;
@@ -56,7 +56,7 @@ public class AcquisitionSettings {
         cameraExposure_ = 10.0f;
         isStageScanning_ = false;
         useChannels_ = false;
-        spimMode_ = AcquisitionModes.NONE;
+        acquisitionMode_ = AcquisitionModes.NONE;
         cameraModes_ = CameraModes.EDGE;
         channelMode_ = MultiChannelModes.VOLUME;
         timingSettings_ = new DefaultTimingSettings.Builder().build();
@@ -145,8 +145,12 @@ public class AcquisitionSettings {
         return numTimePoints_;
     }
 
-    public AcquisitionModes getSPIMMode() {
-        return spimMode_;
+    public void setAcquisitionMode(final AcquisitionModes acquisitionMode) {
+        acquisitionMode_ = acquisitionMode;
+    }
+
+    public AcquisitionModes getAcquisitionMode() {
+        return acquisitionMode_;
     }
 
     public void setChannelMode(final MultiChannelModes channelMode) {

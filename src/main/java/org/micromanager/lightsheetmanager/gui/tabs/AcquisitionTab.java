@@ -16,6 +16,8 @@ import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.components.Spinner;
 import org.micromanager.lightsheetmanager.gui.components.ToggleButton;
+import org.micromanager.lightsheetmanager.model.data.AcquisitionModes;
+import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 
 import javax.swing.JLabel;
 import java.util.Objects;
@@ -148,9 +150,9 @@ public class AcquisitionTab extends Panel {
 
         channelTablePanel_ = new ChannelTablePanel(model_, chkUseChannels_);
 
-        String[] labels = {"Mode 1", "Mode 2"};
-        cmbAcquisitionModes_ = new ComboBox(labels, labels[0]);
-
+        cmbAcquisitionModes_ = new ComboBox(AcquisitionModes.toArray(),
+                model_.acquisitions().getAcquisitionSettings().getAcquisitionMode().toString());
+        
         // durations
         panelDurations_.add(lblSliceTime_, "");
         panelDurations_.add(lblSliceTimeValue_, "wrap");
@@ -251,6 +253,12 @@ public class AcquisitionTab extends Panel {
             final boolean state = chkUseChannels_.isSelected();
             model_.acquisitions().getAcquisitionSettings().setUsingChannels(state);
             channelTablePanel_.setItemsEnabled(state);
+        });
+
+        cmbAcquisitionModes_.registerListener(e -> {
+            final int index = cmbAcquisitionModes_.getSelectedIndex();
+            model_.acquisitions().getAcquisitionSettings().setAcquisitionMode(AcquisitionModes.getByIndex(index));
+            System.out.println("getAcquisitionMode: " + model_.acquisitions().getAcquisitionSettings().getAcquisitionMode());
         });
     }
 }

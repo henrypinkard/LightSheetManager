@@ -98,7 +98,7 @@ public class PLogicDISPIM {
             }
         }
 
-        if (settings.isStageScanning() && settings.getSPIMMode() == AcquisitionModes.STAGE_SCAN_INTERLEAVED) {
+        if (settings.isStageScanning() && settings.getAcquisitionMode() == AcquisitionModes.STAGE_SCAN_INTERLEAVED) {
             if (numViews != 2) {
                 // TODO: error "Interleaved stage scan only possible for 2-sided acquisition."
                 return false;
@@ -144,7 +144,7 @@ public class PLogicDISPIM {
             // figure out the speed we should be going according to slice period, slice spacing, geometry, etc.
             final double requestedMotorSpeed = computeScanSpeed(settings, scanner1.getSPIMNumScansPerSlice());  // in mm/sec
 
-            final boolean isInterleaved = (settings.getSPIMMode() == AcquisitionModes.STAGE_SCAN_INTERLEAVED);
+            final boolean isInterleaved = (settings.getAcquisitionMode() == AcquisitionModes.STAGE_SCAN_INTERLEAVED);
 
             final float maxSpeed = xyStage.getMaxSpeedX();
             if (requestedMotorSpeed > maxSpeed * 0.8) {  // trying to go near max speed smooth scanning will be compromised
@@ -173,7 +173,7 @@ public class PLogicDISPIM {
             numLines *= ((double) settings.getNumChannels() / computeScanChannelsPerPass(settings));
             xyStage.setScanNumLines(numLines);
 
-            final boolean isStageScan2Sided = (settings.getSPIMMode() == AcquisitionModes.STAGE_SCAN) && settings.getVolumeSettings().numViews() == 2;
+            final boolean isStageScan2Sided = (settings.getAcquisitionMode() == AcquisitionModes.STAGE_SCAN) && settings.getVolumeSettings().numViews() == 2;
             xyStage.setScanPattern(isStageScan2Sided ? ASIXYStage.ScanPattern.SERPENTINE : ASIXYStage.ScanPattern.RASTER);
 
             if (xyStage.getAxisPolarityX() != ASIXYStage.AxisPolarity.NORMAL) {
@@ -209,7 +209,7 @@ public class PLogicDISPIM {
         //double sliceDuration = settings.sliceTiming.sliceDuration;
         //double sliceDuration = 0.0; // TODO: get from SliceTiming
         double sliceDuration = getSliceDuration(settings.getTimingSettings(), numScansPerSlice);
-        if (settings.getSPIMMode() == AcquisitionModes.STAGE_SCAN_INTERLEAVED) {
+        if (settings.getAcquisitionMode() == AcquisitionModes.STAGE_SCAN_INTERLEAVED) {
             // pretend like our slice takes twice as long so that we move the correct speed
             // this has the effect of halving the motor speed
             // but keeping the scan distance the same
