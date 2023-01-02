@@ -146,7 +146,7 @@ public class AcquisitionTab extends Panel {
         btnTestAcquisition_ = new Button("Test Acquisition");
         btnOpenPlaylist_ = new Button("Playlist...");
 
-        channelTablePanel_ = new ChannelTablePanel(chkUseChannels_);
+        channelTablePanel_ = new ChannelTablePanel(model_, chkUseChannels_);
 
         String[] labels = {"Mode 1", "Mode 2"};
         cmbAcquisitionModes_ = new ComboBox(labels, labels[0]);

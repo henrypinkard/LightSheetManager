@@ -1,5 +1,10 @@
 package org.micromanager.lightsheetmanager.model.data;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public enum MultiChannelModes {
     NONE("None"),
     VOLUME("Every Volume"),
@@ -7,6 +12,9 @@ public enum MultiChannelModes {
     SLICE_HW("Every Slice (PLogic)");
 
     private final String text_;
+
+    private static final Map<String, MultiChannelModes> stringToEnum =
+            Stream.of(values()).collect(Collectors.toMap(Object::toString, e -> e));
 
     MultiChannelModes(final String text) {
         text_ = text;
@@ -16,4 +24,19 @@ public enum MultiChannelModes {
     public String toString() {
         return text_;
     }
+
+    public static MultiChannelModes fromString(final String symbol) {
+        return stringToEnum.getOrDefault(symbol, MultiChannelModes.NONE);
+    }
+
+    public static MultiChannelModes getByIndex(final int index) {
+        return values()[index];
+    }
+
+    public static String[] toArray() {
+        return Arrays.stream(values())
+                .map(MultiChannelModes::toString)
+                .toArray(String[]::new);
+    }
+
 }

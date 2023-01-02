@@ -4,8 +4,11 @@ import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;
 import org.micromanager.lightsheetmanager.gui.components.ComboBox;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
+import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
+import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 
 import javax.swing.JLabel;
+import java.util.Objects;
 
 public class ChannelTablePanel extends Panel {
 
@@ -16,16 +19,20 @@ public class ChannelTablePanel extends Panel {
     private Button btnRemoveChannel_;
 
     private ComboBox cmbChannelGroup_;
-    private ComboBox cmbChangeChannel_;
+    private ComboBox cmbChannelMode_;
 
     private ChannelTable table_;
 
-    public ChannelTablePanel(final CheckBox checkBox) {
+    private LightSheetManagerModel model_;
+
+    public ChannelTablePanel(final LightSheetManagerModel model, final CheckBox checkBox) {
         super(checkBox);
-        init();
+        model_ = Objects.requireNonNull(model);
+        createUserInterface();
+        createEventHandlers();
     }
 
-    private void init() {
+    private void createUserInterface() {
         lblChannelGroup_ = new JLabel("Channel group:");
         lblChangeChannel_ = new JLabel("Change channel:");
 
@@ -38,10 +45,8 @@ public class ChannelTablePanel extends Panel {
         final String[] groupLabels = {"None"};
         cmbChannelGroup_ = new ComboBox(groupLabels, groupLabels[0]);
 
-        final String[] changeLabels = {"Every volume"};
-        cmbChangeChannel_ = new ComboBox(changeLabels, changeLabels[0]);
-
-        createEventHandlers();
+        cmbChannelMode_ = new ComboBox(MultiChannelModes.toArray(),
+                model_.acquisitions().getAcquisitionSettings().getChannelMode().toString());
 
         add(lblChannelGroup_, "");
         add(cmbChannelGroup_, "wrap");
@@ -49,7 +54,7 @@ public class ChannelTablePanel extends Panel {
         add(btnAddChannel_, "");
         add(btnRemoveChannel_, "wrap");
         add(lblChangeChannel_, "");
-        add(cmbChangeChannel_, "");
+        add(cmbChannelMode_, "");
     }
 
     /**
@@ -63,7 +68,7 @@ public class ChannelTablePanel extends Panel {
         btnAddChannel_.setEnabled(state);
         btnRemoveChannel_.setEnabled(state);
         lblChangeChannel_.setEnabled(state);
-        cmbChangeChannel_.setEnabled(state);
+        cmbChannelMode_.setEnabled(state);
         table_.setEnabled(state);
         table_.getTable().setEnabled(state);
     }
@@ -76,7 +81,7 @@ public class ChannelTablePanel extends Panel {
             table_.refreshData();
 //            table_.repaint();
 //            repaint();
-            System.out.println("add");
+            System.out.println("add channel");
             table_.getData().printChannelData();
         });
 
@@ -87,6 +92,16 @@ public class ChannelTablePanel extends Panel {
                 System.out.println("remove row index: " + row);
                 table_.refreshData();
             }
+        });
+
+        cmbChannelMode_.registerListener(e -> {
+            final int index = cmbChannelMode_.getSelectedIndex();
+            model_.acquisitions().getAcquisitionSettings().setChannelMode(MultiChannelModes.getByIndex(index));
+            System.out.println("getChannelMode: " + model_.acquisitions().getAcquisitionSettings().getChannelMode());
+        });
+
+        cmbChannelGroup_.registerListener(e -> {
+            //model_.acquisitions().getAcquisitionSettings().setChannelGroup();
         });
     }
 

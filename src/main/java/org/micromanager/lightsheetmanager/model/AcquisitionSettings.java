@@ -58,7 +58,7 @@ public class AcquisitionSettings {
         useChannels_ = false;
         spimMode_ = AcquisitionModes.NONE;
         cameraModes_ = CameraModes.EDGE;
-        channelMode_ = MultiChannelModes.VOLUME_HW;
+        channelMode_ = MultiChannelModes.VOLUME;
         timingSettings_ = new DefaultTimingSettings.Builder().build();
         volumeSettings_ = new DefaultVolumeSettings.Builder().build();
         sliceSettings_ = new DefaultSliceSettings.Builder().build();
@@ -149,6 +149,10 @@ public class AcquisitionSettings {
         return spimMode_;
     }
 
+    public void setChannelMode(final MultiChannelModes channelMode) {
+        channelMode_ = channelMode;
+    }
+
     public MultiChannelModes getChannelMode() {
         return channelMode_;
     }
@@ -183,6 +187,10 @@ public class AcquisitionSettings {
 
     public ChannelSpec[] getChannels() {
         return channels_;
+    }
+
+    public void setChannelGroup(final String channelGroup) {
+        channelGroup_= channelGroup;
     }
 
     public String getChannelGroup() {
