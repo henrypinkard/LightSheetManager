@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettings;
+import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettingsLS;
 import org.micromanager.lightsheetmanager.api.internal.DefaultTimingSettings;
 import org.micromanager.lightsheetmanager.api.internal.DefaultVolumeSettings;
 import org.micromanager.lightsheetmanager.model.channels.ChannelSpec;
@@ -12,11 +13,13 @@ import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 
 /**
  * Acquisition settings for diSPIM.
+ * There are two versions of slice settings, one for virtual slit mode, and one for other camera trigger modes.
  */
 public class AcquisitionSettings {
 
     private DefaultTimingSettings timingSettings_;
     private DefaultVolumeSettings volumeSettings_;
+    private DefaultSliceSettingsLS sliceSettingsLS_;
     private DefaultSliceSettings sliceSettings_;
 
     private ScanSettings scanSettings_;
@@ -61,7 +64,7 @@ public class AcquisitionSettings {
         channelMode_ = MultiChannelModes.VOLUME;
         timingSettings_ = new DefaultTimingSettings.Builder().build();
         volumeSettings_ = new DefaultVolumeSettings.Builder().build();
-        sliceSettings_ = new DefaultSliceSettings.Builder().build();
+        sliceSettingsLS_ = new DefaultSliceSettingsLS.Builder().build();
     }
 
     public void setTimingSettings(final DefaultTimingSettings settings) {
@@ -72,8 +75,8 @@ public class AcquisitionSettings {
         volumeSettings_ = settings;
     }
 
-    public void setSliceSettings(final DefaultSliceSettings settings) {
-        sliceSettings_ = settings;
+    public void setSliceSettings(final DefaultSliceSettingsLS settings) {
+        sliceSettingsLS_ = settings;
     }
 
     public DefaultTimingSettings getTimingSettings() {
@@ -84,8 +87,8 @@ public class AcquisitionSettings {
         return volumeSettings_;
     }
 
-    public DefaultSliceSettings getSliceSettings() {
-        return sliceSettings_;
+    public DefaultSliceSettingsLS getSliceSettings() {
+        return sliceSettingsLS_;
     }
 
     public ScanSettings getScanSettings() {

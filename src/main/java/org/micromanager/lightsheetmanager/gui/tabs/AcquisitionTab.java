@@ -102,7 +102,7 @@ public class AcquisitionTab extends Panel {
         Panel panelRight = new Panel();
 
         volumeSettingsPanel_ = new VolumeSettingsPanel(model_);
-        sliceSettingsPanel_ = new SliceSettingsPanel(advTimingFrame_);
+        sliceSettingsPanel_ = new SliceSettingsPanel(model_, advTimingFrame_);
 
         // check boxes for panels
         chkUseMultiplePositions_ = new CheckBox("Multiple positions (XY)", acqSettings.isUsingMultiplePositions());

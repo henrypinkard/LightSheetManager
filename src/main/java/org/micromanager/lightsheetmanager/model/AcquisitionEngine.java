@@ -10,7 +10,7 @@ import org.micromanager.acqj.main.AcquisitionEvent;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.lightsheetmanager.api.AcquisitionManager;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
-import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettings;
+import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettingsLS;
 import org.micromanager.lightsheetmanager.api.internal.DefaultTimingSettings;
 import org.micromanager.lightsheetmanager.api.data.GeometryType;
 import org.micromanager.lightsheetmanager.api.internal.DefaultVolumeSettings;
@@ -38,7 +38,7 @@ public class AcquisitionEngine implements AcquisitionManager {
     // diSPIM builders
     DefaultTimingSettings.Builder tsb_;
     DefaultVolumeSettings.Builder vsb_;
-    DefaultSliceSettings.Builder ssb_;
+    DefaultSliceSettingsLS.Builder ssb_;
 
     // acquisition status
     private final AtomicBoolean isRunning_;
@@ -69,7 +69,7 @@ public class AcquisitionEngine implements AcquisitionManager {
     public void setupBuilders() {
         tsb_ = new DefaultTimingSettings.Builder();
         vsb_ = new DefaultVolumeSettings.Builder(acqSettings_.getVolumeSettings());
-        ssb_ = new DefaultSliceSettings.Builder();
+        ssb_ = new DefaultSliceSettingsLS.Builder();
     }
 
     public void setAcquisitionSettings(final AcquisitionSettings acqSettings) {
@@ -789,7 +789,7 @@ public class AcquisitionEngine implements AcquisitionManager {
         return vsb_;
     }
 
-    public DefaultSliceSettings.Builder getSliceSettingsBuilder() {
+    public DefaultSliceSettingsLS.Builder getSliceSettingsBuilder() {
         return ssb_;
     }
 

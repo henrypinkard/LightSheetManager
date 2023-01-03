@@ -5,6 +5,7 @@ import org.micromanager.lightsheetmanager.gui.components.CheckBox;
 import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.components.Spinner;
+import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
 import java.util.Objects;
 
@@ -19,8 +20,12 @@ public class SliceSettingsPanel extends Panel {
     private Spinner spnSampleExposure_;
 
     private AdvancedTimingFrame advTimingFrame_;
-    public SliceSettingsPanel(final AdvancedTimingFrame advTimingFrame) {
+
+    private LightSheetManagerModel model_;
+
+    public SliceSettingsPanel(final LightSheetManagerModel model, final AdvancedTimingFrame advTimingFrame) {
         super("Slice Settings");
+        model_ = Objects.requireNonNull(model);
         advTimingFrame_ = Objects.requireNonNull(advTimingFrame);
         createUserInterface();
         createEventHandlers();
@@ -50,7 +55,7 @@ public class SliceSettingsPanel extends Panel {
         });
 
         spnSlicePeriod_.registerListener(e -> {
-
+            //model_.acquisitions().getAcquisitionSettings().getSliceSettings().;
         });
 
         spnSampleExposure_.registerListener(e -> {

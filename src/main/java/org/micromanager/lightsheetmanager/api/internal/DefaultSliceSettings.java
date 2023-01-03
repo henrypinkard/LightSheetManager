@@ -4,114 +4,91 @@ import org.micromanager.lightsheetmanager.api.SliceSettings;
 
 public class DefaultSliceSettings implements SliceSettings {
 
-
     public static class Builder implements SliceSettings.Builder {
 
-        double shutterWidth_ = 10.0;
-        double shutterSpeedFactor_ = 1.0;
-        double scanSettleTime_ = 100.0;
-        double scanResetTime_ = 100.0;
+        double slicePeriod_ = 10.0;
+        double sampleExposure_ = 1.0;
+        boolean minimizeSlicePeriod_ = false;
 
         public Builder() {
         }
 
-        public Builder(final double shutterWidth,
-                       final double shutterSpeedFactor,
-                       final double scanSettleTime,
-                       final double scanResetTime) {
-            shutterWidth_ = shutterWidth;
-            shutterSpeedFactor_ = shutterSpeedFactor;
-            scanSettleTime_ = scanSettleTime;
-            scanResetTime_ = scanResetTime;
+        public Builder(final double slicePeriod,
+                       final double sampleExposure,
+                       final boolean minimizeSlicePeriod) {
+            slicePeriod_ = slicePeriod;
+            sampleExposure_ = sampleExposure;
+            minimizeSlicePeriod_ = minimizeSlicePeriod;
         }
 
         @Override
-        public SliceSettings.Builder shutterWidth(double um) {
-            shutterWidth_ = um;
-            return this;
+        public SliceSettings.Builder slicePeriod(double slicePeriodMs) {
+            return null;
         }
 
         @Override
-        public SliceSettings.Builder shutterSpeedFactor(double factor) {
-            shutterSpeedFactor_ = factor;
-            return this;
+        public SliceSettings.Builder sampleExposure(double exposureMs) {
+            return null;
         }
 
         @Override
-        public SliceSettings.Builder scanSettleTime(double ms) {
-            scanSettleTime_ = ms;
-            return this;
-        }
-
-        @Override
-        public SliceSettings.Builder scanResetTime(double ms) {
-            scanResetTime_ = ms;
-            return this;
+        public SliceSettings.Builder minimizeSlicePeriod(boolean state) {
+            return null;
         }
 
         @Override
         public DefaultSliceSettings build() {
             return new DefaultSliceSettings(
-                    shutterWidth_,
-                    shutterSpeedFactor_,
-                    scanSettleTime_,
-                    scanResetTime_
+                    slicePeriod_,
+                    sampleExposure_,
+                    minimizeSlicePeriod_
             );
         }
     }
 
-    final double shutterWidth_;
-    final double shutterSpeedFactor_;
-    final double scanSettleTime_;
-    final double scanResetTime_;
+    final double slicePeriod_;
+    final double sampleExposure_;
+    final boolean minimizeSlicePeriod_;
 
     private DefaultSliceSettings(
-            final double shutterWidth,
-            final double shutterSpeedFactor,
-            final double scanSettleTime,
-            final double scanResetTime) {
-        shutterWidth_ = shutterWidth;
-        shutterSpeedFactor_ = shutterSpeedFactor;
-        scanSettleTime_ = scanSettleTime;
-        scanResetTime_ = scanResetTime;
+            final double slicePeriod,
+            final double sampleExposure,
+            final boolean minimizeSlicePeriod) {
+        slicePeriod_ = slicePeriod;
+        sampleExposure_ = sampleExposure;
+        minimizeSlicePeriod_ = minimizeSlicePeriod;
     }
 
     @Override
     public SliceSettings.Builder copyBuilder() {
         return new Builder(
-                shutterWidth_,
-                shutterSpeedFactor_,
-                scanSettleTime_,
-                scanResetTime_
+                slicePeriod_,
+                sampleExposure_,
+                minimizeSlicePeriod_
         );
     }
 
     @Override
-    public double shutterWidth() {
-        return shutterWidth_;
+    public double slicePeriod() {
+        return slicePeriod_;
     }
 
     @Override
-    public double shutterSpeedFactor() {
-        return shutterSpeedFactor_;
+    public double sampleExposure() {
+        return sampleExposure_;
     }
 
     @Override
-    public double scanSettleTime() {
-        return scanSettleTime_;
-    }
-
-    @Override
-    public double scanResetTime() {
-        return scanResetTime_;
+    public boolean isSlicePeriodMinimized() {
+        return minimizeSlicePeriod_;
     }
 
     @Override
     public String toString() {
         return String.format(
-                "%s[shutterWidth=%s, shutterSpeedFactor=%s, scanSettleTime=%s, scanResetTime=%s]",
+                "%s[slicePeriod_=%s, sampleExposure_=%s, minimizeSlicePeriod_=%s]",
                 getClass().getSimpleName(),
-                shutterWidth_, shutterSpeedFactor_, scanSettleTime_, scanResetTime_
+                slicePeriod_, sampleExposure_, minimizeSlicePeriod_
         );
     }
 }

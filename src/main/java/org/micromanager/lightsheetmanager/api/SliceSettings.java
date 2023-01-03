@@ -1,36 +1,30 @@
 package org.micromanager.lightsheetmanager.api;
 
-// corresponds to slice settings panel on acquisition tab when in light sheet mode (virtual slit)
+// FIXME: maybe wrap this into timing settings ???
+
 public interface SliceSettings {
 
     interface Builder {
         /**
-         * Sets the shutter width in microns.
+         * Sets the slice period in milliseconds.
          *
-         * @param um the shutter width in microns
+         * @param slicePeriodMs the slice period in milliseconds
          */
-        Builder shutterWidth(final double um);
+        Builder slicePeriod(final double slicePeriodMs);
 
         /**
-         * Sets the shutter speed factor.
+         * Sets the sample exposure time in milliseconds.
          *
-         * @param factor the shutter speed factor
+         * @param exposureMs the exposure time in milliseconds
          */
-        Builder shutterSpeedFactor(final double factor);
+        Builder sampleExposure(final double exposureMs);
 
         /**
-         * Sets the scan settle time in milliseconds.
+         * Sets the slice period automatically.
          *
-         * @param ms the scan settle time in milliseconds
+         * @param state true to minimize the slice period
          */
-        Builder scanSettleTime(final double ms);
-
-        /**
-         * Sets the scan settle reset in milliseconds.
-         *
-         * @param ms the scan reset time in milliseconds
-         */
-        Builder scanResetTime(final double ms);
+        Builder minimizeSlicePeriod(final boolean state);
 
         /**
          * Creates an immutable instance of SliceSettings
@@ -40,38 +34,26 @@ public interface SliceSettings {
         SliceSettings build();
     }
 
-    /**
-     * Creates a Builder populated with settings of this SliceSettings instance.
-     *
-     * @return SliceSettings.Builder pre-populated with settings of this instance.
-     */
-    SliceSettings.Builder copyBuilder();
+    Builder copyBuilder();
 
     /**
-     * Returns the shutter width in microns.
+     * Returns the slice period in milliseconds.
      *
-     * @return the shutter width in microns
+     * @return the slice period in milliseconds
      */
-    double shutterWidth();
+    double slicePeriod();
 
     /**
-     * Returns the shutter speed factor. (1 / speedFactor)
+     * Returns the sample exposure time in milliseconds.
      *
-     * @return the shutter speed factor
+     * @return the exposure time in milliseconds
      */
-    double shutterSpeedFactor();
+    double sampleExposure();
 
     /**
-     * Returns the scan settle time in milliseconds.
+     * Returns true if the slice period is minimized.
      *
-     * @return the scan settle time in milliseconds
+     * @return true if slice period is minimized
      */
-    double scanSettleTime();
-
-    /**
-     * Returns the scan reset time in milliseconds.
-     *
-     * @return the scan reset time in milliseconds
-     */
-    double scanResetTime();
+    boolean isSlicePeriodMinimized();
 }
