@@ -194,7 +194,7 @@ public class LSMAcquisitionEvents {
    }
 
    /**
-    * Iterate over an arbitrary list of positions. Adds in postition indices to
+    * Iterate over an arbitrary list of positions. Adds in position indices to
     * the axes that assume the order in the list provided correspond to the
     * desired indices
     *

@@ -32,6 +32,8 @@ public class AcquisitionEngine implements AcquisitionManager {
 
     private DataStorage data_;
 
+    // TODO: these are not related to acqSettings, probably needs to be clarified
+    // (used to get builder objects for acqSettings related objects)
     // TODO: come up with a way to abstract this for different kinds of microscopes
     // diSPIM builders
     DefaultTimingSettings.Builder tsb_;
@@ -59,12 +61,14 @@ public class AcquisitionEngine implements AcquisitionManager {
 
         // true if the acquisition is paused
         isPaused_ = new AtomicBoolean(false);
+    }
 
-        // TODO: these are not related to acqSettings, probably needs to be clarified
-        // (used to get builder objects for acqSettings related objects)
-        // diSPIM builders
+    /**
+     * Create builders from loaded acquisition settings.
+     */
+    public void setupBuilders() {
         tsb_ = new DefaultTimingSettings.Builder();
-        vsb_ = new DefaultVolumeSettings.Builder();
+        vsb_ = new DefaultVolumeSettings.Builder(acqSettings_.getVolumeSettings());
         ssb_ = new DefaultSliceSettings.Builder();
     }
 
@@ -72,11 +76,14 @@ public class AcquisitionEngine implements AcquisitionManager {
         acqSettings_ = acqSettings;
     }
 
-    // TODO: slice settings as well
-//    public void setSettingsFromBuilders() {
-//        acqSettings_.setTimingSettings(tsb_.build());
-//        acqSettings_.setVolumeSettings(vsb_.build());
-//    }
+    /**
+     * Used make sure the acquisition settings and updated to the current builder settings.
+     */
+    public void setAcqSettingsFromBuilders() {
+        acqSettings_.setTimingSettings(tsb_.build());
+        acqSettings_.setVolumeSettings(vsb_.build());
+        acqSettings_.setSliceSettings(ssb_.build());
+    }
 
     @Override
     public void requestRun() {
@@ -160,7 +167,7 @@ public class AcquisitionEngine implements AcquisitionManager {
         // test acq was here
 
         double volumeDuration = computeActualVolumeDuration(acqSettings_);
-        double timepointDuration = computeTimepointDuration();
+        double timepointDuration = computeTimePointDuration();
         long timepointIntervalMs = Math.round(acqSettings_.getTimePointInterval()*1000);
 
         // use hardware timing if < 1 second between time points
@@ -755,7 +762,7 @@ public class AcquisitionEngine implements AcquisitionManager {
      * is that it also takes into account the multiple positions, if any.
      * @return duration in ms
      */
-    private double computeTimepointDuration() {
+    private double computeTimePointDuration() {
         final double volumeDuration = computeActualVolumeDuration(acqSettings_);
         if (acqSettings_.isUsingMultiplePositions()) {
             // use 1.5 seconds motor move between positions

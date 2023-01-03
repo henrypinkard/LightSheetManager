@@ -62,6 +62,9 @@ public class LightSheetManagerModel implements LightSheetManager {
         // load settings
         settings_.load();
 
+        // we need to load acquisition settings before creating the acquisition engine
+        acqEngine_.setupBuilders();
+
         // if we made it here then everything loaded correctly
         return true;
     }
@@ -103,7 +106,15 @@ public class LightSheetManagerModel implements LightSheetManager {
         return core_;
     }
 
+    public CMMCore core() {
+        return core_;
+    }
+
     public Studio getStudio() {
+        return studio_;
+    }
+
+    public Studio studio() {
         return studio_;
     }
 

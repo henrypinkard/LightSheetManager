@@ -1,6 +1,7 @@
 package org.micromanager.lightsheetmanager.gui.tabs.acquisition;
 
 import org.micromanager.lightsheetmanager.api.internal.DefaultVolumeSettings;
+import org.micromanager.lightsheetmanager.model.AcquisitionSettings;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 import org.micromanager.lightsheetmanager.model.devices.LightSheetDeviceManager;
 import org.micromanager.lightsheetmanager.gui.components.ComboBox;
@@ -60,8 +61,19 @@ public class VolumeSettingsPanel extends Panel {
         lblSlicesPerView_ = new Label("Slices per view:");
         lblSliceStepSize_ = new Label("Slice step size [\u00B5m]:");
 
-        cmbNumViews_ = new ComboBox(lbls, lbls[0], 60, 20);
-        cmbFirstView_ = new ComboBox(lbls, lbls[0], 60, 20);
+        // if the number of sides has changed and the firstView or numViews is larger
+        // than the number of sides, default to 1.
+        int numViews = volumeSettings.numViews();
+        int firstView = volumeSettings.firstView();
+        if (numViews > labels.size()) {
+            numViews = 1;
+        }
+        if (firstView > labels.size()) {
+            firstView = 1;
+        }
+
+        cmbNumViews_ = new ComboBox(lbls, String.valueOf(numViews), 60, 20);
+        cmbFirstView_ = new ComboBox(lbls, String.valueOf(firstView), 60, 20);
         spnViewDelay_ = Spinner.createDoubleSpinner(volumeSettings.delayBeforeView(), 0.0, Double.MAX_VALUE, 0.25);
         spnSliceStepSize_ = Spinner.createDoubleSpinner(volumeSettings.sliceStepSize(), 0.0, 100.0, 0.1);
         spnSlicesPerSide_ = Spinner.createIntegerSpinner(volumeSettings.slicesPerVolume(), 0, 100, 1);
@@ -79,24 +91,32 @@ public class VolumeSettingsPanel extends Panel {
     }
 
     private void createEventHandlers() {
+        final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
+
         cmbNumViews_.registerListener(e -> {
             vsb_.numViews(Integer.parseInt(cmbNumViews_.getSelected()));
+            acqSettings.setVolumeSettings(vsb_.build());
+            System.out.println(acqSettings.getVolumeSettings().numViews());
         });
 
         cmbFirstView_.registerListener(e -> {
             vsb_.firstView(Integer.parseInt(cmbFirstView_.getSelected()));
+            acqSettings.setVolumeSettings(vsb_.build());
         });
 
         spnViewDelay_.registerListener(e -> {
             vsb_.delayBeforeView(spnViewDelay_.getDouble());
+            acqSettings.setVolumeSettings(vsb_.build());
         });
 
         spnSlicesPerSide_.registerListener(e -> {
             vsb_.slicesPerVolume(spnSlicesPerSide_.getInt());
+            acqSettings.setVolumeSettings(vsb_.build());
         });
 
         spnSliceStepSize_.registerListener(e -> {
             vsb_.sliceStepSize(spnSliceStepSize_.getDouble());
+            acqSettings.setVolumeSettings(vsb_.build());
         });
     }
 }

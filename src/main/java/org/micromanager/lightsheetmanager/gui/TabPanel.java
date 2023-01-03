@@ -40,7 +40,7 @@ public class TabPanel extends Panel {
         devices_ = Objects.requireNonNull(devices);
         model_ = Objects.requireNonNull(model);
 
-        tabbedPane_ = new TabbedPane(800, 600);
+        tabbedPane_ = new TabbedPane(840, 600);
         createUserInterface();
     }
 

@@ -1,5 +1,6 @@
 package org.micromanager.lightsheetmanager.gui.channels;
 
+import mmcorej.StrVector;
 import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;
 import org.micromanager.lightsheetmanager.gui.components.ComboBox;
@@ -8,6 +9,7 @@ import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 
 import javax.swing.JLabel;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class ChannelTablePanel extends Panel {
@@ -42,8 +44,9 @@ public class ChannelTablePanel extends Panel {
         btnAddChannel_ = new Button("Add");
         btnRemoveChannel_ = new Button("Remove");
 
-        final String[] groupLabels = {"None"};
+        final String[] groupLabels = getAvailableGroups();
         cmbChannelGroup_ = new ComboBox(groupLabels, groupLabels[0]);
+
 
         cmbChannelMode_ = new ComboBox(MultiChannelModes.toArray(),
                 model_.acquisitions().getAcquisitionSettings().getChannelMode().toString());
@@ -101,8 +104,27 @@ public class ChannelTablePanel extends Panel {
         });
 
         cmbChannelGroup_.registerListener(e -> {
-            //model_.acquisitions().getAcquisitionSettings().setChannelGroup();
+            model_.acquisitions().getAcquisitionSettings().setChannelGroup(cmbChannelGroup_.getSelected());
+            System.out.println("getChannelGroup: " + model_.acquisitions().getAcquisitionSettings().getChannelGroup());
         });
     }
 
+    // TODO: probably should be in the model not gui
+    private String[] getAvailableGroups() {
+        StrVector groups;
+        try {
+            groups = model_.studio().core().getAllowedPropertyValues("Core", "ChannelGroup");
+        } catch (Exception e) {
+            model_.studio().logs().logError(e);
+            return new String[0];
+        }
+        ArrayList<String> strGroups = new ArrayList<>();
+        strGroups.add("None");
+        for (String group : groups) {
+            if (model_.studio().core().getAvailableConfigs(group).size() > 1) {
+                strGroups.add(group);
+            }
+        }
+        return strGroups.toArray(new String[0]);
+    }
 }

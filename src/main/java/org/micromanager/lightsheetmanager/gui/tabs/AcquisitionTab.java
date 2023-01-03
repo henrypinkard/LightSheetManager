@@ -19,6 +19,9 @@ import org.micromanager.lightsheetmanager.gui.components.Spinner;
 import org.micromanager.lightsheetmanager.gui.components.ToggleButton;
 import org.micromanager.lightsheetmanager.model.data.AcquisitionModes;
 
+import org.micromanager.internal.utils.NumberUtils;
+import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
+
 import javax.swing.JLabel;
 import java.util.Objects;
 
@@ -191,7 +194,7 @@ public class AcquisitionTab extends Panel {
         panelButtons_.add(btnOpenPlaylist_, "");
 
         // 3 panel layout
-        panelLeft.add(panelDurations_, "growx");
+        panelLeft.add(panelDurations_, "growx, growy");
         panelLeft.add(panelTimePoints_, "growx, growy, wrap");
         panelLeft.add(panelMultiplePositions_, "growx, span 2");
 
@@ -203,6 +206,8 @@ public class AcquisitionTab extends Panel {
         panelRight.add(sliceSettingsPanel_, "growx, wrap");
 
         //add(lblTitle, "wrap");
+
+        updateDurationLabels();
 
         add(panelLeft, "");
         add(panelCenter, "");
@@ -290,5 +295,143 @@ public class AcquisitionTab extends Panel {
         lblPostMoveDelay_.setEnabled(state);
         spnPostMoveDelay_.setEnabled(state);
         btnEditPositionList_.setEnabled(state);
+    }
+
+    private void updateDurationLabels() {
+        updateSlicePeriodLabel();
+        updateVolumeDurationLabel();
+        updateTotalTimeDurationLabel();
+    }
+
+    private void updateSlicePeriodLabel() {
+        final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
+        model_.getAcquisitionEngine().recalculateSliceTiming(acqSettings);
+        lblSliceTimeValue_.setText(Double.toString(acqSettings.getTimingSettings().sliceDuration()));
+        //System.out.println("updating slice label to: " + acqSettings.getTimingSettings().sliceDuration());
+    }
+
+    private void updateVolumeDurationLabel() {
+        double duration = computeVolumeDuration(model_.acquisitions().getAcquisitionSettings());
+        if (duration > 1000) {
+            lblVolumeTimeValue_.setText(
+                    NumberUtils.doubleToDisplayString(duration/1000d) +
+                            " s"); // round to ms
+        } else {
+            lblVolumeTimeValue_.setText(
+                    NumberUtils.doubleToDisplayString(Math.round(10*duration)/10d) +
+                            " ms");  // round to tenth of ms
+        }
+        //System.out.println("updating volume label to: " + );
+    }
+
+    /**
+     * Update the displayed total time duration.
+     */
+    private void updateTotalTimeDurationLabel() {
+        String s = "";
+        double duration = computeTotalTimeDuration();
+        if (duration < 60) {  // less than 1 min
+            s += NumberUtils.doubleToDisplayString(duration) + " s";
+        } else if (duration < 60*60) { // between 1 min and 1 hour
+            s += NumberUtils.doubleToDisplayString(Math.floor(duration/60)) + " min ";
+            s += NumberUtils.doubleToDisplayString(Math.round(duration %  60)) + " s";
+        } else { // longer than 1 hour
+            s += NumberUtils.doubleToDisplayString(Math.floor(duration/(60*60))) + " hr ";
+            s +=  NumberUtils.doubleToDisplayString(Math.round((duration % (60*60))/60)) + " min";
+        }
+        lblTotalTimeValue_.setText(s);
+    }
+
+    private double computeTotalTimeDuration() {
+        final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
+        final double duration = (acqSettings.getNumTimePoints() - 1) * acqSettings.getTimePointInterval()
+                + computeTimePointDuration()/1000;
+        return duration;
+    }
+
+    /**
+     * Compute the time point duration in ms. Only difference from computeVolumeDuration()
+     * is that it also takes into account the multiple positions, if any.
+     * @return duration in ms
+     */
+    private double computeTimePointDuration() {
+        final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
+        final double volumeDuration = computeVolumeDuration(acqSettings);
+        if (acqSettings.isUsingMultiplePositions()) {
+            try {
+                // use 1.5 seconds motor move between positions
+                // (could be wildly off but was estimated using actual system
+                // and then slightly padded to be conservative to avoid errors
+                // where positions aren't completed in time for next position)
+                // could estimate the actual time by analyzing the position's relative locations
+                //   and using the motor speed and acceleration time
+                return studio_.positions().getPositionList().getNumberOfPositions() *
+                        (volumeDuration + 1500 + spnPostMoveDelay_.getInt());
+            } catch (Exception e) {
+                studio_.logs().showError("Error getting position list for multiple XY positions");
+            }
+        }
+        return volumeDuration;
+    }
+
+    public double computeVolumeDuration(final AcquisitionSettings acqSettings) {
+//        final MultiChannelModes channelMode = acqSettings.getChannelMode();
+//        final int numChannels = acqSettings.numChannels;
+//        final int numSides = acqSettings.numSides;
+//        final float delayBeforeSide = acqSettings.delayBeforeSide;
+//        int numCameraTriggers = acqSettings.numSlices;
+//        if (acqSettings.cameraMode == CameraModes.Keys.OVERLAP) {
+//            numCameraTriggers += 1;
+//        }
+//        // stackDuration is per-side, per-channel, per-position
+//
+//        final double stackDuration = numCameraTriggers * acqSettings.sliceTiming.sliceDuration;
+//        if (acqSettings.isStageScanning || acqSettings.isStageStepping) {
+//            final double rampDuration = getStageRampDuration(acqSettings);
+//            final double retraceTime = getStageRetraceDuration(acqSettings);
+//            // TODO double-check these calculations below, at least they are better than before ;-)
+//            if (acqSettings.spimMode == AcquisitionModes.Keys.STAGE_SCAN) {
+//                if (channelMode == MultichannelModes.Keys.SLICE_HW) {
+//                    return retraceTime + (numSides * ((rampDuration * 2) + (stackDuration * numChannels)));
+//                } else {  // "normal" stage scan with volume channel switching
+//                    if (numSides == 1) {
+//                        // single-view so will retrace at beginning of each channel
+//                        return ((rampDuration * 2) + stackDuration + retraceTime) * numChannels;
+//                    } else {
+//                        // will only retrace at very start/end
+//                        return retraceTime + (numSides * ((rampDuration * 2) + stackDuration) * numChannels);
+//                    }
+//                }
+//            } else if (acqSettings.spimMode == AcquisitionModes.Keys.STAGE_SCAN_UNIDIRECTIONAL
+//                    || acqSettings.spimMode == AcquisitionModes.Keys.STAGE_STEP_SUPPLEMENTAL_UNIDIRECTIONAL
+//                    || acqSettings.spimMode == AcquisitionModes.Keys.STAGE_SCAN_SUPPLEMENTAL_UNIDIRECTIONAL) {
+//                if (channelMode == MultichannelModes.Keys.SLICE_HW) {
+//                    return ((rampDuration * 2) + (stackDuration * numChannels) + retraceTime) * numSides;
+//                } else {  // "normal" stage scan with volume channel switching
+//                    return ((rampDuration * 2) + stackDuration + retraceTime) * numChannels * numSides;
+//                }
+//            } else {  // interleaved mode => one-way pass collecting both sides
+//                if (channelMode == MultichannelModes.Keys.SLICE_HW) {
+//                    // single pass with all sides and channels
+//                    return retraceTime + (rampDuration * 2 + stackDuration * numSides * numChannels);
+//                } else {  // one-way pass collecting both sides, then rewind for next channel
+//                    return ((rampDuration * 2) + (stackDuration * numSides) + retraceTime) * numChannels;
+//                }
+//            }
+//        } else { // piezo scan
+//            double channelSwitchDelay = 0;
+//            if (channelMode == MultichannelModes.Keys.VOLUME) {
+//                channelSwitchDelay = 500;   // estimate channel switching overhead time as 0.5s
+//                // actual value will be hardware-dependent
+//            }
+//            if (channelMode == MultichannelModes.Keys.SLICE_HW) {
+//                return numSides * (delayBeforeSide + stackDuration * numChannels);  // channelSwitchDelay = 0
+//            } else {
+//                return numSides * numChannels
+//                        * (delayBeforeSide + stackDuration)
+//                        + (numChannels - 1) * channelSwitchDelay;
+//            }
+//        }
+        return 1.0;
     }
 }
