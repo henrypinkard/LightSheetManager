@@ -5,6 +5,7 @@ import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.ComboBox;
 import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
+import org.micromanager.lightsheetmanager.gui.tabs.acquisition.SliceSettingsPanel;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
 import javax.swing.JLabel;
@@ -22,9 +23,11 @@ public class CameraTab extends Panel {
 
     private ComboBox cmbCameraTriggerMode_;
 
+    private SliceSettingsPanel sliceSettingsPanel_;
     private LightSheetManagerModel model_;
 
-    public CameraTab(final LightSheetManagerModel model) {
+    public CameraTab(final LightSheetManagerModel model, final SliceSettingsPanel sliceSettingsPanel) {
+        sliceSettingsPanel_ = Objects.requireNonNull(sliceSettingsPanel);
         model_ = Objects.requireNonNull(model);
         createUserInterface();
         createEventHandlers();
@@ -75,7 +78,9 @@ public class CameraTab extends Panel {
         cmbCameraTriggerMode_.registerListener(e -> {
             final CameraModes cameraMode = CameraModes.fromString(cmbCameraTriggerMode_.getSelected());
             model_.acquisitions().getAcquisitionSettings().setCameraMode(cameraMode);
+            sliceSettingsPanel_.switchUI(cameraMode);
             System.out.println("getCameraMode: " + model_.acquisitions().getAcquisitionSettings().getCameraMode());
         });
     }
+
 }

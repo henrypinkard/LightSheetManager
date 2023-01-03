@@ -20,7 +20,6 @@ import org.micromanager.lightsheetmanager.gui.components.ToggleButton;
 import org.micromanager.lightsheetmanager.model.data.AcquisitionModes;
 
 import org.micromanager.internal.utils.NumberUtils;
-import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 
 import javax.swing.JLabel;
 import java.util.Objects;
@@ -282,6 +281,10 @@ public class AcquisitionTab extends Panel {
             model_.acquisitions().getAcquisitionSettings().setAcquisitionMode(AcquisitionModes.getByIndex(index));
             System.out.println("getAcquisitionMode: " + model_.acquisitions().getAcquisitionSettings().getAcquisitionMode());
         });
+    }
+
+    public SliceSettingsPanel getSliceSettingsPanel() {
+        return sliceSettingsPanel_;
     }
 
     private void setTimePointSpinnersEnabled(final boolean state) {

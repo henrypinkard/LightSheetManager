@@ -67,7 +67,7 @@ public class TabPanel extends Panel {
         // create panels
         acquisitionTab_ = new AcquisitionTab(studio_, model_);
         autofocusTab_ = new AutofocusTab();
-        cameraTab_ = new CameraTab(model_);
+        cameraTab_ = new CameraTab(model_, acquisitionTab_.getSliceSettingsPanel());
         dataTab_ = new DataTab();
         deviceTab_ = new DeviceTab(devices_, model_);
         settingsTab_ = new SettingsTab();
@@ -81,9 +81,6 @@ public class TabPanel extends Panel {
         tabbedPane_.addTab(createTabTitle("Devices"), deviceTab_);
         tabbedPane_.addTab(createTabTitle("Settings"), settingsTab_);
         tabbedPane_.addTab(createTabTitle("Help"), helpTab_);
-//        tabbedPane.addTab(createTabTitle("Main"), mainPanel);
-//        tabbedPane.addTab(createTabTitle("Camera"), cameraPanel);
-//        tabbedPane.addTab(createTabTitle("Data"), dataPanel);
 
         // add ui elements to the panel
         add(tabbedPane_, "growx, growy");

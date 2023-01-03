@@ -7,10 +7,10 @@ public class DefaultSliceSettingsLS implements SliceSettingsLS {
 
     public static class Builder implements SliceSettingsLS.Builder {
 
-        double shutterWidth_ = 10.0;
+        double scanResetTime_ = 3.0;
+        double scanSettleTime_ = 1.0;
+        double shutterWidth_ = 5.0;
         double shutterSpeedFactor_ = 1.0;
-        double scanSettleTime_ = 100.0;
-        double scanResetTime_ = 100.0;
 
         public Builder() {
         }
