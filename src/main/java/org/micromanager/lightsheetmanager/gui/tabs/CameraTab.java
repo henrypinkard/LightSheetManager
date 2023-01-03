@@ -1,11 +1,14 @@
 package org.micromanager.lightsheetmanager.gui.tabs;
 
+import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.ComboBox;
 import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
+import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
 import javax.swing.JLabel;
+import java.util.Objects;
 
 public class CameraTab extends Panel {
 
@@ -19,11 +22,15 @@ public class CameraTab extends Panel {
 
     private ComboBox cmbCameraTriggerMode_;
 
-    public CameraTab() {
-        init();
+    private LightSheetManagerModel model_;
+
+    public CameraTab(final LightSheetManagerModel model) {
+        model_ = Objects.requireNonNull(model);
+        createUserInterface();
+        createEventHandlers();
     }
 
-    public void init() {
+    private void createUserInterface() {
         JLabel lblTitle = new JLabel("Cameras");
 
         final Panel panelROI = new Panel("Imaging ROI");
@@ -42,8 +49,8 @@ public class CameraTab extends Panel {
         btnCustomROI_ = new Button("Custom", 120, 30);
         btnGetCurrentROI_ = new Button("Get Current ROI", 120, 30);
 
-        final String[] labels = {"None"};
-        cmbCameraTriggerMode_ = new ComboBox(labels, labels[0]);
+        cmbCameraTriggerMode_ = new ComboBox(CameraModes.toArray(),
+                model_.acquisitions().getAcquisitionSettings().getCameraMode().toString());
 
         panelROI.add(btnUnchangedROI_, "span 2, wrap");
         panelROI.add(btnFullROI_, "");
@@ -62,5 +69,13 @@ public class CameraTab extends Panel {
         add(lblTitle, "wrap");
         add(panelROI, "wrap");
         add(panelCameraTrigger, "growx");
+    }
+
+    private void createEventHandlers() {
+        cmbCameraTriggerMode_.registerListener(e -> {
+            final CameraModes cameraMode = CameraModes.fromString(cmbCameraTriggerMode_.getSelected());
+            model_.acquisitions().getAcquisitionSettings().setCameraMode(cameraMode);
+            System.out.println("getCameraMode: " + model_.acquisitions().getAcquisitionSettings().getCameraMode());
+        });
     }
 }

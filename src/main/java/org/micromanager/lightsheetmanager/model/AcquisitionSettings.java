@@ -65,6 +65,7 @@ public class AcquisitionSettings {
         timingSettings_ = new DefaultTimingSettings.Builder().build();
         volumeSettings_ = new DefaultVolumeSettings.Builder().build();
         sliceSettingsLS_ = new DefaultSliceSettingsLS.Builder().build();
+        sliceSettings_ = new DefaultSliceSettings.Builder().build();
     }
 
     public void setTimingSettings(final DefaultTimingSettings settings) {
@@ -162,6 +163,10 @@ public class AcquisitionSettings {
 
     public MultiChannelModes getChannelMode() {
         return channelMode_;
+    }
+
+    public void setCameraMode(final CameraModes triggerMode) {
+        cameraModes_ = triggerMode;
     }
 
     public CameraModes getCameraMode() {

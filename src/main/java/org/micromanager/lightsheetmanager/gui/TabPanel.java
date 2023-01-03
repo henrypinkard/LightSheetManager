@@ -67,7 +67,7 @@ public class TabPanel extends Panel {
         // create panels
         acquisitionTab_ = new AcquisitionTab(studio_, model_);
         autofocusTab_ = new AutofocusTab();
-        cameraTab_ = new CameraTab();
+        cameraTab_ = new CameraTab(model_);
         dataTab_ = new DataTab();
         deviceTab_ = new DeviceTab(devices_, model_);
         settingsTab_ = new SettingsTab();
