@@ -15,14 +15,21 @@ public class DefaultSliceSettingsLS implements SliceSettingsLS {
         public Builder() {
         }
 
-        public Builder(final double shutterWidth,
-                       final double shutterSpeedFactor,
+        public Builder(final double scanResetTime,
                        final double scanSettleTime,
-                       final double scanResetTime) {
+                       final double shutterWidth,
+                       final double shutterSpeedFactor) {
+            scanResetTime_ = scanResetTime;
+            scanSettleTime_ = scanSettleTime;
             shutterWidth_ = shutterWidth;
             shutterSpeedFactor_ = shutterSpeedFactor;
-            scanSettleTime_ = scanSettleTime;
-            scanResetTime_ = scanResetTime;
+        }
+
+        public Builder(final DefaultSliceSettingsLS sliceSettings) {
+            scanResetTime_ = sliceSettings.scanResetTime();
+            scanSettleTime_ = sliceSettings.scanSettleTime();
+            shutterWidth_ = sliceSettings.shutterWidth();
+            shutterSpeedFactor_ = sliceSettings.shutterSpeedFactor();
         }
 
         @Override
@@ -52,38 +59,48 @@ public class DefaultSliceSettingsLS implements SliceSettingsLS {
         @Override
         public DefaultSliceSettingsLS build() {
             return new DefaultSliceSettingsLS(
-                    shutterWidth_,
-                    shutterSpeedFactor_,
+                    scanResetTime_,
                     scanSettleTime_,
-                    scanResetTime_
+                    shutterWidth_,
+                    shutterSpeedFactor_
             );
         }
     }
 
+    final double scanResetTime_;
+    final double scanSettleTime_;
     final double shutterWidth_;
     final double shutterSpeedFactor_;
-    final double scanSettleTime_;
-    final double scanResetTime_;
 
     private DefaultSliceSettingsLS(
-            final double shutterWidth,
-            final double shutterSpeedFactor,
+            final double scanResetTime,
             final double scanSettleTime,
-            final double scanResetTime) {
+            final double shutterWidth,
+            final double shutterSpeedFactor) {
+        scanResetTime_ = scanResetTime;
+        scanSettleTime_ = scanSettleTime;
         shutterWidth_ = shutterWidth;
         shutterSpeedFactor_ = shutterSpeedFactor;
-        scanSettleTime_ = scanSettleTime;
-        scanResetTime_ = scanResetTime;
     }
 
     @Override
     public SliceSettingsLS.Builder copyBuilder() {
         return new Builder(
-                shutterWidth_,
-                shutterSpeedFactor_,
+                scanResetTime_,
                 scanSettleTime_,
-                scanResetTime_
+                shutterWidth_,
+                shutterSpeedFactor_
         );
+    }
+
+    @Override
+    public double scanResetTime() {
+        return scanResetTime_;
+    }
+
+    @Override
+    public double scanSettleTime() {
+        return scanSettleTime_;
     }
 
     @Override
@@ -97,21 +114,11 @@ public class DefaultSliceSettingsLS implements SliceSettingsLS {
     }
 
     @Override
-    public double scanSettleTime() {
-        return scanSettleTime_;
-    }
-
-    @Override
-    public double scanResetTime() {
-        return scanResetTime_;
-    }
-
-    @Override
     public String toString() {
         return String.format(
-                "%s[shutterWidth=%s, shutterSpeedFactor=%s, scanSettleTime=%s, scanResetTime=%s]",
+                "%s[scanResetTime=%s, scanSettleTime=%s, shutterWidth=%s, shutterSpeedFactor=%s]",
                 getClass().getSimpleName(),
-                shutterWidth_, shutterSpeedFactor_, scanSettleTime_, scanResetTime_
+                scanResetTime_, scanSettleTime_, shutterWidth_, shutterSpeedFactor_
         );
     }
 }

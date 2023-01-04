@@ -10,6 +10,7 @@ import org.micromanager.acqj.main.AcquisitionEvent;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.lightsheetmanager.api.AcquisitionManager;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
+import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettings;
 import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettingsLS;
 import org.micromanager.lightsheetmanager.api.internal.DefaultTimingSettings;
 import org.micromanager.lightsheetmanager.api.data.GeometryType;
@@ -38,7 +39,8 @@ public class AcquisitionEngine implements AcquisitionManager {
     // diSPIM builders
     DefaultTimingSettings.Builder tsb_;
     DefaultVolumeSettings.Builder vsb_;
-    DefaultSliceSettingsLS.Builder ssb_;
+    DefaultSliceSettingsLS.Builder ssbLS_;
+    DefaultSliceSettings.Builder ssb_;
 
     // acquisition status
     private final AtomicBoolean isRunning_;
@@ -69,7 +71,8 @@ public class AcquisitionEngine implements AcquisitionManager {
     public void setupBuilders() {
         tsb_ = new DefaultTimingSettings.Builder();
         vsb_ = new DefaultVolumeSettings.Builder(acqSettings_.getVolumeSettings());
-        ssb_ = new DefaultSliceSettingsLS.Builder();
+        ssb_ = new DefaultSliceSettings.Builder(acqSettings_.getSliceSettings());
+        ssbLS_ = new DefaultSliceSettingsLS.Builder(acqSettings_.getSliceSettingsLS());
     }
 
     public void setAcquisitionSettings(final AcquisitionSettings acqSettings) {
@@ -83,6 +86,7 @@ public class AcquisitionEngine implements AcquisitionManager {
         acqSettings_.setTimingSettings(tsb_.build());
         acqSettings_.setVolumeSettings(vsb_.build());
         acqSettings_.setSliceSettings(ssb_.build());
+        acqSettings_.setSliceSettingsLS(ssbLS_.build());
     }
 
     @Override
@@ -643,8 +647,8 @@ public class AcquisitionEngine implements AcquisitionManager {
                 // 5. laser turns on 0.25ms before camera trigger and stays on until exposure is ending
                 // TODO revisit this after further experimentation
                 cameraDuration = 1;  // only need to trigger camera
-                final float shutterWidth = (float) acqSettings_.getSliceSettings().shutterWidth();
-                final float shutterSpeed = (float) acqSettings_.getSliceSettings().shutterSpeedFactor();
+                final float shutterWidth = (float) acqSettings_.getSliceSettingsLS().shutterWidth();
+                final float shutterSpeed = (float) acqSettings_.getSliceSettingsLS().shutterSpeedFactor();
                 ///final float shutterWidth = props_.getPropValueFloat(Devices.Keys.PLUGIN, Properties.Keys.PLUGIN_LS_SHUTTER_WIDTH);
                 //final int shutterSpeed = props_.getPropValueInteger(Devices.Keys.PLUGIN, Properties.Keys.PLUGIN_LS_SHUTTER_SPEED);
                 float pixelSize = (float) core_.getPixelSizeUm();
@@ -655,8 +659,8 @@ public class AcquisitionEngine implements AcquisitionManager {
                 cameraExposure = (float)(rowReadoutTime * (int)(shutterWidth/pixelSize) * shutterSpeed);
                 // s.cameraExposure = (float) (rowReadoutTime * shutterWidth / pixelSize * shutterSpeed);
                 final float totalExposureMax = MyNumberUtils.ceilToQuarterMs(cameraReadoutTime + cameraExposure + 0.05f);  // 50-300us extra cushion time
-                final float scanSettle = (float) acqSettings_.getSliceSettings().scanSettleTime();
-                final float scanReset = (float) acqSettings_.getSliceSettings().scanResetTime();
+                final float scanSettle = (float) acqSettings_.getSliceSettingsLS().scanSettleTime();
+                final float scanReset = (float) acqSettings_.getSliceSettingsLS().scanResetTime();
                 delayBeforeScan = scanReset - scanDelayFilter;
                 scanDuration = scanSettle + (totalExposureMax*shutterSpeed) + scanLaserBufferTime;
                 delayBeforeCamera = scanReset + scanSettle;
@@ -789,9 +793,14 @@ public class AcquisitionEngine implements AcquisitionManager {
         return vsb_;
     }
 
-    public DefaultSliceSettingsLS.Builder getSliceSettingsBuilder() {
+    public DefaultSliceSettingsLS.Builder getSliceSettingsBuilderLS() {
+        return ssbLS_;
+    }
+
+    public DefaultSliceSettings.Builder getSliceSettingsBuilder() {
         return ssb_;
     }
+
 
     public AcquisitionSettings getAcquisitionSettings() {
         return acqSettings_;

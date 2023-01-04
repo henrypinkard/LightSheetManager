@@ -21,19 +21,28 @@ public class DefaultSliceSettings implements SliceSettings {
             minimizeSlicePeriod_ = minimizeSlicePeriod;
         }
 
+        public Builder(final DefaultSliceSettings sliceSettings) {
+            slicePeriod_ = sliceSettings.slicePeriod();
+            sampleExposure_ = sliceSettings.sampleExposure();
+            minimizeSlicePeriod_ = sliceSettings.isSlicePeriodMinimized();
+        }
+
         @Override
         public SliceSettings.Builder slicePeriod(double slicePeriodMs) {
-            return null;
+            slicePeriod_ = slicePeriodMs;
+            return this;
         }
 
         @Override
         public SliceSettings.Builder sampleExposure(double exposureMs) {
-            return null;
+            sampleExposure_ = exposureMs;
+            return this;
         }
 
         @Override
         public SliceSettings.Builder minimizeSlicePeriod(boolean state) {
-            return null;
+            minimizeSlicePeriod_ = state;
+            return this;
         }
 
         @Override

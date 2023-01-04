@@ -11,6 +11,7 @@ import org.micromanager.lightsheetmanager.model.channels.ChannelSpec;
 import org.micromanager.lightsheetmanager.model.data.AcquisitionModes;
 import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 
+// TODO: merge DefaultSliceSettings and DefaultSliceSettingsLS?
 /**
  * Acquisition settings for diSPIM.
  * There are two versions of slice settings, one for virtual slit mode, and one for other camera trigger modes.
@@ -76,8 +77,13 @@ public class AcquisitionSettings {
         volumeSettings_ = settings;
     }
 
-    public void setSliceSettings(final DefaultSliceSettingsLS settings) {
+    public void setSliceSettingsLS(final DefaultSliceSettingsLS settings) {
         sliceSettingsLS_ = settings;
+    }
+
+    public void setSliceSettings(final DefaultSliceSettings settings) {
+        sliceSettings_ = settings;
+        System.out.println(sliceSettings_);
     }
 
     public DefaultTimingSettings getTimingSettings() {
@@ -88,8 +94,12 @@ public class AcquisitionSettings {
         return volumeSettings_;
     }
 
-    public DefaultSliceSettingsLS getSliceSettings() {
+    public DefaultSliceSettingsLS getSliceSettingsLS() {
         return sliceSettingsLS_;
+    }
+
+    public DefaultSliceSettings getSliceSettings() {
+        return sliceSettings_;
     }
 
     public ScanSettings getScanSettings() {
