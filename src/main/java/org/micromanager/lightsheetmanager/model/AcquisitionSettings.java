@@ -34,10 +34,10 @@ public class AcquisitionSettings {
     private String channelGroup_;
 
     private String saveNamePrefix_;
-    private String saveDirectoryRoot_;
+    private String saveDirectory_;
 
     private boolean useChannels_;
-    private boolean useTimepoints_;
+    private boolean useTimePoints_;
     private boolean useAutofocus_;
 
     private boolean useMultiplePositions_;
@@ -55,7 +55,7 @@ public class AcquisitionSettings {
     public AcquisitionSettings() {
         demoMode_ = false;
         saveNamePrefix_ = "";
-        saveDirectoryRoot_ = "";
+        saveDirectory_ = "";
         channelGroup_ = "";
         cameraExposure_ = 10.0f;
         isStageScanning_ = false;
@@ -135,16 +135,16 @@ public class AcquisitionSettings {
         return saveNamePrefix_;
     }
 
-    public String getSaveDirectoryRoot() {
-        return saveDirectoryRoot_;
+    public String getSaveDirectory() {
+        return saveDirectory_;
     }
 
     public void setSaveNamePrefix(final String prefix) {
         saveNamePrefix_ = prefix;
     }
 
-    public void setSaveDirectoryRoot(final String directory) {
-        saveDirectoryRoot_ = directory;
+    public void setSaveDirectory(final String directory) {
+        saveDirectory_ = directory;
     }
 
     public int getNumChannels() {
@@ -196,7 +196,7 @@ public class AcquisitionSettings {
     }
 
     public boolean isUsingTimePoints() {
-        return useTimepoints_;
+        return useTimePoints_;
     }
 
     public void setUsingChannels(final boolean state) {
@@ -223,8 +223,8 @@ public class AcquisitionSettings {
         return cameraExposure_;
     }
 
-    public void setUsingTimepoints(final boolean state) {
-        useTimepoints_ = state;
+    public void setUsingTimePoints(final boolean state) {
+        useTimePoints_ = state;
     }
 
     public void setHardwareTimesPoints(final boolean state) {

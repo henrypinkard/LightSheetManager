@@ -77,9 +77,9 @@ public class AcquisitionTab extends Panel {
 
     private LightSheetManagerModel model_;
 
-    public AcquisitionTab(final Studio studio, final LightSheetManagerModel model) {
-        studio_ = Objects.requireNonNull(studio);
+    public AcquisitionTab(final LightSheetManagerModel model) {
         model_ = Objects.requireNonNull(model);
+        studio_ = model_.getStudio();
         acqTableFrame_ = new AcquisitionTableFrame(studio_);
         advTimingFrame_ = new AdvancedTimingFrame(model_);
         xyzGridFrame_ = new XYZGridFrame();
@@ -255,7 +255,7 @@ public class AcquisitionTab extends Panel {
 
         chkUseTimePoints_.registerListener(e -> {
             final boolean selected = chkUseTimePoints_.isSelected();
-            model_.acquisitions().getAcquisitionSettings().setUsingTimepoints(selected);
+            model_.acquisitions().getAcquisitionSettings().setUsingTimePoints(selected);
             setTimePointSpinnersEnabled(selected);
         });
 

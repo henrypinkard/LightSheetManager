@@ -65,11 +65,11 @@ public class TabPanel extends Panel {
      */
     private void createUserInterface() {
         // create panels
-        acquisitionTab_ = new AcquisitionTab(studio_, model_);
+        acquisitionTab_ = new AcquisitionTab(model_);
         autofocusTab_ = new AutofocusTab();
         cameraTab_ = new CameraTab(model_, acquisitionTab_.getSliceSettingsPanel());
-        dataTab_ = new DataTab();
-        deviceTab_ = new DeviceTab(devices_, model_);
+        dataTab_ = new DataTab(model_);
+        deviceTab_ = new DeviceTab(model_, devices_);
         settingsTab_ = new SettingsTab();
         helpTab_ = new HelpTab();
 

@@ -29,7 +29,7 @@ public class DeviceTab extends Panel {
     private DeviceManager devices_;
     private LightSheetManagerModel model_;
 
-    public DeviceTab(final DeviceManager devices, final LightSheetManagerModel model) {
+    public DeviceTab(final LightSheetManagerModel model, final DeviceManager devices) {
         devices_ = Objects.requireNonNull(devices);
         model_ = Objects.requireNonNull(model);
         setupPanelButtons_ = new ArrayList<>();

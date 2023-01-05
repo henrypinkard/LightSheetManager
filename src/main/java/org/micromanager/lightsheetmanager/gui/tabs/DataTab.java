@@ -9,9 +9,11 @@ import org.micromanager.lightsheetmanager.gui.components.FileSelect;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.components.RadioButton;
 import org.micromanager.lightsheetmanager.gui.components.TextField;
+import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
 import javax.swing.JLabel;
 import java.awt.Color;
+import java.util.Objects;
 
 public class DataTab extends Panel {
 
@@ -23,15 +25,19 @@ public class DataTab extends Panel {
     private FileSelect fileSelect_;
     private RadioButton radSaveMode_;
 
-    public DataTab() {
+    private LightSheetManagerModel model_;
+
+    public DataTab(final LightSheetManagerModel model) {
+        model_ = Objects.requireNonNull(model);
         fileSelect_ = new FileSelect(
             "Please select a directory to save image data...",
             FileSelect.DIRECTORIES_ONLY
         );
-        init();
+        createUserInterface();
+        createEventHandlers();
     }
 
-    public void init() {
+    private void createUserInterface() {
         final JLabel lblTitle = new JLabel("Data");
 
         final Panel savePanel = new Panel("Image Save Settings");
@@ -53,13 +59,11 @@ public class DataTab extends Panel {
         txtSaveFileName_ = new TextField();
         //txtSaveFileName_.setEditable(false);
         txtSaveFileName_.setColumns(24);
-        txtSaveFileName_.setForeground(Color.BLACK);
+        txtSaveFileName_.setForeground(Color.WHITE);
 
         chkSaveWhileAcquiring_ = new CheckBox("Save images during acquisition", false);
 
         btnBrowse_ = new Button("Browse...", 80, 20);
-
-        createEventHandlers();
 
         savePanel.add(lblSaveDirectory, "");
         savePanel.add(txtSaveDirectory_, "");
@@ -75,6 +79,20 @@ public class DataTab extends Panel {
         add(datastorePanel, "growx");
     }
 
+    private void createEventHandlers() {
+        btnBrowse_.registerListener((EventObject e) -> {
+            final String path = fileSelect_.openDialogBox(this, new File(""));
+            model_.acquisitions().getAcquisitionSettings().setSaveDirectory(path);
+            txtSaveDirectory_.setText(path);
+            System.out.println("getSaveDirectory: " + model_.acquisitions().getAcquisitionSettings().getSaveDirectory());
+        });
+
+        txtSaveFileName_.addDocumentListener(e -> {
+            model_.acquisitions().getAcquisitionSettings().setSaveNamePrefix(txtSaveFileName_.getText());
+            System.out.println("getSaveNamePrefix: " + model_.acquisitions().getAcquisitionSettings().getSaveNamePrefix());
+        });
+    }
+
     public String getSaveDir() {
         return txtSaveDirectory_.getText();
     }
@@ -83,10 +101,4 @@ public class DataTab extends Panel {
         return txtSaveFileName_.getText();
     }
 
-    private void createEventHandlers() {
-        btnBrowse_.registerListener((EventObject e) -> {
-            String path = fileSelect_.openDialogBox(this, new File(""));
-            txtSaveDirectory_.setText(path);
-        });
-    }
 }

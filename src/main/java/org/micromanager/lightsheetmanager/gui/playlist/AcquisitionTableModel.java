@@ -68,7 +68,7 @@ public class AcquisitionTableModel extends AbstractTableModel {
                 return tableData_.getAcquisitionSettings(acqName).getSaveNamePrefix();
             case 3:
                 //System.out.println(tableData_.getAcquisitionSettings(acqName).saveDirectoryRoot);
-                return tableData_.getAcquisitionSettings(acqName).getSaveDirectoryRoot();
+                return tableData_.getAcquisitionSettings(acqName).getSaveDirectory();
             case 4:
                 //System.out.println(info.getPositionListName());
                 return info.getPositionListName();
@@ -97,7 +97,7 @@ public class AcquisitionTableModel extends AbstractTableModel {
                 }
                 break;
             case 3:
-                tableData_.getAcquisitionSettings(acqName).setSaveDirectoryRoot((String)value);
+                tableData_.getAcquisitionSettings(acqName).setSaveDirectory((String)value);
                 break;
             case 4:
                 info.setPositionListName((String)value);

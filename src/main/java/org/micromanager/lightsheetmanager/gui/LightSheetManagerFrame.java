@@ -57,8 +57,8 @@ public class LightSheetManagerFrame extends JFrame {
     public AcquisitionSettings getAcquisitionSettings() {
         //TODO fill this out with all settings
         AcquisitionSettings settings = new AcquisitionSettings();
-        settings.setSaveDirectoryRoot(tabPanel_.getDataTab().getSaveDir());
-        settings.setSaveDirectoryRoot(tabPanel_.getDataTab().getSaveName());
+        settings.setSaveDirectory(tabPanel_.getDataTab().getSaveDir());
+        settings.setSaveDirectory(tabPanel_.getDataTab().getSaveName());
         return settings;
     }
 

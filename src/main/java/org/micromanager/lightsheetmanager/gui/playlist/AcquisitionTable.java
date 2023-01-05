@@ -373,7 +373,7 @@ public class AcquisitionTable extends JScrollPane {
         //System.out.println("currentAcq: " + currentAcq);
         final AcquisitionSettings settings = data_.getAcquisitionSettings(currentAcqName_);
         if (settings != null) {
-            settings.setSaveDirectoryRoot(name);
+            settings.setSaveDirectory(name);
             repaint();
         }
     }
