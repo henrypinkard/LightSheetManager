@@ -15,7 +15,6 @@ public class DefaultTimingSettings implements TimingSettings {
         double cameraExposure_ = 1.0;
         double sliceDuration_ = 0.0;
         boolean alternateScanDirection_ = false;
-        boolean useAdvancedTiming_ = false;
 
         public Builder() {
         }
@@ -29,8 +28,7 @@ public class DefaultTimingSettings implements TimingSettings {
                         final double cameraDuration,
                         final double cameraExposure,
                         final double sliceDuration,
-                        final boolean alternateScanDirection,
-                        final boolean useAdvancedTiming) {
+                        final boolean alternateScanDirection) {
             scansPerSlice_ = scansPerSlice;
             delayBeforeScan_ = delayBeforeScan;
             scanDuration_ = scanDuration;
@@ -41,7 +39,6 @@ public class DefaultTimingSettings implements TimingSettings {
             cameraExposure_ = cameraExposure;
             sliceDuration_ = sliceDuration;
             alternateScanDirection_ = alternateScanDirection;
-            useAdvancedTiming_ = useAdvancedTiming;
         }
 
         /**
@@ -155,17 +152,6 @@ public class DefaultTimingSettings implements TimingSettings {
         }
 
         /**
-         * Sets the advanced timing mode.
-         *
-         * @param state true if using advanced timing
-         */
-        @Override
-        public TimingSettings.Builder useAdvancedTiming(boolean state) {
-            useAdvancedTiming_ = state;
-            return this;
-        }
-
-        /**
          * Creates an immutable instance of TimingSettings
          *
          * @return Immutable version of TimingSettings
@@ -182,8 +168,7 @@ public class DefaultTimingSettings implements TimingSettings {
                     cameraTriggerDuration_,
                     cameraExposure_,
                     sliceDuration_,
-                    alternateScanDirection_,
-                    useAdvancedTiming_
+                    alternateScanDirection_
             );
         }
     }
@@ -198,7 +183,6 @@ public class DefaultTimingSettings implements TimingSettings {
     final double cameraExposure_;
     final double sliceDuration_;
     final boolean alternateScanDirection_;
-    final boolean useAdvancedTiming_;
 
     private DefaultTimingSettings(
                 final int scansPerSlice,
@@ -210,8 +194,7 @@ public class DefaultTimingSettings implements TimingSettings {
                 final double cameraTriggerDuration,
                 final double cameraExposure,
                 final double sliceDuration,
-                final boolean alternateScanDirection,
-                final boolean useAdvancedTiming) {
+                final boolean alternateScanDirection) {
         scansPerSlice_ = scansPerSlice;
         delayBeforeScan_ = delayBeforeScan;
         scanDuration_ = scanDuration;
@@ -222,7 +205,6 @@ public class DefaultTimingSettings implements TimingSettings {
         cameraExposure_ = cameraExposure;
         sliceDuration_ = sliceDuration;
         alternateScanDirection_ = alternateScanDirection;
-        useAdvancedTiming_ = useAdvancedTiming;
     }
 
     /**
@@ -242,18 +224,8 @@ public class DefaultTimingSettings implements TimingSettings {
                 cameraTriggerDuration_,
                 cameraExposure_,
                 sliceDuration_,
-                alternateScanDirection_,
-                useAdvancedTiming_);
-    }
-
-    /**
-     * Returns true if using custom timing settings.
-     *
-     * @return true if using custom timing settings
-     */
-    @Override
-    public boolean useAdvancedTiming() {
-        return useAdvancedTiming_;
+                alternateScanDirection_
+        );
     }
 
     /**
@@ -362,11 +334,11 @@ public class DefaultTimingSettings implements TimingSettings {
                 "%s[scansPerSlice=%s, delayBeforeScan=%s, scanDuration=%s,"
                         + " delayBeforeLaser=%s, laserTriggerDuration=%s,"
                         + " delayBeforeCamera=%s, cameraTriggerDuration=%s, cameraExposure=%s,"
-                        + " sliceDuration=%s, alternateScanDirection=%s, useAdvancedTiming=%s]",
+                        + " sliceDuration=%s, alternateScanDirection=%s]",
                 getClass().getSimpleName(),
                 scansPerSlice_, delayBeforeScan_, scanDuration_, delayBeforeLaser_, laserTriggerDuration_,
                 delayBeforeCamera_, cameraTriggerDuration_, cameraExposure_,
-                sliceDuration_, alternateScanDirection_, useAdvancedTiming_
+                sliceDuration_, alternateScanDirection_
         );
     }
 

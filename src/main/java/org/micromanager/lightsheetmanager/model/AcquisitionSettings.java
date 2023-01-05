@@ -27,6 +27,7 @@ public class AcquisitionSettings {
     private AcquisitionModes acquisitionMode_;
     private MultiChannelModes channelMode_;
 
+    private boolean useAdvancedTiming_; // should we use the DefaultTimingSettings
     private CameraModes cameraModes_;
     private double cameraExposure_; // TODO: maybe only use the cameraExposure on DefaultTimingSettings
 
@@ -112,6 +113,14 @@ public class AcquisitionSettings {
 
     public void setDemoMode(boolean demoMode) {
         demoMode_ = demoMode;
+    }
+
+    public void setUseAdvancedTiming(final boolean state) {
+        useAdvancedTiming_ = state;
+    }
+
+    public boolean isUsingAdvancedTiming() {
+        return useAdvancedTiming_;
     }
 
     public void setPostMoveDelay(final int milliseconds) {

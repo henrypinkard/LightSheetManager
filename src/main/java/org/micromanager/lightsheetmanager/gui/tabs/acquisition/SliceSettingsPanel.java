@@ -85,7 +85,13 @@ public class SliceSettingsPanel extends Panel {
         spnShutterWidth_ = Spinner.createDoubleSpinner(sliceSettingsLS.shutterWidth(),0.1, 100.0, 1.0);
         spnShutterSpeed_ = Spinner.createDoubleSpinner(sliceSettingsLS.shutterSpeedFactor(), 1.0, 10.0, 1.0);
 
-        chkUseAdvancedTiming_ = new CheckBox("Use advanced timing settings", 12, false, CheckBox.RIGHT);
+        // open the advanced timing frame if using advanced timing settings
+        final boolean isUsingAdvancedTiming = model_.acquisitions().getAcquisitionSettings().isUsingAdvancedTiming();
+        chkUseAdvancedTiming_ = new CheckBox("Use advanced timing settings", 12, isUsingAdvancedTiming, CheckBox.RIGHT);
+        if (isUsingAdvancedTiming) {
+            advTimingFrame_.setVisible(true);
+            advTimingFrame_.toFront();
+        }
 
         // create the ui based on the camera trigger mode
         switchUI(model_.acquisitions().getAcquisitionSettings().getCameraMode());
@@ -144,14 +150,19 @@ public class SliceSettingsPanel extends Panel {
             System.out.println("shutterSpeedFactor: " + acqSettings.getSliceSettingsLS().shutterSpeedFactor());
         });
 
-        // TODO: save to acqSettings
         // disable ui elements
         chkUseAdvancedTiming_.registerListener(e -> {
             // regular panel
             final boolean selected = !chkUseAdvancedTiming_.isSelected();
             chkMinimizeSlicePeriod_.setEnabled(selected);
-            lblSlicePeriod_.setEnabled(selected);
-            spnSlicePeriod_.setEnabled(selected);
+
+            if (acqSettings.getSliceSettings().isSlicePeriodMinimized()) {
+                lblSlicePeriod_.setEnabled(false);
+                spnSlicePeriod_.setEnabled(false);
+            } else {
+                lblSlicePeriod_.setEnabled(selected);
+                spnSlicePeriod_.setEnabled(selected);
+            }
             lblSampleExposure_.setEnabled(selected);
             spnSampleExposure_.setEnabled(selected);
             // virtual slit panel
@@ -166,7 +177,10 @@ public class SliceSettingsPanel extends Panel {
             // show frame
             if (!advTimingFrame_.isVisible()) {
                 advTimingFrame_.setVisible(true);
+                advTimingFrame_.toFront();
             }
+            model_.acquisitions().getAcquisitionSettings().setUseAdvancedTiming(!selected);
+            System.out.println("useAdvancedTiming: " + model_.acquisitions().getAcquisitionSettings().isUsingAdvancedTiming());
         });
     }
 

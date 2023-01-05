@@ -5,13 +5,6 @@ public interface TimingSettings {
     interface Builder {
 
         /**
-         * Sets the advanced timing mode.
-         *
-         * @param state true if using advanced timing
-         */
-        Builder useAdvancedTiming(final boolean state);
-
-        /**
          * Sets the delay time before scanning.
          *
          * @param delayMs the delay time in milliseconds
@@ -96,13 +89,6 @@ public interface TimingSettings {
      * @return TimingSettings.Builder pre-populated with settings of this instance.
      */
     Builder copyBuilder();
-
-    /**
-     * Returns true if using custom timing settings.
-     *
-     * @return true if using custom timing settings
-     */
-    boolean useAdvancedTiming();
 
     /**
      * Return the delay time in milliseconds before the scan begins.

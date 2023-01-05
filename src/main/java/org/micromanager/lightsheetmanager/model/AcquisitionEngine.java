@@ -524,7 +524,7 @@ public class AcquisitionEngine implements AcquisitionManager {
 
     public void recalculateSliceTiming(AcquisitionSettings acqSettings) {
         // don't change timing settings if user is using advanced timing
-        if (acqSettings.getTimingSettings().useAdvancedTiming()) {
+        if (acqSettings.isUsingAdvancedTiming()) {
             return;
         }
         acqSettings.setTimingSettings(getTimingFromPeriodAndLightExposure(acqSettings));
