@@ -36,6 +36,7 @@ public class AcquisitionSettings {
 
     private String saveNamePrefix_;
     private String saveDirectory_;
+    private boolean saveWhileAcquiring_;
 
     private boolean useChannels_;
     private boolean useTimePoints_;
@@ -113,6 +114,14 @@ public class AcquisitionSettings {
 
     public void setDemoMode(boolean demoMode) {
         demoMode_ = demoMode;
+    }
+
+    public void setSaveWhileAcquiring(final boolean state) {
+        saveWhileAcquiring_ = state;
+    }
+
+    public boolean isSavingWhileAcquiring() {
+        return saveWhileAcquiring_;
     }
 
     public void setUseAdvancedTiming(final boolean state) {

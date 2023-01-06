@@ -87,6 +87,11 @@ public class DataTab extends Panel {
             System.out.println("getSaveDirectory: " + model_.acquisitions().getAcquisitionSettings().getSaveDirectory());
         });
 
+        chkSaveWhileAcquiring_.registerListener(e -> {
+            model_.acquisitions().getAcquisitionSettings().setSaveWhileAcquiring(chkSaveWhileAcquiring_.isSelected());
+            System.out.println("isSavingWhileAcquiring: " + model_.acquisitions().getAcquisitionSettings().isSavingWhileAcquiring());
+        });
+
         txtSaveFileName_.addDocumentListener(e -> {
             model_.acquisitions().getAcquisitionSettings().setSaveNamePrefix(txtSaveFileName_.getText());
             System.out.println("getSaveNamePrefix: " + model_.acquisitions().getAcquisitionSettings().getSaveNamePrefix());
