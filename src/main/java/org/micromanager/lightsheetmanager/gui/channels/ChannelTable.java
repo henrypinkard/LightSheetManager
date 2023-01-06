@@ -1,22 +1,30 @@
 package org.micromanager.lightsheetmanager.gui.channels;
 
+import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
+import org.micromanager.lightsheetmanager.model.channels.ChannelSpec;
 import org.micromanager.lightsheetmanager.model.channels.ChannelTableData;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import java.util.Objects;
 
 public class ChannelTable extends JScrollPane {
 
     private JTable table_;
-    private ChannelTableData data_;
-    private ChannelTableModel model_;
+    private ChannelTableData tableData_;
+    private ChannelTableModel tableModel_;
 
-    public ChannelTable() {
-        data_ = new ChannelTableData();
-        model_ = new ChannelTableModel(data_);
-        table_ = new JTable(model_);
-        //table_ = new JTable(new ChannelTableModel(data_));
+    private LightSheetManagerModel model_;
+
+    public ChannelTable(final LightSheetManagerModel model) {
+        model_ = Objects.requireNonNull(model);
+
+        final ChannelSpec[] channels = model_.acquisitions().getAcquisitionSettings().getChannels();
+
+        tableData_ = new ChannelTableData(channels);
+        tableModel_ = new ChannelTableModel(tableData_);
+        table_ = new JTable(tableModel_);
 
         // cancel JTable edits when focus is lost to prevent errors
         table_.putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
@@ -37,19 +45,17 @@ public class ChannelTable extends JScrollPane {
      * @param data the channel data
      */
     public void setTableData(final ChannelTableData data) {
-        this.data_ = data;
-        model_ = new ChannelTableModel(data_);
-        table_ = new JTable(model_);
-        //initTableSettings();
+        this.tableData_ = data;
+        tableModel_ = new ChannelTableModel(tableData_);
+        table_ = new JTable(tableModel_);
     }
 
     public void refreshData() {
-        model_.fireTableDataChanged();
-        //((AbstractTableModel)table_.getModel()).fireTableDataChanged();
+        tableModel_.fireTableDataChanged();
     }
 
     public ChannelTableData getData() {
-        return data_;
+        return tableData_;
     }
 
     public JTable getTable() {

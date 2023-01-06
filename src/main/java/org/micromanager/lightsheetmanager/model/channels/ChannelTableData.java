@@ -1,6 +1,7 @@
 package org.micromanager.lightsheetmanager.model.channels;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * The data model's internal representation of the channel table.
@@ -15,19 +16,29 @@ public class ChannelTableData {
         channelGroup_ = "None";
     }
 
-//    public int size() {
-//        return channels_.size();
-//    }
+    public ChannelTableData(final ChannelSpec[] channels) {
+        channels_ = new ArrayList<>();
+        Collections.addAll(channels_, channels);
+        channelGroup_ = "None";
+    }
 
     public ArrayList<ChannelSpec> getChannels() {
         return channels_;
+    }
+
+    public ChannelSpec[] getChannelArray() {
+        return channels_.toArray(new ChannelSpec[0]);
+    }
+
+    public int getNumChannels() {
+        return channels_.size();
     }
 
     public void addEmptyChannel() {
         channels_.add(new ChannelSpec());
     }
 
-    public void addChannel(ChannelSpec channel) {
+    public void addChannel(final ChannelSpec channel) {
         channels_.add(channel);
     }
 

@@ -10,7 +10,7 @@ public class ChannelTableModel extends AbstractTableModel {
 
     /**Column names for the channels table. */
     private final String[] columnNames_ = {
-            "Use?",
+            "Use",
             "Preset",
             "Offset"
     };
@@ -40,9 +40,6 @@ public class ChannelTableModel extends AbstractTableModel {
     public String getColumnName(int col) {
         return columnNames_[col];
     }
-
-    // TODO: do i need this?
-
 
     @Override
     public boolean isCellEditable(int row, int col) {

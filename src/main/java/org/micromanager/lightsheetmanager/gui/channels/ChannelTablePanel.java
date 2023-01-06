@@ -38,7 +38,7 @@ public class ChannelTablePanel extends Panel {
         lblChannelGroup_ = new JLabel("Channel group:");
         lblChangeChannel_ = new JLabel("Change channel:");
 
-        table_ = new ChannelTable();
+        table_ = new ChannelTable(model_);
 
         Button.setDefaultSize(26, 26);
         btnAddChannel_ = new Button("Add");
@@ -46,7 +46,6 @@ public class ChannelTablePanel extends Panel {
 
         final String[] groupLabels = getAvailableGroups();
         cmbChannelGroup_ = new ComboBox(groupLabels, groupLabels[0]);
-
 
         cmbChannelMode_ = new ComboBox(MultiChannelModes.toArray(),
                 model_.acquisitions().getAcquisitionSettings().getChannelMode().toString());
@@ -60,22 +59,6 @@ public class ChannelTablePanel extends Panel {
         add(cmbChannelMode_, "");
     }
 
-    /**
-     * Enable or disable items in the channel table panel.
-     *
-     * @param state enabled or disabled
-     */
-    public void setItemsEnabled(final boolean state) {
-        lblChannelGroup_.setEnabled(state);
-        cmbChannelGroup_.setEnabled(state);
-        btnAddChannel_.setEnabled(state);
-        btnRemoveChannel_.setEnabled(state);
-        lblChangeChannel_.setEnabled(state);
-        cmbChannelMode_.setEnabled(state);
-        table_.setEnabled(state);
-        table_.getTable().setEnabled(state);
-    }
-
     private void createEventHandlers() {
 
         btnAddChannel_.registerListener(e -> {
@@ -86,14 +69,16 @@ public class ChannelTablePanel extends Panel {
 //            repaint();
             System.out.println("add channel");
             table_.getData().printChannelData();
+            model_.acquisitions().getAcquisitionSettings().setChannels(table_.getData().getChannelArray());
         });
 
         btnRemoveChannel_.registerListener(e -> {
             final int row = table_.getTable().getSelectedRow();
             if (row != -1) {
                 table_.getData().removeChannel(row);
-                System.out.println("remove row index: " + row);
+                model_.acquisitions().getAcquisitionSettings().setChannels(table_.getData().getChannelArray());
                 table_.refreshData();
+                System.out.println("remove row index: " + row);
             }
         });
 
@@ -127,4 +112,21 @@ public class ChannelTablePanel extends Panel {
         }
         return strGroups.toArray(new String[0]);
     }
+
+    /**
+     * Enable or disable items in the channel table panel.
+     *
+     * @param state enabled or disabled
+     */
+    public void setItemsEnabled(final boolean state) {
+        lblChannelGroup_.setEnabled(state);
+        cmbChannelGroup_.setEnabled(state);
+        btnAddChannel_.setEnabled(state);
+        btnRemoveChannel_.setEnabled(state);
+        lblChangeChannel_.setEnabled(state);
+        cmbChannelMode_.setEnabled(state);
+        table_.setEnabled(state);
+        table_.getTable().setEnabled(state);
+    }
+
 }

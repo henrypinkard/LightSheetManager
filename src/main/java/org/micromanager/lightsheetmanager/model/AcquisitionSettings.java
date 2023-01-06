@@ -225,6 +225,10 @@ public class AcquisitionSettings {
         return useChannels_;
     }
 
+    public void setChannels(final ChannelSpec[] channels) {
+        channels_ = channels;
+    }
+
     public ChannelSpec[] getChannels() {
         return channels_;
     }
