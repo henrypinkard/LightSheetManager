@@ -1,6 +1,7 @@
 package org.micromanager.lightsheetmanager.gui.tabs;
 
 import org.micromanager.Studio;
+import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.gui.data.Icons;
 import org.micromanager.lightsheetmanager.model.AcquisitionSettings;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
@@ -20,6 +21,7 @@ import org.micromanager.lightsheetmanager.gui.components.ToggleButton;
 import org.micromanager.lightsheetmanager.model.data.AcquisitionModes;
 
 import org.micromanager.internal.utils.NumberUtils;
+import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 
 import javax.swing.JLabel;
 import java.util.Objects;
@@ -128,7 +130,7 @@ public class AcquisitionTab extends Panel {
         lblNumTimePoints_ = new Label("Number:");
         lblTimePointInterval_ = new Label("Interval [s]:");
         spnNumTimePoints_ = Spinner.createIntegerSpinner(acqSettings.getNumTimePoints(), 1, Integer.MAX_VALUE,1);
-        spnTimePointInterval_ = Spinner.createIntegerSpinner(acqSettings.getTimePointInterval(), 1, Integer.MAX_VALUE, 10);
+        spnTimePointInterval_ = Spinner.createIntegerSpinner(acqSettings.getTimePointInterval(), 1, Integer.MAX_VALUE, 1);
 
         // disable elements based on acqSettings
         setTimePointSpinnersEnabled(acqSettings.isUsingTimePoints());
@@ -204,8 +206,8 @@ public class AcquisitionTab extends Panel {
         panelRight.add(volumeSettingsPanel_, "growx, wrap");
         panelRight.add(sliceSettingsPanel_, "growx, wrap");
 
-        //add(lblTitle, "wrap");
-
+        // TODO: consider putting durations into the model, since recalculating the slice timing shouldn't necessarily happen here
+        // includes calculating the slice timing
         updateDurationLabels();
 
         add(panelLeft, "");
@@ -257,15 +259,18 @@ public class AcquisitionTab extends Panel {
             final boolean selected = chkUseTimePoints_.isSelected();
             model_.acquisitions().getAcquisitionSettings().setUsingTimePoints(selected);
             setTimePointSpinnersEnabled(selected);
+            updateDurationLabels();
         });
 
         spnNumTimePoints_.registerListener(e -> {
             model_.acquisitions().getAcquisitionSettings().setNumTimePoints(spnNumTimePoints_.getInt());
+            updateDurationLabels();
             System.out.println("getNumTimePoints: " + model_.acquisitions().getAcquisitionSettings().getNumTimePoints());
         });
 
         spnTimePointInterval_.registerListener(e -> {
             model_.acquisitions().getAcquisitionSettings().setTimePointInterval(spnTimePointInterval_.getInt());
+            updateDurationLabels();
             System.out.println("getTimePointInterval: " + model_.acquisitions().getAcquisitionSettings().getTimePointInterval());
         });
 
@@ -310,7 +315,7 @@ public class AcquisitionTab extends Panel {
         final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
         model_.getAcquisitionEngine().recalculateSliceTiming(acqSettings);
         lblSliceTimeValue_.setText(Double.toString(acqSettings.getTimingSettings().sliceDuration()));
-        //System.out.println("updating slice label to: " + acqSettings.getTimingSettings().sliceDuration());
+        System.out.println("updating slice label to: " + acqSettings.getTimingSettings().sliceDuration());
     }
 
     private void updateVolumeDurationLabel() {
@@ -378,17 +383,39 @@ public class AcquisitionTab extends Panel {
     }
 
     public double computeVolumeDuration(final AcquisitionSettings acqSettings) {
-//        final MultiChannelModes channelMode = acqSettings.getChannelMode();
-//        final int numChannels = acqSettings.numChannels;
-//        final int numSides = acqSettings.numSides;
-//        final float delayBeforeSide = acqSettings.delayBeforeSide;
-//        int numCameraTriggers = acqSettings.numSlices;
-//        if (acqSettings.cameraMode == CameraModes.Keys.OVERLAP) {
-//            numCameraTriggers += 1;
-//        }
-//        // stackDuration is per-side, per-channel, per-position
-//
-//        final double stackDuration = numCameraTriggers * acqSettings.sliceTiming.sliceDuration;
+        final MultiChannelModes channelMode = acqSettings.getChannelMode();
+        final int numChannels = acqSettings.getNumChannels();
+        final int numViews = acqSettings.getVolumeSettings().numViews();
+        final double delayBeforeView = acqSettings.getVolumeSettings().delayBeforeView();
+        int numCameraTriggers = acqSettings.getVolumeSettings().slicesPerView();
+        if (acqSettings.getCameraMode() == CameraModes.OVERLAP) {
+            numCameraTriggers += 1;
+        }
+
+        System.out.println(acqSettings.getTimingSettings().sliceDuration());
+
+        // stackDuration is per-side, per-channel, per-position
+        final double stackDuration = numCameraTriggers * acqSettings.getTimingSettings().sliceDuration();
+        System.out.println("stackDuration: " + stackDuration);
+        System.out.println("numViews: " + numViews);
+        System.out.println("numCameraTriggers: " + numCameraTriggers);
+        if (acqSettings.isStageScanning()) {
+
+        } else {
+            double channelSwitchDelay = 0;
+            if (channelMode == MultiChannelModes.VOLUME) {
+                channelSwitchDelay = 500;   // estimate channel switching overhead time as 0.5s
+                // actual value will be hardware-dependent
+            }
+            if (channelMode == MultiChannelModes.SLICE_HW) {
+                return numViews * (delayBeforeView + stackDuration * numChannels);  // channelSwitchDelay = 0
+            } else {
+                return numViews * numChannels
+                        * (delayBeforeView + stackDuration)
+                        + (numChannels - 1) * channelSwitchDelay;
+            }
+        }
+        // TODO: stage scanning still needs to be taken into consideration
 //        if (acqSettings.isStageScanning || acqSettings.isStageStepping) {
 //            final double rampDuration = getStageRampDuration(acqSettings);
 //            final double retraceTime = getStageRetraceDuration(acqSettings);

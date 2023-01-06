@@ -75,7 +75,7 @@ public class VolumeSettingsPanel extends Panel {
         cmbFirstView_ = new ComboBox(lbls, String.valueOf(firstView), 60, 20);
         spnViewDelay_ = Spinner.createDoubleSpinner(volumeSettings.delayBeforeView(), 0.0, Double.MAX_VALUE, 0.25);
         spnSliceStepSize_ = Spinner.createDoubleSpinner(volumeSettings.sliceStepSize(), 0.0, 100.0, 0.1);
-        spnSlicesPerSide_ = Spinner.createIntegerSpinner(volumeSettings.slicesPerVolume(), 0, 100, 1);
+        spnSlicesPerSide_ = Spinner.createIntegerSpinner(volumeSettings.slicesPerView(), 0, 100, 1);
 
         add(lblNumViews_, "");
         add(cmbNumViews_, "wrap");

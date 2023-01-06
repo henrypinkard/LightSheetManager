@@ -158,7 +158,7 @@ public class AcquisitionEngine implements AcquisitionManager {
 
         // setup channels
         int nrChannelsSoftware = acqSettings_.getNumChannels();  // how many times we trigger the controller per stack
-        int nrSlicesSoftware = acqSettings_.getVolumeSettings().slicesPerVolume();
+        int nrSlicesSoftware = acqSettings_.getVolumeSettings().slicesPerView();
         // TODO: channels
 
 
@@ -528,7 +528,7 @@ public class AcquisitionEngine implements AcquisitionManager {
             return;
         }
         acqSettings.setTimingSettings(getTimingFromPeriodAndLightExposure(acqSettings));
-        // TODO: update gui elements
+        // TODO: update gui (but not in the model)
     }
 
     // TODO: only using acqSettings for cameraExposure which maybe should not exist?
@@ -734,7 +734,7 @@ public class AcquisitionEngine implements AcquisitionManager {
         final int numChannels = acqSettings.getNumChannels();
         final int numViews = acqSettings.getVolumeSettings().numViews();
         final double delayBeforeSide = acqSettings.getVolumeSettings().delayBeforeView();
-        int numCameraTriggers = acqSettings.getVolumeSettings().slicesPerVolume();
+        int numCameraTriggers = acqSettings.getVolumeSettings().slicesPerView();
         if (acqSettings.getCameraMode() == CameraModes.OVERLAP) {
             numCameraTriggers += 1;
         }

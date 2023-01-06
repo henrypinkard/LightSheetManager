@@ -51,7 +51,7 @@ public class DefaultVolumeSettings implements VolumeSettings {
         public Builder(final DefaultVolumeSettings volumeSettings) {
             firstView_ = volumeSettings.firstView();
             numViews_ = volumeSettings.numViews();
-            slicesPerVolume_ = volumeSettings.slicesPerVolume();
+            slicesPerVolume_ = volumeSettings.slicesPerView();
             delayBeforeView_ = volumeSettings.delayBeforeView();
             sliceStepSize_ = volumeSettings.sliceStepSize();
             startPosition_ = volumeSettings.startPosition();
@@ -242,7 +242,7 @@ public class DefaultVolumeSettings implements VolumeSettings {
      *
      * @return the number of slices
      */
-    public int slicesPerVolume() {
+    public int slicesPerView() {
         return slicesPerVolume_;
     }
 

@@ -174,7 +174,8 @@ public class AcquisitionSettings {
     }
 
     public int getNumTimePoints() {
-        return numTimePoints_;
+        //return numTimePoints_;
+        return useTimePoints_ ? numTimePoints_ : 1;
     }
 
     public void setAcquisitionMode(final AcquisitionModes acquisitionMode) {

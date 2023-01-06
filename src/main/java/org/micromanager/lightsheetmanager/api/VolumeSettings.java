@@ -88,7 +88,7 @@ public interface VolumeSettings {
      *
      * @return the number of slices
      */
-    int slicesPerVolume();
+    int slicesPerView();
 
     /**
      * Returns the imaging path that the acquisition starts on.

@@ -1,16 +1,20 @@
 package org.micromanager.lightsheetmanager.model.data;
 
-
 import java.util.Arrays;
+
+// TODO: replicate getValidModeKeys from 1.4 plugin to populate acq mode combo box
 
 /**
  * Acquisition modes for diSPIM.
  */
 public enum AcquisitionModes {
     NONE("None"),
+
+    PIEZO_SLICE_SCAN("Synchronous piezo/slice scan"),
     NO_SCAN("No Scan (Fixed Sheet)"),
     STAGE_SCAN("Stage Scan"),
-    STAGE_SCAN_INTERLEAVED("Stage Scan Interleaved");
+    STAGE_SCAN_INTERLEAVED("Stage Scan Interleaved"),
+    STAGE_SCAN_UNIDIRECTIONAL("Stage Scan Unidirectional");
 
     private final String text_;
 

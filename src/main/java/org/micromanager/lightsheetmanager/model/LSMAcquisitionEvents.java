@@ -42,7 +42,7 @@ public class LSMAcquisitionEvents {
       channels = channels(acquisitionSettings.getChannels());
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
-            acquisitionSettings.getVolumeSettings().slicesPerVolume() - 1);
+            acquisitionSettings.getVolumeSettings().slicesPerView() - 1);
 
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
@@ -67,7 +67,7 @@ public class LSMAcquisitionEvents {
       channels = channels(acquisitionSettings.getChannels());
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
-            acquisitionSettings.getVolumeSettings().slicesPerVolume() - 1);
+            acquisitionSettings.getVolumeSettings().slicesPerView() - 1);
 
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
@@ -88,7 +88,7 @@ public class LSMAcquisitionEvents {
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor) {
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
-            acquisitionSettings.getVolumeSettings().slicesPerVolume() - 1);
+            acquisitionSettings.getVolumeSettings().slicesPerView() - 1);
 
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
