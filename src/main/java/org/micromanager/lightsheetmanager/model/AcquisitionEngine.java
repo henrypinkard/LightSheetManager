@@ -288,6 +288,8 @@ public class AcquisitionEngine implements AcquisitionManager {
         //////////////////////////////////////
         // Create acquisition
         Acquisition acquisition = new Acquisition(adapter);
+        // TODO remove printing of debug logging
+        acquisition.setDebugMode(true);
 
         long acqButtonStart = System.currentTimeMillis();
 
@@ -305,6 +307,10 @@ public class AcquisitionEngine implements AcquisitionManager {
             public AcquisitionEvent run(AcquisitionEvent event) {
                 // TODO: does the Tiger controller need to be cleared and/or checked for errors here?
 
+                if (event.isAcquisitionFinishedEvent()) {
+                    // Acqusitiion is finished, pass along event so things shut down properly
+                    return event;
+                }
 
                 // Translate event to timeIndex/channel/etc
                 AcquisitionEvent firstAcqEvent = event.getSequence().get(0);
@@ -463,11 +469,11 @@ public class AcquisitionEngine implements AcquisitionManager {
                 if (acqSettings_.isUsingChannels()) {
                     acquisition.submitEventIterator(
                           LSMAcquisitionEvents.createTimelapseMultiChannelVolumeAcqEvents(
-                                baseEvent, acqSettings_, eventMonitor));
+                                baseEvent.copy(), acqSettings_, eventMonitor));
                 } else {
                     acquisition.submitEventIterator(
                           LSMAcquisitionEvents.createTimelapseVolumeAcqEvents(
-                                baseEvent, acqSettings_, eventMonitor));
+                                baseEvent.copy(), acqSettings_, eventMonitor));
                 }
             } else {
                 // Loop 2: Multiple time points
@@ -479,13 +485,13 @@ public class AcquisitionEngine implements AcquisitionManager {
                     if (acqSettings_.isUsingChannels()) {
                         acquisition.submitEventIterator(
                               LSMAcquisitionEvents.createMultiChannelVolumeAcqEvents(
-                                    baseEvent, acqSettings_, eventMonitor,
+                                    baseEvent.copy(), acqSettings_, eventMonitor,
                                     acqSettings_.getAcquisitionMode() ==
                                           AcquisitionModes.STAGE_SCAN_INTERLEAVED));
                     } else {
                         acquisition.submitEventIterator(
                               LSMAcquisitionEvents.createVolumeAcqEvents(
-                                    baseEvent, acqSettings_, eventMonitor));
+                                    baseEvent.copy(), acqSettings_, eventMonitor));
                     }
                 }
             }
@@ -522,6 +528,8 @@ public class AcquisitionEngine implements AcquisitionManager {
         // TODO: execute any end-acquisition runnables
 
         isRunning_.set(false);
+
+        // TODO tell GUI running is complete
         return true;
     }
 
