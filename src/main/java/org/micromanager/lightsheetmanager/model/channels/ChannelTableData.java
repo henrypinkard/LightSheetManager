@@ -18,7 +18,9 @@ public class ChannelTableData {
 
     public ChannelTableData(final ChannelSpec[] channels) {
         channels_ = new ArrayList<>();
-        Collections.addAll(channels_, channels);
+        if (channels != null) {
+            Collections.addAll(channels_, channels);
+        }
         channelGroup_ = "None";
     }
 
