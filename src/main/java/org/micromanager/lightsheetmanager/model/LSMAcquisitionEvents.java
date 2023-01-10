@@ -24,8 +24,7 @@ public class LSMAcquisitionEvents {
 
 
    public static Iterator<AcquisitionEvent> createTimelapseMultiChannelVolumeAcqEvents(
-         AcquisitionEvent baseEvent,
-         Acquisition acq, AcquisitionSettings acquisitionSettings,
+         AcquisitionEvent baseEvent, AcquisitionSettings acquisitionSettings,
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor) {
 
       if (acquisitionSettings.getNumTimePoints() <= 1) {
@@ -52,6 +51,26 @@ public class LSMAcquisitionEvents {
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
    }
 
+   public static Iterator<AcquisitionEvent> createTimelapseVolumeAcqEvents(
+         AcquisitionEvent baseEvent, AcquisitionSettings acquisitionSettings,
+         Function<AcquisitionEvent, AcquisitionEvent> eventMonitor) {
+
+      if (acquisitionSettings.getNumTimePoints() <= 1) {
+         throw new RuntimeException("timelapse selected but only one timepoint");
+      }
+      Function<AcquisitionEvent, Iterator<AcquisitionEvent>> timelapse =
+            timelapse(acquisitionSettings.getNumTimePoints(), null);
+
+      Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
+            acquisitionSettings.getVolumeSettings().slicesPerView() - 1);
+
+      ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
+            = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
+
+      acqFunctions.add(zStack);
+      return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
+   }
+
    /**
     *
     * @param interleaved true: do we want to do every channel at each z slice before moving to
@@ -59,8 +78,7 @@ public class LSMAcquisitionEvents {
     *                    false: do an entire volume in one channel, then the next one
     */
    public static Iterator<AcquisitionEvent> createMultiChannelVolumeAcqEvents(
-         AcquisitionEvent baseEvent,
-         Acquisition acq, AcquisitionSettings acquisitionSettings,
+         AcquisitionEvent baseEvent, AcquisitionSettings acquisitionSettings,
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor, boolean interleaved) {
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> channels = null;
@@ -82,9 +100,10 @@ public class LSMAcquisitionEvents {
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
    }
 
-   public static Iterator<AcquisitionEvent> createSingleVolumeAcqEvents(
-         AcquisitionEvent baseEvent,
-         Acquisition acq, AcquisitionSettings acquisitionSettings,
+
+
+   public static Iterator<AcquisitionEvent> createVolumeAcqEvents(
+         AcquisitionEvent baseEvent, AcquisitionSettings acquisitionSettings,
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor) {
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
@@ -220,6 +239,7 @@ public class LSMAcquisitionEvents {
          return builder.build().iterator();
       };
    }
+
 
 }
 

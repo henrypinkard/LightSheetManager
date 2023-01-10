@@ -91,27 +91,34 @@ public class AcquisitionEngine implements AcquisitionManager {
 
     @Override
     public void requestRun() {
-        if (isRunning_.get()) {
-            studio_.logs().showError("Acquisition is already running.");
-            return;
-        }
+        // Run on a new thread so it doesnt block the EDT
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-        // TODO: build the settings objects here...
-        // build settings objects
-        //model_.acquisitions().getAcquisitionSettings().build
+                if (isRunning_.get()) {
+                    studio_.logs().showError("Acquisition is already running.");
+                    return;
+                }
 
-        GeometryType geometryType = model_.devices().getDeviceAdapter().getMicroscopeGeometry();
-        switch (geometryType) {
-            case DISPIM:
-                runAcquisitionDISPIM();
-                break;
-            case SCAPE:
-                runAcquisitionSCAPE();
-                break;
-            default:
-                // TODO: error "Acquisition Engine is not implemented for " + geometryType
-                break;
-        }
+                // TODO: build the settings objects here...
+                // build settings objects
+                //model_.acquisitions().getAcquisitionSettings().build
+
+                GeometryType geometryType = model_.devices().getDeviceAdapter().getMicroscopeGeometry();
+                switch (geometryType) {
+                    case DISPIM:
+                        runAcquisitionDISPIM();
+                        break;
+                    case SCAPE:
+                        runAcquisitionSCAPE();
+                        break;
+                    default:
+                        // TODO: error "Acquisition Engine is not implemented for " + geometryType
+                        break;
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -266,12 +273,8 @@ public class AcquisitionEngine implements AcquisitionManager {
         // Create and NDViewer and NDTiffStorage wrapped in a package that implements
         // the org.micromanager.acqj.api.DataSink interface that the acquisition engine
         // requires
-//        String saveDir = acqSettings_.getSaveDirectoryRoot();
-//        String saveName = acqSettings_.getSaveNamePrefix();
-
-        //TODO delete this, just for testing
-        String saveName = "test";
-        String saveDir = "C:\\Users\\henry\\Desktop\\datadump";
+        String saveDir = acqSettings_.getSaveDirectory();
+        String saveName = acqSettings_.getSaveNamePrefix();
 
         boolean showViewer = true;
         NDTiffAndViewerAdapter adapter = new NDTiffAndViewerAdapter(showViewer, saveDir, saveName
@@ -457,9 +460,15 @@ public class AcquisitionEngine implements AcquisitionManager {
             if (acqSettings_.isUsingHardwareTimePoints()) {
                 // create a full iterator of TCZ acquisition events, and Tiger controller
                 // will handle everything else
-                acquisition.submitEventIterator(
-                      LSMAcquisitionEvents.createTimelapseMultiChannelVolumeAcqEvents(
-                      baseEvent, acquisition, acqSettings_, eventMonitor));
+                if (acqSettings_.isUsingChannels()) {
+                    acquisition.submitEventIterator(
+                          LSMAcquisitionEvents.createTimelapseMultiChannelVolumeAcqEvents(
+                                baseEvent, acqSettings_, eventMonitor));
+                } else {
+                    acquisition.submitEventIterator(
+                          LSMAcquisitionEvents.createTimelapseVolumeAcqEvents(
+                                baseEvent, acqSettings_, eventMonitor));
+                }
             } else {
                 // Loop 2: Multiple time points
                 for (int timeIndex = 0; timeIndex < (acqSettings_.isUsingTimePoints() ?
@@ -467,10 +476,17 @@ public class AcquisitionEngine implements AcquisitionManager {
                     baseEvent.setTimeIndex(timeIndex);
                     // Loop 3: Channels; Loop 4: Z slices (non-interleaved)
                     // Loop 3: Channels; Loop 4: Z slices (interleaved)
-                    acquisition.submitEventIterator(
+                    if (acqSettings_.isUsingChannels()) {
+                        acquisition.submitEventIterator(
                               LSMAcquisitionEvents.createMultiChannelVolumeAcqEvents(
-                                    baseEvent, acquisition, acqSettings_, eventMonitor,
-                                    acqSettings_.getAcquisitionMode() == AcquisitionModes.STAGE_SCAN_INTERLEAVED));
+                                    baseEvent, acqSettings_, eventMonitor,
+                                    acqSettings_.getAcquisitionMode() ==
+                                          AcquisitionModes.STAGE_SCAN_INTERLEAVED));
+                    } else {
+                        acquisition.submitEventIterator(
+                              LSMAcquisitionEvents.createVolumeAcqEvents(
+                                    baseEvent, acqSettings_, eventMonitor));
+                    }
                 }
             }
         }
