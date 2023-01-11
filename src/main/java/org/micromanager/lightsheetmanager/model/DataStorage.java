@@ -20,8 +20,7 @@ public class DataStorage implements DataSink {
     public enum SaveMode {
 
         SINGLEPLANE_TIFF_SERIES("Single Plane TIFF"),
-        MULTIPAGE_TIFF("Multi Page TIFF"),
-        RAM_STORE("RAM Store");
+        MULTIPAGE_TIFF("Multi Page TIFF");
 
         private String text_;
 
@@ -41,28 +40,14 @@ public class DataStorage implements DataSink {
         }
     }
 
-    public static final String DEFAULT_SAVE_PATH = "C:\\";
-
     private final Studio studio_;
 
     private Datastore datastore_;
     private DataStorage.SaveMode saveMode_;
 
-    private String savePath_;
-
     public DataStorage(final Studio studio) {
         studio_ = Objects.requireNonNull(studio);
-        saveMode_ = DataStorage.SaveMode.RAM_STORE;
-        savePath_ = DEFAULT_SAVE_PATH;
-        createDatastore();
-    }
-
-    public String getSavePath() {
-        return savePath_;
-    }
-
-    public void setSavePath(final String savePath) {
-        savePath_ = savePath;
+        saveMode_ = SaveMode.SINGLEPLANE_TIFF_SERIES;
     }
 
     public String getDatastoreSavePath() {
@@ -86,18 +71,18 @@ public class DataStorage implements DataSink {
     }
 
     // TODO: expose params for MULTIPAGE_TIFF?
-    public void createDatastore() {
+    public void createDatastore(final String savePath) {
         switch (saveMode_) {
             case SINGLEPLANE_TIFF_SERIES:
                 try {
-                    datastore_ = studio_.data().createSinglePlaneTIFFSeriesDatastore(savePath_);
+                    datastore_ = studio_.data().createSinglePlaneTIFFSeriesDatastore(savePath);
                 } catch (IOException e) {
                     studio_.logs().showError("DataStorage: could not create single plane TIFF datastore.");
                 }
                 break;
             case MULTIPAGE_TIFF:
                 try {
-                    datastore_ = studio_.data().createMultipageTIFFDatastore(savePath_, false, false);
+                    datastore_ = studio_.data().createMultipageTIFFDatastore(savePath, false, false);
                 } catch (IOException e) {
                     studio_.logs().showError("DataStorage: could not create multi page TIFF datastore.");
                 }

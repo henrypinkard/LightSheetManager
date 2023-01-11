@@ -29,10 +29,6 @@ public class DataTab extends Panel {
 
     public DataTab(final LightSheetManagerModel model) {
         model_ = Objects.requireNonNull(model);
-        fileSelect_ = new FileSelect(
-            "Please select a directory to save image data...",
-            FileSelect.DIRECTORIES_ONLY
-        );
         createUserInterface();
         createEventHandlers();
     }
@@ -40,28 +36,34 @@ public class DataTab extends Panel {
     private void createUserInterface() {
         final JLabel lblTitle = new JLabel("Data");
 
+        fileSelect_ = new FileSelect(
+                "Please select a directory to save image data...",
+                FileSelect.DIRECTORIES_ONLY
+        );
+
         final Panel savePanel = new Panel("Image Save Settings");
         final Panel datastorePanel = new Panel("Datastore Save Mode");
 
         final JLabel lblSaveDirectory = new JLabel("Save Directory:");
         final JLabel lblSaveFileName = new JLabel("Save File Name:");
 
-        // TODO: populate radio button with model settings for "selected" var
-        //final JLabel lblSaveType = new JLabel("Save Mode:");
-        //final String selected = getSaveModeText(model.getDatastoreSaveMode());
-        radSaveMode_ = new RadioButton(DataStorage.SaveMode.toArray(), "RAM Store");
+        radSaveMode_ = new RadioButton(DataStorage.SaveMode.toArray(),
+                DataStorage.SaveMode.SINGLEPLANE_TIFF_SERIES.toString());
 
         txtSaveDirectory_ = new TextField();
         txtSaveDirectory_.setEditable(false);
         txtSaveDirectory_.setColumns(24);
         txtSaveDirectory_.setForeground(Color.BLACK);
+        txtSaveDirectory_.setText(model_.acquisitions().getAcquisitionSettings().getSaveDirectory());
 
         txtSaveFileName_ = new TextField();
         //txtSaveFileName_.setEditable(false);
         txtSaveFileName_.setColumns(24);
         txtSaveFileName_.setForeground(Color.WHITE);
+        txtSaveFileName_.setText(model_.acquisitions().getAcquisitionSettings().getSaveNamePrefix());
 
-        chkSaveWhileAcquiring_ = new CheckBox("Save images during acquisition", false);
+        chkSaveWhileAcquiring_ = new CheckBox("Save images during acquisition",
+                model_.acquisitions().getAcquisitionSettings().isSavingWhileAcquiring());
 
         btnBrowse_ = new Button("Browse...", 80, 20);
 
