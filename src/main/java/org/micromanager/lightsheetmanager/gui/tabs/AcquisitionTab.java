@@ -5,7 +5,7 @@ import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.gui.data.Icons;
 import org.micromanager.lightsheetmanager.model.AcquisitionSettings;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
-import org.micromanager.lightsheetmanager.gui.channels.ChannelTablePanel;
+import org.micromanager.lightsheetmanager.gui.tabs.channels.ChannelTablePanel;
 import org.micromanager.lightsheetmanager.gui.tabs.acquisition.SliceSettingsPanel;
 import org.micromanager.lightsheetmanager.gui.tabs.acquisition.VolumeSettingsPanel;
 import org.micromanager.lightsheetmanager.gui.frames.AdvancedTimingFrame;
@@ -315,7 +315,7 @@ public class AcquisitionTab extends Panel {
         final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
         model_.getAcquisitionEngine().recalculateSliceTiming(acqSettings);
         lblSliceTimeValue_.setText(Double.toString(acqSettings.getTimingSettings().sliceDuration()));
-        System.out.println("updating slice label to: " + acqSettings.getTimingSettings().sliceDuration());
+        //System.out.println("updating slice label to: " + acqSettings.getTimingSettings().sliceDuration());
     }
 
     private void updateVolumeDurationLabel() {
@@ -392,13 +392,13 @@ public class AcquisitionTab extends Panel {
             numCameraTriggers += 1;
         }
 
-        System.out.println(acqSettings.getTimingSettings().sliceDuration());
+        //System.out.println(acqSettings.getTimingSettings().sliceDuration());
 
         // stackDuration is per-side, per-channel, per-position
         final double stackDuration = numCameraTriggers * acqSettings.getTimingSettings().sliceDuration();
-        System.out.println("stackDuration: " + stackDuration);
-        System.out.println("numViews: " + numViews);
-        System.out.println("numCameraTriggers: " + numCameraTriggers);
+        //System.out.println("stackDuration: " + stackDuration);
+        //System.out.println("numViews: " + numViews);
+        //System.out.println("numCameraTriggers: " + numCameraTriggers);
         if (acqSettings.isStageScanning()) {
 
         } else {

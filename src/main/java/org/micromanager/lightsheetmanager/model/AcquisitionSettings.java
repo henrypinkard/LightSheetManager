@@ -50,7 +50,7 @@ public class AcquisitionSettings {
 
     private int numChannels_;
     private int numTimePoints_;
-    private int timepointInterval_;
+    private int timePointInterval_;
 
     private boolean demoMode_;
 
@@ -142,11 +142,11 @@ public class AcquisitionSettings {
 
     // TODO: should this be milliseconds instead?
     public void setTimePointInterval(final int seconds) {
-        timepointInterval_ = seconds;
+        timePointInterval_ = seconds;
     }
 
     public int getTimePointInterval() {
-        return timepointInterval_;
+        return timePointInterval_;
     }
 
     public String getSaveNamePrefix() {
