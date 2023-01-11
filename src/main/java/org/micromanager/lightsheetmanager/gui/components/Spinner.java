@@ -37,7 +37,7 @@ public class Spinner extends JSpinner {
             final Integer min,
             final Integer max,
             final Integer step) {
-        return new Spinner(start, min, max, step);
+        return new Spinner(Math.max(min, Math.min(start, max)), min, max, step);
     }
 
     public static Spinner createDoubleSpinner(
