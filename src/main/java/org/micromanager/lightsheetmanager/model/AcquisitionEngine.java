@@ -1,5 +1,6 @@
 package org.micromanager.lightsheetmanager.model;
 
+import java.io.File;
 import java.util.function.Function;
 import mmcorej.CMMCore;
 import org.micromanager.PositionList;
@@ -50,11 +51,10 @@ public class AcquisitionEngine implements AcquisitionManager {
 
     public AcquisitionEngine(final Studio studio, final LightSheetManagerModel model) {
         studio_ = Objects.requireNonNull(studio);
+        model_ = Objects.requireNonNull(model);
         core_ = studio_.core();
-        model_ = model;
 
         data_ = new DataStorage(studio_);
-        //System.out.println(data_.getSavePath());
 
         acqSettings_ = new AcquisitionSettings();
 
@@ -91,32 +91,29 @@ public class AcquisitionEngine implements AcquisitionManager {
 
     @Override
     public void requestRun() {
-        // Run on a new thread so it doesnt block the EDT
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+        // Run on a new thread, so it doesn't block the EDT
+        new Thread(() -> {
 
-                if (isRunning_.get()) {
-                    studio_.logs().showError("Acquisition is already running.");
-                    return;
-                }
+            if (isRunning_.get()) {
+                studio_.logs().showError("Acquisition is already running.");
+                return;
+            }
 
-                // TODO: build the settings objects here...
-                // build settings objects
-                //model_.acquisitions().getAcquisitionSettings().build
+            // TODO: build the settings objects here...
+            // build settings objects
+            //model_.acquisitions().getAcquisitionSettings().build
 
-                GeometryType geometryType = model_.devices().getDeviceAdapter().getMicroscopeGeometry();
-                switch (geometryType) {
-                    case DISPIM:
-                        runAcquisitionDISPIM();
-                        break;
-                    case SCAPE:
-                        runAcquisitionSCAPE();
-                        break;
-                    default:
-                        // TODO: error "Acquisition Engine is not implemented for " + geometryType
-                        break;
-                }
+            GeometryType geometryType = model_.devices().getDeviceAdapter().getMicroscopeGeometry();
+            switch (geometryType) {
+                case DISPIM:
+                    runAcquisitionDISPIM();
+                    break;
+                case SCAPE:
+                    runAcquisitionSCAPE();
+                    break;
+                default:
+                    studio_.logs().showError("Acquisition Engine is not implemented for " + geometryType);
+                    break;
             }
         }).start();
     }
@@ -255,6 +252,12 @@ public class AcquisitionEngine implements AcquisitionManager {
 
         //TODO remove
         acqSettings_.setDemoMode(true);
+
+        // create the datastore
+        final String saveDirectory = model_.acquisitions().getAcquisitionSettings().getSaveDirectory();
+        final String saveNamePrefix = model_.acquisitions().getAcquisitionSettings().getSaveNamePrefix();
+        data_.createDatastore(saveDirectory + File.separator + saveNamePrefix);
+        System.out.println("getDatastoreSavePath: " + data_.getDatastoreSavePath());
 
         final boolean isLiveModeOn = studio_.live().isLiveModeOn();
         if (isLiveModeOn) {
