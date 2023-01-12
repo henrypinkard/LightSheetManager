@@ -31,7 +31,8 @@ public class LSMAcquisitionEvents {
          throw new RuntimeException("timelapse selected but only one timepoint");
       }
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> timelapse =
-            timelapse(acquisitionSettings.getNumTimePoints(), null);
+            timelapse(acquisitionSettings.getNumTimePoints(),
+                  acquisitionSettings.getTimePointInterval());
 
       if (acquisitionSettings.getNumChannels() == 1) {
          throw new RuntimeException("Expected multiple channels but only one found");
@@ -46,6 +47,7 @@ public class LSMAcquisitionEvents {
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
 
+      acqFunctions.add(timelapse);
       acqFunctions.add(channels);
       acqFunctions.add(zStack);
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
@@ -67,6 +69,7 @@ public class LSMAcquisitionEvents {
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
 
+      acqFunctions.add(timelapse);
       acqFunctions.add(zStack);
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
    }
