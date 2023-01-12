@@ -32,7 +32,7 @@ public class LSMAcquisitionEvents {
       }
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> timelapse =
             timelapse(acquisitionSettings.getNumTimePoints(),
-                  acquisitionSettings.getTimePointInterval());
+                  (double) acquisitionSettings.getTimePointInterval());
 
       if (acquisitionSettings.getNumChannels() == 1) {
          throw new RuntimeException("Expected multiple channels but only one found");
