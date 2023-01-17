@@ -1,7 +1,14 @@
 package org.micromanager.lightsheetmanager.model;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Function;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import mmcorej.CMMCore;
 import org.micromanager.PositionList;
 import org.micromanager.Studio;
@@ -24,6 +31,10 @@ import org.micromanager.lightsheetmanager.model.utils.MyNumberUtils;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.micromanager.ndtiffstorage.ImageWrittenListener;
+import org.micromanager.ndtiffstorage.IndexEntryData;
+import org.micromanager.ndtiffstorage.NDTiffAPI;
+import org.micromanager.ndtiffstorage.NDTiffStorage;
 
 public class AcquisitionEngine implements AcquisitionManager {
 
@@ -43,11 +54,15 @@ public class AcquisitionEngine implements AcquisitionManager {
     DefaultSliceSettingsLS.Builder ssbLS_;
     DefaultSliceSettings.Builder ssb_;
 
-    // acquisition status
-    private final AtomicBoolean isRunning_;
-    private final AtomicBoolean isPaused_;
-
+    private ExecutorService acquistitonExecutor_ = Executors.newSingleThreadExecutor(
+          new ThreadFactory() {
+              @Override
+              public Thread newThread(Runnable r) {
+                  return new Thread(r, "Acquisition Thread");
+              }
+          });
     private LightSheetManagerModel model_;
+    private volatile Acquisition currentAcquisition_ = null;
 
     public AcquisitionEngine(final Studio studio, final LightSheetManagerModel model) {
         studio_ = Objects.requireNonNull(studio);
@@ -57,12 +72,6 @@ public class AcquisitionEngine implements AcquisitionManager {
         data_ = new DataStorage(studio_);
 
         acqSettings_ = new AcquisitionSettings();
-
-        // true if the acquisition is running or paused
-        isRunning_ = new AtomicBoolean(false);
-
-        // true if the acquisition is paused
-        isPaused_ = new AtomicBoolean(false);
     }
 
     /**
@@ -90,53 +99,80 @@ public class AcquisitionEngine implements AcquisitionManager {
     }
 
     @Override
-    public void requestRun() {
+    public Future requestRun(boolean speedTest) {
         // Run on a new thread, so it doesn't block the EDT
-        new Thread(() -> {
+        Future acqFinished = acquistitonExecutor_.submit(new Runnable() {
+            @Override
+            public void run() {
+                if (currentAcquisition_ != null) {
+                    studio_.logs().showError("Acquisition is already running.");
+                    return;
+                }
 
-            if (isRunning_.get()) {
-                studio_.logs().showError("Acquisition is already running.");
-                return;
+                // TODO: build the settings objects here...
+                // build settings objects
+                //model_.acquisitions().getAcquisitionSettings().build
+
+                if (speedTest) {
+                    try {
+                        runSpeedTest();
+                    } catch (Exception e) {
+                        studio_.logs().showError(e);
+                    }
+                } else {
+
+                    // Every one of these modality-specific functions should block until the
+                    // acquisiton is complete
+                    GeometryType geometryType =
+                          model_.devices().getDeviceAdapter().getMicroscopeGeometry();
+                    switch (geometryType) {
+                        case DISPIM:
+                            runAcquisitionDISPIM();
+                            break;
+                        case SCAPE:
+                            runAcquisitionSCAPE();
+                            break;
+                        default:
+                            studio_.logs().showError(
+                                  "Acquisition Engine is not implemented for " + geometryType);
+                            break;
+                    }
+                }
             }
-
-            // TODO: build the settings objects here...
-            // build settings objects
-            //model_.acquisitions().getAcquisitionSettings().build
-
-            GeometryType geometryType = model_.devices().getDeviceAdapter().getMicroscopeGeometry();
-            switch (geometryType) {
-                case DISPIM:
-                    runAcquisitionDISPIM();
-                    break;
-                case SCAPE:
-                    runAcquisitionSCAPE();
-                    break;
-                default:
-                    studio_.logs().showError("Acquisition Engine is not implemented for " + geometryType);
-                    break;
-            }
-        }).start();
+        });
+        return acqFinished;
     }
 
     @Override
     public void requestStop() {
-        if (!isRunning_.get()) {
+        if (currentAcquisition_ == null || currentAcquisition_.areEventsFinished()) {
             studio_.logs().showError("Acquisition is not running.");
             return;
         }
-        isRunning_.set(false);
+        currentAcquisition_.abort();
     }
 
     @Override
     public void requestPause() {
-        if (!isRunning_.get()) {
+        if (currentAcquisition_ == null) {
             studio_.logs().showError("Acquisition is not running.");
+        } else {
+            currentAcquisition_.setPaused(true);
+        }
+    }
+
+    @Override
+    public void requestResume() {
+        if (currentAcquisition_ != null) {
+            if (currentAcquisition_.isPaused()) {
+                currentAcquisition_.setPaused(false);
+            }
         }
     }
 
     @Override
     public boolean isRunning() {
-        return isRunning_.get();
+        return currentAcquisition_ != null && !currentAcquisition_.areEventsFinished();
     }
 
     private boolean runAcquisitionSCAPE() {
@@ -246,18 +282,104 @@ public class AcquisitionEngine implements AcquisitionManager {
         return controller;
     }
 
-    private boolean runAcquisitionDISPIM() {
-        // validate settings
-        isRunning_.set(true);
+    /**
+     * Run a speed test and write out log files, using only the num time points from acquisition settings
+     * @return
+     */
+    private void runSpeedTest() throws Exception {
 
-        //TODO remove
-        acqSettings_.setDemoMode(true);
+        if (core_.hasProperty("Camera", "FastImage")) {
+            // demo camera
+            core_.setProperty("Camera", "FastImage", false);
+            core_.snapImage();
+            core_.setProperty("Camera", "FastImage", true);
+
+
+            // so that the capicty is reported correctly
+            core_.clearCircularBuffer();
+            core_.initializeCircularBuffer();
+            core_.startContinuousSequenceAcquisition(0);
+            core_.stopSequenceAcquisition();
+        }
+
+        boolean showViewer = true;
+        NDTiffAndViewerAdapter ndTiffAndViewerAdapter = new NDTiffAndViewerAdapter(showViewer,
+              acqSettings_.getSaveDirectory(), acqSettings_.getSaveNamePrefix()
+              ,  10);
+
+
+        Acquisition acquisition = new Acquisition(ndTiffAndViewerAdapter);
+
+
+
+        SpeedTest speedTest = new SpeedTest(core_.getBufferTotalCapacity(),
+              acquisition.getImageTransferQueueSize(),
+              ndTiffAndViewerAdapter.getStorage().getWritingQueueTaskMaxSize());
+
+        ndTiffAndViewerAdapter.getStorage().addImageWrittenListener(new ImageWrittenListener() {
+            int imageCount = 0;
+
+            @Override
+            public void imageWritten(IndexEntryData ied) {
+                imageCount++;
+                speedTest.imageWritten(imageCount);
+            }
+
+            @Override
+            public void awaitCompletion() {
+
+            }
+        });
+
+
+        acquisition.start();
+        long start = System.currentTimeMillis();
+
+        acquisition.submitEventIterator(LSMAcquisitionEvents.createSpeedTestEvents(acquisition,
+              acqSettings_.getNumTimePoints()));
+        acquisition.finish();
+
+        while (!acquisition.areEventsFinished()) {
+            int bufferFreeCapacity = core_.getBufferTotalCapacity() - core_.getBufferFreeCapacity();
+            int acqEngQueueCount = acquisition.getImageTransferQueueCount();
+            int writingTaskCount = ndTiffAndViewerAdapter.getStorage().getWritingQueueTaskSize();
+            speedTest.logStatus(System.currentTimeMillis(), bufferFreeCapacity,
+                  acqEngQueueCount, writingTaskCount);
+            try {
+                Thread.sleep(3);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        acquisition.waitForCompletion();
+
+        System.out.println("Speed test complete in " + (System.currentTimeMillis() - start) + " ms");
+
+        try {
+            speedTest.save(ndTiffAndViewerAdapter.getDiskLocation() + "/"
+                        + ndTiffAndViewerAdapter.getStorage().getUniqueAcqName() + "_queues.csv",
+                  ndTiffAndViewerAdapter.getDiskLocation() + "/"
+                        + ndTiffAndViewerAdapter.getStorage().getUniqueAcqName() + "_image_data.csv",
+                  (int) (core_.getImageHeight() * core_.getImageWidth() * core_.getBytesPerPixel())
+            );
+        } catch (IOException e ) {
+            studio_.logs().showError(e);
+        }
+        try {
+            acquisition.checkForExceptions();
+        } catch (Exception e){
+            studio_.logs().showError(e);
+        }
+    }
+
+    private void runAcquisitionDISPIM() {
 
         // create the datastore
-        final String saveDirectory = model_.acquisitions().getAcquisitionSettings().getSaveDirectory();
-        final String saveNamePrefix = model_.acquisitions().getAcquisitionSettings().getSaveNamePrefix();
-        data_.createDatastore(saveDirectory + File.separator + saveNamePrefix);
-        System.out.println("getDatastoreSavePath: " + data_.getDatastoreSavePath());
+//        final String saveDirectory = model_.acquisitions().getAcquisitionSettings().getSaveDirectory();
+//        final String saveNamePrefix = model_.acquisitions().getAcquisitionSettings().getSaveNamePrefix();
+//        data_.createDatastore(saveDirectory + File.separator + saveNamePrefix);
+//        System.out.println("getDatastoreSavePath: " + data_.getDatastoreSavePath());
 
         final boolean isLiveModeOn = studio_.live().isLiveModeOn();
         if (isLiveModeOn) {
@@ -269,9 +391,8 @@ public class AcquisitionEngine implements AcquisitionManager {
         }
 
         PLogicDISPIM controller = null;
-        if (!acqSettings_.getDemoMode()) {
-            controller = doHardwareCalculations();
-        }
+        controller = doHardwareCalculations();
+
 
         // Create and NDViewer and NDTiffStorage wrapped in a package that implements
         // the org.micromanager.acqj.api.DataSink interface that the acquisition engine
@@ -279,9 +400,11 @@ public class AcquisitionEngine implements AcquisitionManager {
         String saveDir = acqSettings_.getSaveDirectory();
         String saveName = acqSettings_.getSaveNamePrefix();
 
-        boolean showViewer = true;
-        NDTiffAndViewerAdapter adapter = new NDTiffAndViewerAdapter(showViewer, saveDir, saveName
-              ,  50);
+        boolean showViewer = false;
+        NDTiffAndViewerAdapter ndTiffAndViewerAdapter = new NDTiffAndViewerAdapter(showViewer, saveDir, saveName
+              ,  10);
+
+
 
         //////////////////////////////////////
         // Begin AcqEngJ integration
@@ -290,9 +413,8 @@ public class AcquisitionEngine implements AcquisitionManager {
         //      will "order" the acquisiton of 1 image (per each camera)
         //////////////////////////////////////
         // Create acquisition
-        Acquisition acquisition = new Acquisition(adapter);
-        // TODO remove printing of debug logging
-        acquisition.setDebugMode(true);
+        currentAcquisition_ = new Acquisition(ndTiffAndViewerAdapter);
+
 
         long acqButtonStart = System.currentTimeMillis();
 
@@ -305,7 +427,7 @@ public class AcquisitionEngine implements AcquisitionManager {
         //  that controls hardware)
 
         // TODO: autofocus
-        acquisition.addHook(new AcquisitionHook() {
+        currentAcquisition_.addHook(new AcquisitionHook() {
             @Override
             public AcquisitionEvent run(AcquisitionEvent event) {
                 // TODO: does the Tiger controller need to be cleared and/or checked for errors here?
@@ -385,7 +507,7 @@ public class AcquisitionEngine implements AcquisitionManager {
 
         // TODO This after camera hook is called after the camera has been readied to acquire a
         //  sequence. I assume we want to tell the Tiger to start sending TTLs etc here
-        acquisition.addHook(new AcquisitionHook() {
+        currentAcquisition_.addHook(new AcquisitionHook() {
             @Override
             public AcquisitionEvent run(AcquisitionEvent event) {
                 // TODO: Cameras are now ready to recieve triggers, so we can send (software) trigger
@@ -441,7 +563,7 @@ public class AcquisitionEngine implements AcquisitionManager {
             }
         }
 
-        acquisition.start();
+        currentAcquisition_.start();
 
         ////////////  Create and submit acquisition events ////////////////////
         // Create iterators of acquisition events and submit them to the engine for execution
@@ -459,7 +581,7 @@ public class AcquisitionEngine implements AcquisitionManager {
         }
         for (int positionIndex = 0; positionIndex < (acqSettings_.isUsingMultiplePositions() ?
               pl.getNumberOfPositions() : 1); positionIndex++) {
-            AcquisitionEvent baseEvent = new AcquisitionEvent(acquisition);
+            AcquisitionEvent baseEvent = new AcquisitionEvent(currentAcquisition_);
             if (acqSettings_.isUsingMultiplePositions()) {
                 baseEvent.setAxisPosition(LSMAcquisitionEvents.POSITION_AXIS, positionIndex);
             }
@@ -470,11 +592,11 @@ public class AcquisitionEngine implements AcquisitionManager {
                 // create a full iterator of TCZ acquisition events, and Tiger controller
                 // will handle everything else
                 if (acqSettings_.isUsingChannels()) {
-                    acquisition.submitEventIterator(
+                    currentAcquisition_.submitEventIterator(
                           LSMAcquisitionEvents.createTimelapseMultiChannelVolumeAcqEvents(
                                 baseEvent.copy(), acqSettings_, eventMonitor));
                 } else {
-                    acquisition.submitEventIterator(
+                    currentAcquisition_.submitEventIterator(
                           LSMAcquisitionEvents.createTimelapseVolumeAcqEvents(
                                 baseEvent.copy(), acqSettings_, eventMonitor));
                 }
@@ -486,13 +608,13 @@ public class AcquisitionEngine implements AcquisitionManager {
                     // Loop 3: Channels; Loop 4: Z slices (non-interleaved)
                     // Loop 3: Channels; Loop 4: Z slices (interleaved)
                     if (acqSettings_.isUsingChannels()) {
-                        acquisition.submitEventIterator(
+                        currentAcquisition_.submitEventIterator(
                               LSMAcquisitionEvents.createMultiChannelVolumeAcqEvents(
                                     baseEvent.copy(), acqSettings_, eventMonitor,
                                     acqSettings_.getAcquisitionMode() ==
                                           AcquisitionModes.STAGE_SCAN_INTERLEAVED));
                     } else {
-                        acquisition.submitEventIterator(
+                        currentAcquisition_.submitEventIterator(
                               LSMAcquisitionEvents.createVolumeAcqEvents(
                                     baseEvent.copy(), acqSettings_, eventMonitor));
                     }
@@ -501,10 +623,13 @@ public class AcquisitionEngine implements AcquisitionManager {
         }
 
 
+
         // No more instructions (i.e. AcquisitionEvents); tell the acquisition to initiate shutdown
         // once everything finishes
-        acquisition.finish();
-        acquisition.waitForCompletion();
+        currentAcquisition_.finish();
+
+
+        currentAcquisition_.waitForCompletion();
 
         // cleanup
         studio_.logs().logMessage("diSPIM plugin acquisition " +
@@ -527,13 +652,16 @@ public class AcquisitionEngine implements AcquisitionManager {
             throw new RuntimeException("Couldn't restore shutter to original state");
         }
 
+        // Check if acquisition ended due to an exception and show error to user if it did
+        try {
+            currentAcquisition_.checkForExceptions();
+        } catch (Exception e){
+            studio_.logs().showError(e);
+        }
 
         // TODO: execute any end-acquisition runnables
 
-        isRunning_.set(false);
-
-        // TODO tell GUI running is complete
-        return true;
+        currentAcquisition_ = null;
     }
 
     private void stopSPIMStateMachines(AcquisitionSettings acqSettings) {

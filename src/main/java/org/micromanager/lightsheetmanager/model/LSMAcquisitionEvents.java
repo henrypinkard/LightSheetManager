@@ -103,7 +103,13 @@ public class LSMAcquisitionEvents {
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
    }
 
-
+   public static Iterator<AcquisitionEvent> createSpeedTestEvents(Acquisition a, int numTimePoints) {
+      AcquisitionEvent baseEvent = new AcquisitionEvent(a);
+      ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
+            = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
+      acqFunctions.add(timelapse(numTimePoints, 0.0));
+      return new AcquisitionEventIterator(baseEvent, acqFunctions);
+   }
 
    public static Iterator<AcquisitionEvent> createVolumeAcqEvents(
          AcquisitionEvent baseEvent, AcquisitionSettings acquisitionSettings,
