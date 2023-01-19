@@ -31,7 +31,8 @@ public class LSMAcquisitionEvents {
          throw new RuntimeException("timelapse selected but only one timepoint");
       }
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> timelapse =
-            timelapse(acquisitionSettings.getNumTimePoints(), null);
+            timelapse(acquisitionSettings.getNumTimePoints(),
+                  (double) acquisitionSettings.getTimePointInterval());
 
       if (acquisitionSettings.getNumChannels() == 1) {
          throw new RuntimeException("Expected multiple channels but only one found");
@@ -46,6 +47,7 @@ public class LSMAcquisitionEvents {
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
 
+      acqFunctions.add(timelapse);
       acqFunctions.add(channels);
       acqFunctions.add(zStack);
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
@@ -67,6 +69,7 @@ public class LSMAcquisitionEvents {
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
 
+      acqFunctions.add(timelapse);
       acqFunctions.add(zStack);
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
    }
@@ -100,7 +103,13 @@ public class LSMAcquisitionEvents {
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
    }
 
-
+   public static Iterator<AcquisitionEvent> createSpeedTestEvents(Acquisition a, int numTimePoints) {
+      AcquisitionEvent baseEvent = new AcquisitionEvent(a);
+      ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
+            = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
+      acqFunctions.add(timelapse(numTimePoints, 0.0));
+      return new AcquisitionEventIterator(baseEvent, acqFunctions);
+   }
 
    public static Iterator<AcquisitionEvent> createVolumeAcqEvents(
          AcquisitionEvent baseEvent, AcquisitionSettings acquisitionSettings,

@@ -1,7 +1,12 @@
 package org.micromanager.lightsheetmanager.gui.tabs;
 
+import java.awt.event.ActionListener;
+import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.Future;
+import javax.swing.SwingUtilities;
 import org.micromanager.Studio;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
+import org.micromanager.lightsheetmanager.gui.components.Method;
 import org.micromanager.lightsheetmanager.gui.data.Icons;
 import org.micromanager.lightsheetmanager.model.AcquisitionSettings;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
@@ -36,6 +41,7 @@ public class AcquisitionTab extends Panel {
     private ToggleButton btnPauseAcquisition_;
     private Button btnTestAcquisition_;
     private Button btnOpenPlaylist_;
+    private Button btnSpeedTest_;
 
     private CheckBox chkUseChannels_;
 
@@ -149,15 +155,19 @@ public class AcquisitionTab extends Panel {
                 "Start Acquisition", "Stop Acquisition",
                 Icons.ARROW_RIGHT, Icons.CANCEL
         );
+        //TODO enable this once the plugin works with hardware
+        btnRunAcquisition_.setEnabled(false);
 
         btnPauseAcquisition_ = new ToggleButton(
                 "Pause", "Resume",
                 Icons.PAUSE, Icons.PLAY
         );
+        btnPauseAcquisition_.setEnabled(false);
 
         Button.setDefaultSize(120, 30);
         btnTestAcquisition_ = new Button("Test Acquisition");
         btnOpenPlaylist_ = new Button("Playlist...");
+        btnSpeedTest_ = new Button("Speed test");
 
         channelTablePanel_ = new ChannelTablePanel(model_, chkUseChannels_);
         // disable elements based on acqSettings
@@ -193,6 +203,7 @@ public class AcquisitionTab extends Panel {
         panelButtons_.add(btnPauseAcquisition_, "");
         panelButtons_.add(btnTestAcquisition_, "");
         panelButtons_.add(btnOpenPlaylist_, "");
+        panelButtons_.add(btnSpeedTest_, "");
 
         // 3 panel layout
         panelLeft.add(panelDurations_, "growx, growy");
@@ -216,11 +227,47 @@ public class AcquisitionTab extends Panel {
         add(panelButtons_, "span 3");
     }
 
+    private void acqFinishedCallback() {
+        try {
+            SwingUtilities.invokeAndWait(new Runnable() {
+                @Override
+                public void run() {
+                    btnRunAcquisition_.setState(false);
+                    btnPauseAcquisition_.setEnabled(false);
+                    btnSpeedTest_.setEnabled(true);
+                }
+            });
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void runAcquisiton(boolean speedTest) {
+        btnPauseAcquisition_.setEnabled(true);
+        btnSpeedTest_.setEnabled(false);
+        Future acqFinished = model_.acquisitions().requestRun(speedTest);
+        // Launch new thread to update the button when the acquisiton is complete
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    acqFinished.get();
+                } catch (Exception e ) {
+
+                }
+                // update the GUI when acquisition complete
+                acqFinishedCallback();
+            }
+        }).start();
+    }
+
     private void createEventHandlers() {
         // start/stop acquisitions
         btnRunAcquisition_.registerListener(e -> {
             if (btnRunAcquisition_.isSelected()) {
-                model_.acquisitions().requestRun();
+                runAcquisiton(false);
                 System.out.println("request run");
             } else {
                 model_.acquisitions().requestStop();
@@ -233,12 +280,17 @@ public class AcquisitionTab extends Panel {
                 model_.acquisitions().requestPause();
                 System.out.println("request pause");
             } else {
-                model_.acquisitions().requestRun(); // TODO: requestResume?
+                model_.acquisitions().requestResume();
                 System.out.println("request resume");
             }
         });
 
         btnOpenPlaylist_.registerListener(e -> acqTableFrame_.setVisible(true));
+
+        btnSpeedTest_.registerListener(e -> {
+            runAcquisiton(true);
+        });
+
         btnOpenXYZGrid_.registerListener(e -> xyzGridFrame_.setVisible(true));
         btnEditPositionList_.registerListener(e -> studio_.app().showPositionList());
 
