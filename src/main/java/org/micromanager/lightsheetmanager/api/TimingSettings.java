@@ -91,7 +91,7 @@ public interface TimingSettings {
     Builder copyBuilder();
 
     /**
-     * Return the delay time in milliseconds before the scan begins.
+     * Returns the delay time in milliseconds before the scan begins.
      *
      * @return the delay time in milliseconds
      */
