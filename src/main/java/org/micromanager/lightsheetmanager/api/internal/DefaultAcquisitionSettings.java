@@ -30,30 +30,55 @@ public class DefaultAcquisitionSettings implements AcquisitionSettings {
             demoMode_ = acqSettings.demoMode();
         }
 
+        /**
+         * Sets the save directory.
+         *
+         * @param directory the directory
+         */
         @Override
         public AcquisitionSettings.Builder saveDirectory(final String directory) {
             saveDirectory_ = directory;
             return this;
         }
 
+        /**
+         * Sets the folder name.
+         *
+         * @param name the name of the folder
+         */
         @Override
         public AcquisitionSettings.Builder saveNamePrefix(final String name) {
             saveNamePrefix_ = name;
             return this;
         }
 
+        /**
+         * Sets the acquisition to demo mode.
+         *
+         * @param state true if in demo mode
+         */
         @Override
         public AcquisitionSettings.Builder demoMode(final boolean state) {
             demoMode_ = state;
             return this;
         }
 
+        /**
+         * Creates an immutable instance of DefaultAcquisitionSettings
+         *
+         * @return Immutable version of DefaultAcquisitionSettings
+         */
         @Override
         public AcquisitionSettings build() {
             return new DefaultAcquisitionSettings();
         }
     }
 
+    /**
+     * Creates a Builder populated with settings of this AcquisitionSettings instance.
+     *
+     * @return AcquisitionSettings.Builder pre-populated with settings of this instance.
+     */
     @Override
     public AcquisitionSettings.Builder copyBuilder() {
         return new DefaultAcquisitionSettings.Builder(
@@ -79,16 +104,31 @@ public class DefaultAcquisitionSettings implements AcquisitionSettings {
         demoMode_ = demoMode;
     }
 
+    /**
+     * Returns the save name prefix.
+     *
+     * @return the save name prefix.
+     */
     @Override
     public String saveNamePrefix() {
         return saveNamePrefix_;
     }
 
+    /**
+     * Returns the save directory.
+     *
+     * @return the save directory.
+     */
     @Override
     public String saveDirectory() {
         return saveDirectory_;
     }
 
+    /**
+     * Returns true if using demo mode.
+     *
+     * @return true if using demo mode
+     */
     @Override
     public boolean demoMode() {
         return demoMode_;
