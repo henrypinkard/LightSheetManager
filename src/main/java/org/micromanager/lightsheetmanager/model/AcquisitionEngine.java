@@ -1,20 +1,18 @@
 package org.micromanager.lightsheetmanager.model;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Function;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import mmcorej.CMMCore;
 import org.micromanager.PositionList;
 import org.micromanager.Studio;
 import org.micromanager.acqj.api.AcquisitionHook;
 import org.micromanager.acqj.main.Acquisition;
 import org.micromanager.acqj.main.AcquisitionEvent;
+import org.micromanager.acquisition.internal.acqengjcompat.speedtest.SpeedTest;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.lightsheetmanager.api.AcquisitionManager;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
@@ -30,11 +28,9 @@ import org.micromanager.lightsheetmanager.model.devices.vendor.ASIScanner;
 import org.micromanager.lightsheetmanager.model.utils.MyNumberUtils;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.micromanager.ndtiffstorage.ImageWrittenListener;
 import org.micromanager.ndtiffstorage.IndexEntryData;
-import org.micromanager.ndtiffstorage.NDTiffAPI;
-import org.micromanager.ndtiffstorage.NDTiffStorage;
+import org.micromanager.acquisition.internal.acqengjcompat.speedtest.NDTiffAndViewerAdapter;
 
 public class AcquisitionEngine implements AcquisitionManager {
 
@@ -115,7 +111,8 @@ public class AcquisitionEngine implements AcquisitionManager {
 
                 if (speedTest) {
                     try {
-                        runSpeedTest();
+                        SpeedTest.runSpeedTest(acqSettings_.getSaveDirectory(), acqSettings_.getSaveNamePrefix(),
+                              core_, acqSettings_.getNumTimePoints(), true);
                     } catch (Exception e) {
                         studio_.logs().showError(e);
                     }
@@ -282,96 +279,6 @@ public class AcquisitionEngine implements AcquisitionManager {
         return controller;
     }
 
-    /**
-     * Run a speed test and write out log files, using only the num time points from acquisition settings
-     * @return
-     */
-    private void runSpeedTest() throws Exception {
-
-        if (core_.hasProperty("Camera", "FastImage")) {
-            // demo camera
-            core_.setProperty("Camera", "FastImage", false);
-            core_.snapImage();
-            core_.setProperty("Camera", "FastImage", true);
-
-
-            // so that the capicty is reported correctly
-            core_.clearCircularBuffer();
-            core_.initializeCircularBuffer();
-            core_.startContinuousSequenceAcquisition(0);
-            core_.stopSequenceAcquisition();
-        }
-
-        boolean showViewer = true;
-        NDTiffAndViewerAdapter ndTiffAndViewerAdapter = new NDTiffAndViewerAdapter(showViewer,
-              acqSettings_.getSaveDirectory(), acqSettings_.getSaveNamePrefix()
-              ,  10);
-
-
-        Acquisition acquisition = new Acquisition(ndTiffAndViewerAdapter);
-
-
-
-        SpeedTest speedTest = new SpeedTest(core_.getBufferTotalCapacity(),
-              acquisition.getImageTransferQueueSize(),
-              ndTiffAndViewerAdapter.getStorage().getWritingQueueTaskMaxSize());
-
-        ndTiffAndViewerAdapter.getStorage().addImageWrittenListener(new ImageWrittenListener() {
-            int imageCount = 0;
-
-            @Override
-            public void imageWritten(IndexEntryData ied) {
-                imageCount++;
-                speedTest.imageWritten(imageCount);
-            }
-
-            @Override
-            public void awaitCompletion() {
-
-            }
-        });
-
-
-        acquisition.start();
-        long start = System.currentTimeMillis();
-
-        acquisition.submitEventIterator(LSMAcquisitionEvents.createSpeedTestEvents(acquisition,
-              acqSettings_.getNumTimePoints()));
-        acquisition.finish();
-
-        while (!acquisition.areEventsFinished()) {
-            int bufferFreeCapacity = core_.getBufferTotalCapacity() - core_.getBufferFreeCapacity();
-            int acqEngQueueCount = acquisition.getImageTransferQueueCount();
-            int writingTaskCount = ndTiffAndViewerAdapter.getStorage().getWritingQueueTaskSize();
-            speedTest.logStatus(System.currentTimeMillis(), bufferFreeCapacity,
-                  acqEngQueueCount, writingTaskCount);
-            try {
-                Thread.sleep(3);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        acquisition.waitForCompletion();
-
-        System.out.println("Speed test complete in " + (System.currentTimeMillis() - start) + " ms");
-
-        try {
-            speedTest.save(ndTiffAndViewerAdapter.getDiskLocation() + "/"
-                        + ndTiffAndViewerAdapter.getStorage().getUniqueAcqName() + "_queues.csv",
-                  ndTiffAndViewerAdapter.getDiskLocation() + "/"
-                        + ndTiffAndViewerAdapter.getStorage().getUniqueAcqName() + "_image_data.csv",
-                  (int) (core_.getImageHeight() * core_.getImageWidth() * core_.getBytesPerPixel())
-            );
-        } catch (IOException e ) {
-            studio_.logs().showError(e);
-        }
-        try {
-            acquisition.checkForExceptions();
-        } catch (Exception e){
-            studio_.logs().showError(e);
-        }
-    }
 
     private void runAcquisitionDISPIM() {
 
