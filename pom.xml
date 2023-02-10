@@ -56,6 +56,21 @@
 			<version>10.1.1.0</version>
 		</dependency>
 
+              <dependency>
+         <groupId>org.micro-manager.acqengj</groupId>
+         <artifactId>AcqEngJ</artifactId>
+     <version>LATEST</version>
+      </dependency>
+      <dependency>
+         <groupId>org.micro-manager.ndviewer</groupId>
+         <artifactId>NDViewer</artifactId>
+     <version>LATEST</version>
+      </dependency>
+      <dependency>
+         <groupId>org.micro-manager.ndtiffstorage</groupId>
+         <artifactId>NDTiffStorage</artifactId>
+     <version>LATEST</version>
+      </dependency>
       <!-- TODO: switch to a remote repo for MMJ once it is mavenized -->
 <!--       <dependency>
          <groupId>org.micro-manager</groupId>
