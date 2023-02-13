@@ -2,6 +2,8 @@ package org.micromanager.lightsheetmanager.gui.tabs;
 
 import java.io.File;
 import java.util.EventObject;
+
+import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.model.DataStorage;
 import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;
@@ -54,16 +56,16 @@ public class DataTab extends Panel {
         txtSaveDirectory_.setEditable(false);
         txtSaveDirectory_.setColumns(24);
         txtSaveDirectory_.setForeground(Color.BLACK);
-        txtSaveDirectory_.setText(model_.acquisitions().getAcquisitionSettings().getSaveDirectory());
+        txtSaveDirectory_.setText(model_.acquisitions().getAcquisitionSettings().saveDirectory());
 
         txtSaveFileName_ = new TextField();
         //txtSaveFileName_.setEditable(false);
         txtSaveFileName_.setColumns(24);
         txtSaveFileName_.setForeground(Color.WHITE);
-        txtSaveFileName_.setText(model_.acquisitions().getAcquisitionSettings().getSaveNamePrefix());
+        txtSaveFileName_.setText(model_.acquisitions().getAcquisitionSettings().saveNamePrefix());
 
         chkSaveWhileAcquiring_ = new CheckBox("Save images during acquisition",
-                model_.acquisitions().getAcquisitionSettings().isSavingWhileAcquiring());
+                model_.acquisitions().getAcquisitionSettings().isSavingImagesDuringAcquisition());
 
         btnBrowse_ = new Button("Browse...", 80, 20);
 
@@ -82,21 +84,23 @@ public class DataTab extends Panel {
     }
 
     private void createEventHandlers() {
+        final DefaultAcquisitionSettingsDISPIM.Builder asb_ = model_.acquisitions().getAcquisitionSettingsBuilder();
+
         btnBrowse_.registerListener((EventObject e) -> {
             final String path = fileSelect_.openDialogBox(this, new File(""));
-            model_.acquisitions().getAcquisitionSettings().setSaveDirectory(path);
+            asb_.saveDirectory(path);
             txtSaveDirectory_.setText(path);
-            System.out.println("getSaveDirectory: " + model_.acquisitions().getAcquisitionSettings().getSaveDirectory());
+            //System.out.println("getSaveDirectory: " + model_.acquisitions().getAcquisitionSettings().getSaveDirectory());
         });
 
         chkSaveWhileAcquiring_.registerListener(e -> {
-            model_.acquisitions().getAcquisitionSettings().setSaveWhileAcquiring(chkSaveWhileAcquiring_.isSelected());
-            System.out.println("isSavingWhileAcquiring: " + model_.acquisitions().getAcquisitionSettings().isSavingWhileAcquiring());
+            asb_.saveImagesDuringAcquisition(chkSaveWhileAcquiring_.isSelected());
+            //System.out.println("isSavingWhileAcquiring: " + model_.acquisitions().getAcquisitionSettings().isSavingWhileAcquiring());
         });
 
         txtSaveFileName_.addDocumentListener(e -> {
-            model_.acquisitions().getAcquisitionSettings().setSaveNamePrefix(txtSaveFileName_.getText());
-            System.out.println("getSaveNamePrefix: " + model_.acquisitions().getAcquisitionSettings().getSaveNamePrefix());
+            asb_.saveNamePrefix(txtSaveFileName_.getText());
+            //System.out.println("getSaveNamePrefix: " + model_.acquisitions().getAcquisitionSettings().getSaveNamePrefix());
         });
     }
 

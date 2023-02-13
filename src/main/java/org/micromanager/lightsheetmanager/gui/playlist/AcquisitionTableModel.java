@@ -65,10 +65,10 @@ public class AcquisitionTableModel extends AbstractTableModel {
                 return info.getAcquisitionName();
             case 2:
                // System.out.println(tableData_.getAcquisitionSettings(acqName).saveNamePrefix);
-                return tableData_.getAcquisitionSettings(acqName).getSaveNamePrefix();
+                return tableData_.getAcquisitionSettings(acqName).saveNamePrefix();
             case 3:
                 //System.out.println(tableData_.getAcquisitionSettings(acqName).saveDirectoryRoot);
-                return tableData_.getAcquisitionSettings(acqName).getSaveDirectory();
+                return tableData_.getAcquisitionSettings(acqName).saveDirectory();
             case 4:
                 //System.out.println(info.getPositionListName());
                 return info.getPositionListName();
@@ -90,14 +90,16 @@ public class AcquisitionTableModel extends AbstractTableModel {
             case 2:
                 final String val = (String)value;
                 if (AcquisitionTable.isNameValid(val)) {
-                    tableData_.getAcquisitionSettings(acqName).setSaveNamePrefix(val);
+                    // FIXME: set value
+                    //tableData_.getAcquisitionSettings(acqName).saveNamePrefix(val);
                 } else {
                     DialogUtils.showErrorMessage(null, "Name Error",
                             "Name can only contain characters, digits, and underscores.");
                 }
                 break;
             case 3:
-                tableData_.getAcquisitionSettings(acqName).setSaveDirectory((String)value);
+                // FIXME: set value
+                //tableData_.getAcquisitionSettings(acqName).saveDirectory((String)value);
                 break;
             case 4:
                 info.setPositionListName((String)value);

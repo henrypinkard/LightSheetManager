@@ -1,7 +1,6 @@
 package org.micromanager.lightsheetmanager.gui.tabs.acquisition;
 
 import org.micromanager.lightsheetmanager.api.internal.DefaultVolumeSettings;
-import org.micromanager.lightsheetmanager.model.AcquisitionSettings;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 import org.micromanager.lightsheetmanager.model.devices.LightSheetDeviceManager;
 import org.micromanager.lightsheetmanager.gui.components.ComboBox;
@@ -34,7 +33,6 @@ public class VolumeSettingsPanel extends Panel {
     public VolumeSettingsPanel(final LightSheetManagerModel model) {
         super("Volume Settings");
         model_ = Objects.requireNonNull(model);
-        vsb_ = model_.acquisitions().getVolumeSettingsBuilder();
         createUserInterface();
         createEventHandlers();
     }
@@ -45,7 +43,7 @@ public class VolumeSettingsPanel extends Panel {
         final int numImagingPaths = lsdm.getNumImagingPaths();
 
         final DefaultVolumeSettings volumeSettings = model_.acquisitions()
-                .getAcquisitionSettings().getVolumeSettings();
+                .getAcquisitionSettings().volumeSettings();
 
         // create labels for combo boxes
         ArrayList<String> labels = new ArrayList<>(numImagingPaths);
@@ -90,32 +88,26 @@ public class VolumeSettingsPanel extends Panel {
     }
 
     private void createEventHandlers() {
-        final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
+        final DefaultVolumeSettings.Builder vsb_ = model_.acquisitions().getAcquisitionSettingsBuilder().volumeSettingsBuilder();
 
         cmbNumViews_.registerListener(e -> {
             vsb_.numViews(Integer.parseInt(cmbNumViews_.getSelected()));
-            acqSettings.setVolumeSettings(vsb_.build());
-            System.out.println(acqSettings.getVolumeSettings().numViews());
         });
 
         cmbFirstView_.registerListener(e -> {
             vsb_.firstView(Integer.parseInt(cmbFirstView_.getSelected()));
-            acqSettings.setVolumeSettings(vsb_.build());
         });
 
         spnViewDelay_.registerListener(e -> {
             vsb_.delayBeforeView(spnViewDelay_.getDouble());
-            acqSettings.setVolumeSettings(vsb_.build());
         });
 
         spnSlicesPerSide_.registerListener(e -> {
             vsb_.slicesPerVolume(spnSlicesPerSide_.getInt());
-            acqSettings.setVolumeSettings(vsb_.build());
         });
 
         spnSliceStepSize_.registerListener(e -> {
             vsb_.sliceStepSize(spnSliceStepSize_.getDouble());
-            acqSettings.setVolumeSettings(vsb_.build());
         });
     }
 }

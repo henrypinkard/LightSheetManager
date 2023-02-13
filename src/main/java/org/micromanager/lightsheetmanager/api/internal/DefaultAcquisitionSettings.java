@@ -1,33 +1,31 @@
 package org.micromanager.lightsheetmanager.api.internal;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.micromanager.lightsheetmanager.api.AcquisitionSettings;
+
+// TODO: make public instead of abstract? use this in demo mode?
 
 /**
  * Base acquisition settings for all microscopes.
  */
-public class DefaultAcquisitionSettings implements AcquisitionSettings {
+public abstract class DefaultAcquisitionSettings implements AcquisitionSettings {
 
-    public static class Builder implements AcquisitionSettings.Builder {
+    public abstract static class Builder<T extends Builder<T>> implements AcquisitionSettings.Builder<T> {
 
-        private String saveDirectory_;
-        private String saveNamePrefix_;
-        private boolean demoMode_;
+        private String saveDirectory_ = "";
+        private String saveNamePrefix_ = "";
+        private boolean saveDuringAcq_ = false;
+        private boolean demoMode_ = false;
 
         public Builder() {
         }
 
-        public Builder(final String saveDirectory,
-                       final String saveNamePrefix,
-                       final boolean demoMode) {
-            saveDirectory_ = saveDirectory;
-            saveNamePrefix_ = saveNamePrefix;
-            demoMode_ = demoMode;
-        }
-
-        public Builder(final AcquisitionSettings acqSettings) {
-            saveDirectory_ = acqSettings.saveDirectory();
-            saveNamePrefix_ = acqSettings.saveNamePrefix();
-            demoMode_ = acqSettings.demoMode();
+        public Builder(final DefaultAcquisitionSettings acqSettings) {
+            saveDirectory_ = acqSettings.saveDirectory_;
+            saveNamePrefix_ = acqSettings.saveNamePrefix_;
+            saveDuringAcq_ = acqSettings.saveDuringAcq_;
+            demoMode_ = acqSettings.demoMode_;
         }
 
         /**
@@ -36,9 +34,9 @@ public class DefaultAcquisitionSettings implements AcquisitionSettings {
          * @param directory the directory
          */
         @Override
-        public AcquisitionSettings.Builder saveDirectory(final String directory) {
+        public T saveDirectory(final String directory) {
             saveDirectory_ = directory;
-            return this;
+            return self();
         }
 
         /**
@@ -47,9 +45,20 @@ public class DefaultAcquisitionSettings implements AcquisitionSettings {
          * @param name the name of the folder
          */
         @Override
-        public AcquisitionSettings.Builder saveNamePrefix(final String name) {
+        public T saveNamePrefix(final String name) {
             saveNamePrefix_ = name;
-            return this;
+            return self();
+        }
+
+        /**
+         * Sets the folder name.
+         *
+         * @param state the name of the folder
+         */
+        @Override
+        public T saveImagesDuringAcquisition(final boolean state) {
+            saveDuringAcq_ = state;
+            return self();
         }
 
         /**
@@ -58,9 +67,9 @@ public class DefaultAcquisitionSettings implements AcquisitionSettings {
          * @param state true if in demo mode
          */
         @Override
-        public AcquisitionSettings.Builder demoMode(final boolean state) {
+        public T demoMode(final boolean state) {
             demoMode_ = state;
-            return this;
+            return self();
         }
 
         /**
@@ -68,10 +77,10 @@ public class DefaultAcquisitionSettings implements AcquisitionSettings {
          *
          * @return Immutable version of DefaultAcquisitionSettings
          */
-        @Override
-        public AcquisitionSettings build() {
-            return new DefaultAcquisitionSettings();
-        }
+        //@Override
+        //public abstract AcquisitionSettings build();
+
+        //public abstract T self();
     }
 
     /**
@@ -79,29 +88,29 @@ public class DefaultAcquisitionSettings implements AcquisitionSettings {
      *
      * @return AcquisitionSettings.Builder pre-populated with settings of this instance.
      */
-    @Override
-    public AcquisitionSettings.Builder copyBuilder() {
-        return new DefaultAcquisitionSettings.Builder(
-                saveDirectory_, saveNamePrefix_, demoMode_
-        );
-    }
+//    @Override
+//    public AcquisitionSettings.Builder copyBuilder() {
+//        return new DefaultAcquisitionSettings.Builder(
+//                saveDirectory_, saveNamePrefix_, demoMode_
+//        );
+//    }
 
     private final String saveNamePrefix_;
     private final String saveDirectory_;
+    private final boolean saveDuringAcq_;
     private final boolean demoMode_;
 
-    public DefaultAcquisitionSettings() {
-        saveNamePrefix_ = "";
-        saveDirectory_ = "";
-        demoMode_ = false;
-    }
+//    public DefaultAcquisitionSettings() {
+//        saveNamePrefix_ = "";
+//        saveDirectory_ = "";
+//        demoMode_ = false;
+//    }
 
-    private DefaultAcquisitionSettings(final String saveDirectory,
-                                       final String saveNamePrefix,
-                                       final boolean demoMode) {
-        saveDirectory_ = saveDirectory;
-        saveNamePrefix_ = saveNamePrefix;
-        demoMode_ = demoMode;
+    protected DefaultAcquisitionSettings(Builder<?> builder) {
+        saveDirectory_ = builder.saveDirectory_;
+        saveNamePrefix_ = builder.saveNamePrefix_;
+        saveDuringAcq_ = builder.saveDuringAcq_;
+        demoMode_ = builder.demoMode_;
     }
 
     /**
@@ -125,6 +134,16 @@ public class DefaultAcquisitionSettings implements AcquisitionSettings {
     }
 
     /**
+     * Returns true if saving images during an acquisition.
+     *
+     * @return true if saving images during an acquisition.
+     */
+    @Override
+    public boolean isSavingImagesDuringAcquisition() {
+        return saveDuringAcq_;
+    }
+
+    /**
      * Returns true if using demo mode.
      *
      * @return true if using demo mode
@@ -137,8 +156,22 @@ public class DefaultAcquisitionSettings implements AcquisitionSettings {
     @Override
     public String toString() {
         return String.format(
-                "%s[saveDirectory=%s, saveNamePrefix=%s, demoMode=%s]",
-                getClass().getSimpleName(), saveDirectory_, saveNamePrefix_, demoMode_
+                "%s[saveDirectory=%s, saveNamePrefix=%s, saveDuringAcq=%s, demoMode=%s]",
+                getClass().getSimpleName(), saveDirectory_, saveNamePrefix_, saveDuringAcq_, demoMode_
         );
     }
+
+//    public String toJson() {
+//        return new Gson().toJson(this);
+//    }
+//
+//    public String toPrettyJson() {
+//        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//        return gson.toJson(this);
+//    }
+
+    // TODO: make subclasses implement this
+//    public static org.micromanager.lightsheetmanager.model.AcquisitionSettings fromJson(final String json) {
+//        return new Gson().fromJson(json, org.micromanager.lightsheetmanager.model.AcquisitionSettings.class);
+//    }
 }

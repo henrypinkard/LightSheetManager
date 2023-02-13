@@ -10,123 +10,123 @@ import org.micromanager.lightsheetmanager.model.data.AcquisitionModes;
 import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 
 /**
- * Acquisition settings for diSPIM microscopes.
+ * Acquisition settings for diSPIM microscope geometries.
  */
 public interface AcquisitionSettingsDISPIM extends AcquisitionSettings {
 
-    interface Builder extends AcquisitionSettings.Builder {
+    interface Builder<T extends AcquisitionSettings.Builder<T>> extends AcquisitionSettings.Builder<T> {
 
         /**
          * Sets the acquisition mode.
          *
          * @param acqMode the acquisition mode
          */
-        Builder acquisitionMode(final AcquisitionModes acqMode);
+        T acquisitionMode(final AcquisitionModes acqMode);
 
         /**
          * Sets the channel mode.
          *
          * @param channelMode the channel mode.
          */
-        Builder channelMode(final MultiChannelModes channelMode);
+        T channelMode(final MultiChannelModes channelMode);
 
         /**
          * Sets the camera mode.
          *
          * @param cameraMode the camera mode.
          */
-        Builder cameraMode(final CameraModes cameraMode);
+        T cameraMode(final CameraModes cameraMode);
 
         /**
          * Sets the acquisition to use channels.
          *
          * @param state true to use channels.
          */
-        Builder useChannels(final boolean state);
+        T useChannels(final boolean state);
 
         /**
          * Sets the acquisition to use time points.
          *
          * @param state true to use time points.
          */
-        Builder useTimePoints(final boolean state);
+        T useTimePoints(final boolean state);
 
         /**
          * Sets the acquisition to use autofocus.
          *
          * @param state true to use autofocus.
          */
-        Builder useAutofocus(final boolean state);
+        T useAutofocus(final boolean state);
 
         /**
          * Sets the acquisition to use multiple positions.
          *
          * @param state true to use multiple positions.
          */
-        Builder useMultiplePositions(final boolean state);
+        T useMultiplePositions(final boolean state);
 
         /**
          * Sets the acquisition to use hardware time points.
          *
          * @param state true to use time points.
          */
-        Builder useHardwareTimePoints(final boolean state);
+        T useHardwareTimePoints(final boolean state);
 
         /**
          * Sets the acquisition to use stage scanning.
          *
          * @param state true to use stage scanning.
          */
-        Builder useStageScanning(final boolean state);
+        T useStageScanning(final boolean state);
 
         /**
          * Sets the acquisition to use advanced timing settings.
          *
          * @param state true to use advanced timing settings
          */
-        Builder useAdvancedTiming(final boolean state);
+        T useAdvancedTiming(final boolean state);
 
         /**
          * Sets the number of time points.
          *
          * @param numTimePoints the number of time points
          */
-        Builder numTimePoints(final int numTimePoints);
+        T numTimePoints(final int numTimePoints);
 
         /**
          * Sets the time point interval between time points in seconds.
          *
          * @param timePointInterval the time point interval in seconds.
          */
-        Builder timePointInterval(final int timePointInterval);
+        T timePointInterval(final int timePointInterval);
 
         /**
          * Sets the delay after a move when using multiple positions.
          *
          * @param postMoveDelay the delay in milliseconds.
          */
-        Builder postMoveDelay(final int postMoveDelay);
+        T postMoveDelay(final int postMoveDelay);
 
         /**
          * Sets the number of channels.
          *
          * @param numChannels the number of channels.
          */
-        Builder numChannels(final int numChannels);
+        T numChannels(final int numChannels);
 
         /**
          * Sets the channel group.
          *
          * @param channelGroup the channel group.
          */
-        Builder channelGroup(final String channelGroup);
+        T channelGroup(final String channelGroup);
 
         /**
          * Sets the channels array.
          *
          * @param channels the channel array
          */
-        Builder channels(final ChannelSpec[] channels);
+        T channels(final ChannelSpec[] channels);
 
         /**
          * Creates an immutable instance of AcquisitionSettingsDISPIM
@@ -141,7 +141,7 @@ public interface AcquisitionSettingsDISPIM extends AcquisitionSettings {
      *
      * @return AcquisitionSettingsDISPIM.Builder pre-populated with settings of this instance.
      */
-    Builder copyBuilder();
+    //Builder copyBuilder();
 
     /**
      * Returns the immutable DefaultTimingSettings instance.

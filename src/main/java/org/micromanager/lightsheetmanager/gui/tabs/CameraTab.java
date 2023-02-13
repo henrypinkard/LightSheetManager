@@ -53,7 +53,7 @@ public class CameraTab extends Panel {
         btnGetCurrentROI_ = new Button("Get Current ROI", 120, 30);
 
         cmbCameraTriggerMode_ = new ComboBox(CameraModes.toArray(),
-                model_.acquisitions().getAcquisitionSettings().getCameraMode().toString());
+                model_.acquisitions().getAcquisitionSettings().cameraMode().toString());
 
         panelROI.add(btnUnchangedROI_, "span 2, wrap");
         panelROI.add(btnFullROI_, "");
@@ -77,9 +77,9 @@ public class CameraTab extends Panel {
     private void createEventHandlers() {
         cmbCameraTriggerMode_.registerListener(e -> {
             final CameraModes cameraMode = CameraModes.fromString(cmbCameraTriggerMode_.getSelected());
-            model_.acquisitions().getAcquisitionSettings().setCameraMode(cameraMode);
+            model_.acquisitions().getAcquisitionSettingsBuilder().cameraMode(cameraMode);
             sliceSettingsPanel_.switchUI(cameraMode);
-            System.out.println("getCameraMode: " + model_.acquisitions().getAcquisitionSettings().getCameraMode());
+            //System.out.println("getCameraMode: " + model_.acquisitions().getAcquisitionSettings().getCameraMode());
         });
     }
 

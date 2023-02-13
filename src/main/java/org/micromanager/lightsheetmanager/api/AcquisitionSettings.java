@@ -5,28 +5,37 @@ package org.micromanager.lightsheetmanager.api;
  */
 public interface AcquisitionSettings {
 
-    interface Builder {
+    interface Builder<T extends Builder<T>>  {
 
         /**
          * Sets the save directory.
          *
          * @param directory the directory
          */
-        Builder saveDirectory(final String directory);
+        T saveDirectory(final String directory);
 
         /**
          * Sets the folder name.
          *
          * @param name the name of the folder
          */
-        Builder saveNamePrefix(final String name);
+        T saveNamePrefix(final String name);
+
+        /**
+         * Sets the plugin to save images during an acquisition.
+         *
+         * @param state true to save images during an acquisition
+         */
+        T saveImagesDuringAcquisition(final boolean state);
 
         /**
          * Sets the acquisition to demo mode.
          *
          * @param state true if in demo mode
          */
-        Builder demoMode(final boolean state);
+        T demoMode(final boolean state);
+
+        T self();
 
         /**
          * Creates an immutable instance of DefaultAcquisitionSettings
@@ -41,7 +50,7 @@ public interface AcquisitionSettings {
      *
      * @return AcquisitionSettings.Builder pre-populated with settings of this instance.
      */
-    Builder copyBuilder();
+    //Builder copyBuilder();
 
     /**
      * Returns the save name prefix.
@@ -56,6 +65,13 @@ public interface AcquisitionSettings {
      * @return the save directory.
      */
     String saveDirectory();
+
+    /**
+     * Returns true if saving images during an acquisition.
+     *
+     * @return true if saving images during an acquisition.
+     */
+    boolean isSavingImagesDuringAcquisition();
 
     /**
      * Returns true if using demo mode.

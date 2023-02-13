@@ -1,5 +1,7 @@
 package org.micromanager.lightsheetmanager.api.internal;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.micromanager.lightsheetmanager.api.AcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.model.channels.ChannelSpec;
@@ -8,7 +10,7 @@ import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 
 public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings implements AcquisitionSettingsDISPIM {
 
-    public static class Builder extends DefaultAcquisitionSettings.Builder implements AcquisitionSettingsDISPIM.Builder {
+    public static class Builder extends DefaultAcquisitionSettings.Builder<Builder> implements AcquisitionSettingsDISPIM.Builder<Builder> {
         private DefaultTimingSettings.Builder tsb_ = new DefaultTimingSettings.Builder();
         private DefaultVolumeSettings.Builder vsb_ = new DefaultVolumeSettings.Builder();
         private DefaultSliceSettings.Builder ssb_ = new DefaultSliceSettings.Builder();
@@ -32,53 +34,77 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
 
         private int numChannels_ = 0;
         private String channelGroup_ = "";
-        private ChannelSpec[] channels_ = new ChannelSpec[]{};;
+        private ChannelSpec[] channels_ = new ChannelSpec[]{};
 
         public Builder() {
         }
 
-        private Builder(
-                final DefaultTimingSettings.Builder tsb,
-                final DefaultVolumeSettings.Builder vsb,
-                final DefaultSliceSettings.Builder  ssb,
-                final DefaultSliceSettingsLS.Builder ssbLS,
-                final AcquisitionModes acquisitionMode,
-                final MultiChannelModes channelMode,
-                final CameraModes cameraMode,
-                final boolean useChannels,
-                final boolean useTimePoints,
-                final boolean useAutofocus,
-                final boolean useStageScanning,
-                final boolean useMultiplePositions,
-                final boolean useHardwareTimePoints,
-                final boolean useAdvancedTiming,
-                final int numTimePoints,
-                final int timePointInterval,
-                final int postMoveDelayMs,
-                final int numChannels,
-                final String channelGroup,
-                final ChannelSpec[] channels) {
-            tsb_ = tsb;
-            vsb_ = vsb;
-            ssb_ = ssb;
-            ssbLS_ = ssbLS;
-            acquisitionMode_ = acquisitionMode;
-            channelMode_ = channelMode;
-            cameraMode_ = cameraMode;
-            useChannels_ = useChannels;
-            useTimePoints_ = useTimePoints;
-            useAutofocus_ = useAutofocus;
-            useStageScanning_ = useStageScanning;
-            useMultiplePositions_ = useMultiplePositions;
-            useHardwareTimePoints_ = useHardwareTimePoints;
-            useAdvancedTiming_ = useAdvancedTiming;
-            numTimePoints_ = numTimePoints;
-            timePointInterval_ = timePointInterval;
-            postMoveDelay_ = postMoveDelayMs;
-            numChannels_ = numChannels;
-            channelGroup_ = channelGroup;
-            channels_ = channels;
+        public Builder(final DefaultAcquisitionSettingsDISPIM acqSettings) {
+            super(acqSettings);
+            tsb_ = acqSettings.timingSettings_.copyBuilder();
+            vsb_ = acqSettings.volumeSettings_.copyBuilder();
+            ssb_ = acqSettings.sliceSettings_.copyBuilder();
+            ssbLS_ = acqSettings.sliceSettingsLS_.copyBuilder();
+            acquisitionMode_ = acqSettings.acquisitionMode_;
+            channelMode_ = acqSettings.channelMode_;
+            cameraMode_ = acqSettings.cameraMode_;
+            useChannels_ = acqSettings.useChannels_;
+            useTimePoints_ = acqSettings.useTimePoints_;
+            useAutofocus_ = acqSettings.useAutofocus_;
+            useMultiplePositions_ = acqSettings.useMultiplePositions_;
+            useHardwareTimePoints_ = acqSettings.useHardwareTimePoints_;
+            useStageScanning_ = acqSettings.useStageScanning_;
+            useAdvancedTiming_ =  acqSettings.useAdvancedTiming_;
+            numTimePoints_ = acqSettings.numTimePoints_;
+            timePointInterval_ = acqSettings.timePointInterval_;
+            postMoveDelay_ = acqSettings.postMoveDelay_;
+            numChannels_ = acqSettings.numChannels_;
+            channelGroup_ = acqSettings.channelGroup_;
+            channels_ = acqSettings.channels_;
         }
+
+//        private Builder(
+//                final DefaultTimingSettings.Builder tsb,
+//                final DefaultVolumeSettings.Builder vsb,
+//                final DefaultSliceSettings.Builder  ssb,
+//                final DefaultSliceSettingsLS.Builder ssbLS,
+//                final AcquisitionModes acquisitionMode,
+//                final MultiChannelModes channelMode,
+//                final CameraModes cameraMode,
+//                final boolean useChannels,
+//                final boolean useTimePoints,
+//                final boolean useAutofocus,
+//                final boolean useStageScanning,
+//                final boolean useMultiplePositions,
+//                final boolean useHardwareTimePoints,
+//                final boolean useAdvancedTiming,
+//                final int numTimePoints,
+//                final int timePointInterval,
+//                final int postMoveDelayMs,
+//                final int numChannels,
+//                final String channelGroup,
+//                final ChannelSpec[] channels) {
+//            tsb_ = tsb;
+//            vsb_ = vsb;
+//            ssb_ = ssb;
+//            ssbLS_ = ssbLS;
+//            acquisitionMode_ = acquisitionMode;
+//            channelMode_ = channelMode;
+//            cameraMode_ = cameraMode;
+//            useChannels_ = useChannels;
+//            useTimePoints_ = useTimePoints;
+//            useAutofocus_ = useAutofocus;
+//            useStageScanning_ = useStageScanning;
+//            useMultiplePositions_ = useMultiplePositions;
+//            useHardwareTimePoints_ = useHardwareTimePoints;
+//            useAdvancedTiming_ = useAdvancedTiming;
+//            numTimePoints_ = numTimePoints;
+//            timePointInterval_ = timePointInterval;
+//            postMoveDelay_ = postMoveDelayMs;
+//            numChannels_ = numChannels;
+//            channelGroup_ = channelGroup;
+//            channels_ = channels;
+//        }
 
         /**
          * Sets the acquisition mode.
@@ -86,7 +112,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param acqMode the acquisition mode
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder acquisitionMode(final AcquisitionModes acqMode) {
+        public Builder acquisitionMode(final AcquisitionModes acqMode) {
             acquisitionMode_ = acqMode;
             return this;
         }
@@ -97,7 +123,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param channelMode the channel mode.
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder channelMode(final MultiChannelModes channelMode) {
+        public Builder channelMode(final MultiChannelModes channelMode) {
             channelMode_ = channelMode;
             return this;
         }
@@ -108,7 +134,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param cameraMode the camera mode.
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder cameraMode(final CameraModes cameraMode) {
+        public Builder cameraMode(final CameraModes cameraMode) {
             cameraMode_ = cameraMode;
             return this;
         }
@@ -119,7 +145,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param state true to use channels.
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder useChannels(final boolean state) {
+        public Builder useChannels(final boolean state) {
             useChannels_ = state;
             return this;
         }
@@ -130,7 +156,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param state true to use time points.
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder useTimePoints(final boolean state) {
+        public Builder useTimePoints(final boolean state) {
             useTimePoints_ = state;
             return this;
         }
@@ -141,7 +167,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param state true to use autofocus.
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder useAutofocus(final boolean state) {
+        public Builder useAutofocus(final boolean state) {
             useAutofocus_ = state;
             return this;
         }
@@ -152,7 +178,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param state true to use multiple positions.
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder useMultiplePositions(final boolean state) {
+        public Builder useMultiplePositions(final boolean state) {
             useMultiplePositions_ = state;
             return this;
         }
@@ -163,7 +189,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param state true to use time points.
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder useHardwareTimePoints(final boolean state) {
+        public Builder useHardwareTimePoints(final boolean state) {
             useHardwareTimePoints_ = state;
             return this;
         }
@@ -174,7 +200,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param state true to use stage scanning.
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder useStageScanning(final boolean state) {
+        public Builder useStageScanning(final boolean state) {
             useStageScanning_ = state;
             return this;
         }
@@ -185,7 +211,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param state true to use advanced timing settings
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder useAdvancedTiming(final boolean state) {
+        public Builder useAdvancedTiming(final boolean state) {
             useAdvancedTiming_ = state;
             return this;
         }
@@ -196,7 +222,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param numTimePoints the number of time points
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder numTimePoints(final int numTimePoints) {
+        public Builder numTimePoints(final int numTimePoints) {
             numTimePoints_ = numTimePoints;
             return this;
         }
@@ -207,7 +233,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param timePointInterval the time point interval in seconds.
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder timePointInterval(final int timePointInterval) {
+        public Builder timePointInterval(final int timePointInterval) {
             timePointInterval_ = timePointInterval;
             return this;
         }
@@ -218,7 +244,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param postMoveDelay the delay in milliseconds.
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder postMoveDelay(final int postMoveDelay) {
+        public Builder postMoveDelay(final int postMoveDelay) {
             postMoveDelay_ = postMoveDelay;
             return this;
         }
@@ -229,7 +255,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param numChannels the number of channels.
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder numChannels(final int numChannels) {
+        public Builder numChannels(final int numChannels) {
             numChannels_ = numChannels;
             return this;
         }
@@ -240,7 +266,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param channelGroup the channel group.
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder channelGroup(final String channelGroup) {
+        public Builder channelGroup(final String channelGroup) {
             channelGroup_ = channelGroup;
             return this;
         }
@@ -251,141 +277,155 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
          * @param channels the channel array
          */
         @Override
-        public AcquisitionSettingsDISPIM.Builder channels(final ChannelSpec[] channels) {
+        public Builder channels(final ChannelSpec[] channels) {
             channels_ = channels;
             return this;
         }
 
-        /**
-         * Creates an immutable instance of DefaultAcquisitionSettingsDISPIM
-         *
-         * @return Immutable version of DefaultAcquisitionSettingsDISPIM
-         */
+        // getters for sub-builders
+        public DefaultTimingSettings.Builder timingSettingsBuilder() {
+            return tsb_;
+        }
+
+        public DefaultVolumeSettings.Builder volumeSettingsBuilder() {
+            return vsb_;
+        }
+
+        public DefaultSliceSettings.Builder sliceSettingsBuilder() {
+            return ssb_;
+        }
+
+        public DefaultSliceSettingsLS.Builder sliceSettingsLSBuilder() {
+            return ssbLS_;
+        }
+
+//        /**
+//         * Creates an immutable instance of DefaultAcquisitionSettingsDISPIM
+//         *
+//         * @return Immutable version of DefaultAcquisitionSettingsDISPIM
+//         */
+//        @Override
+//        public DefaultAcquisitionSettingsDISPIM build() {
+//            return new DefaultAcquisitionSettingsDISPIM(
+//                    tsb_.build(),
+//                    vsb_.build(),
+//                    ssb_.build(),
+//                    ssbLS_.build(),
+//                    acquisitionMode_,
+//                    channelMode_,
+//                    cameraMode_,
+//                    useChannels_,
+//                    useTimePoints_,
+//                    useAutofocus_,
+//                    useStageScanning_,
+//                    useMultiplePositions_,
+//                    useHardwareTimePoints_,
+//                    useAdvancedTiming_,
+//                    numTimePoints_,
+//                    timePointInterval_,
+//                    postMoveDelay_,
+//                    numChannels_,
+//                    channelGroup_,
+//                    channels_
+//            );
+//        }
+
         @Override
         public DefaultAcquisitionSettingsDISPIM build() {
-            return new DefaultAcquisitionSettingsDISPIM(
-                    tsb_.build(),
-                    vsb_.build(),
-                    ssb_.build(),
-                    ssbLS_.build(),
-                    acquisitionMode_,
-                    channelMode_,
-                    cameraMode_,
-                    useChannels_,
-                    useTimePoints_,
-                    useAutofocus_,
-                    useStageScanning_,
-                    useMultiplePositions_,
-                    useHardwareTimePoints_,
-                    useAdvancedTiming_,
-                    numTimePoints_,
-                    timePointInterval_,
-                    postMoveDelay_,
-                    numChannels_,
-                    channelGroup_,
-                    channels_
-            );
+            return new DefaultAcquisitionSettingsDISPIM(this);
         }
+
+        @Override
+        public Builder self() {
+            return this;
+        }
+
     }
 
-    private DefaultTimingSettings timingSettings_;
-    private DefaultVolumeSettings volumeSettings_;
-    private DefaultSliceSettingsLS sliceSettingsLS_;
-    private DefaultSliceSettings sliceSettings_;
+    private final DefaultTimingSettings timingSettings_;
+    private final DefaultVolumeSettings volumeSettings_;
+    private final DefaultSliceSettingsLS sliceSettingsLS_;
+    private final DefaultSliceSettings sliceSettings_;
 
-    private AcquisitionModes acquisitionMode_;
-    private MultiChannelModes channelMode_;
-    private CameraModes cameraMode_;
+    private final AcquisitionModes acquisitionMode_;
+    private final MultiChannelModes channelMode_;
+    private final CameraModes cameraMode_;
 
-    private boolean useChannels_;
-    private boolean useTimePoints_;
-    private boolean useAutofocus_;
-    private boolean useMultiplePositions_;
-    private boolean useHardwareTimePoints_;
-    private boolean useStageScanning_;
-    private boolean useAdvancedTiming_;
+    private final boolean useChannels_;
+    private final boolean useTimePoints_;
+    private final boolean useAutofocus_;
+    private final boolean useMultiplePositions_;
+    private final boolean useHardwareTimePoints_;
+    private final boolean useStageScanning_;
+    private final boolean useAdvancedTiming_;
 
-    private int numTimePoints_;
-    private int timePointInterval_;
-    private int postMoveDelay_;
+    private final int numTimePoints_;
+    private final int timePointInterval_;
+    private final int postMoveDelay_;
 
-    private int numChannels_;
-    private String channelGroup_;
-    private ChannelSpec[] channels_;
+    private final int numChannels_;
+    private final String channelGroup_;
+    private final ChannelSpec[] channels_;
 
-    private DefaultAcquisitionSettingsDISPIM(
-            final DefaultTimingSettings timingSettings,
-            final DefaultVolumeSettings volumeSettings,
-            final DefaultSliceSettings sliceSettings,
-            final DefaultSliceSettingsLS sliceSettingsLS,
-            final AcquisitionModes acquisitionMode,
-            final MultiChannelModes channelMode,
-            final CameraModes cameraMode,
-            final boolean useChannels,
-            final boolean useTimePoints,
-            final boolean useAutofocus,
-            final boolean useStageScanning,
-            final boolean useMultiplePositions,
-            final boolean useHardwareTimePoints,
-            final boolean useAdvancedTiming,
-            final int numTimePoints,
-            final int timePointInterval,
-            final int postMoveDelayMs,
-            final int numChannels,
-            final String channelGroup,
-            final ChannelSpec[] channels) {
-        timingSettings_ = timingSettings;
-        volumeSettings_ = volumeSettings;
-        sliceSettings_ = sliceSettings;
-        sliceSettingsLS_ = sliceSettingsLS;
-        acquisitionMode_ = acquisitionMode;
-        channelMode_ = channelMode;
-        cameraMode_ = cameraMode;
-        useChannels_ = useChannels;
-        useTimePoints_ = useTimePoints;
-        useAutofocus_ = useAutofocus;
-        useStageScanning_ = useStageScanning;
-        useMultiplePositions_ = useMultiplePositions;
-        useHardwareTimePoints_ = useHardwareTimePoints;
-        useAdvancedTiming_ = useAdvancedTiming;
-        numTimePoints_ = numTimePoints;
-        timePointInterval_ = timePointInterval;
-        postMoveDelay_ = postMoveDelayMs;
-        numChannels_ = numChannels;
-        channelGroup_ = channelGroup;
-        channels_ = channels;
+    private DefaultAcquisitionSettingsDISPIM(Builder builder) {
+        super(builder);
+        timingSettings_ = builder.tsb_.build();
+        volumeSettings_ = builder.vsb_.build();
+        sliceSettings_ = builder.ssb_.build();
+        sliceSettingsLS_ = builder.ssbLS_.build();
+        acquisitionMode_ = builder.acquisitionMode_;
+        channelMode_ = builder.channelMode_;
+        cameraMode_ = builder.cameraMode_;
+        useChannels_ = builder.useChannels_;
+        useTimePoints_ = builder.useTimePoints_;
+        useAutofocus_ = builder.useAutofocus_;
+        useStageScanning_ = builder.useStageScanning_;
+        useMultiplePositions_ = builder.useMultiplePositions_;
+        useHardwareTimePoints_ = builder.useHardwareTimePoints_;
+        useAdvancedTiming_ = builder.useAdvancedTiming_;
+        numTimePoints_ = builder.numTimePoints_;
+        timePointInterval_ = builder.timePointInterval_;
+        postMoveDelay_ = builder.postMoveDelay_;
+        numChannels_ = builder.numChannels_;
+        channelGroup_ = builder.channelGroup_;
+        channels_ = builder.channels_;
     }
 
-    /**
-     * Creates a Builder populated with settings of this DefaultAcquisitionSettingsDISPIM instance.
-     *
-     * @return DefaultAcquisitionSettingsDISPIM.Builder pre-populated with settings of this instance.
-     */
-    @Override
-    public DefaultAcquisitionSettingsDISPIM.Builder copyBuilder() {
-        return new Builder(
-                timingSettings_.copyBuilder(),
-                volumeSettings_.copyBuilder(),
-                sliceSettings_.copyBuilder(),
-                sliceSettingsLS_.copyBuilder(),
-                acquisitionMode_,
-                channelMode_,
-                cameraMode_,
-                useChannels_,
-                useTimePoints_,
-                useAutofocus_,
-                useStageScanning_,
-                useMultiplePositions_,
-                useHardwareTimePoints_,
-                useAdvancedTiming_,
-                numTimePoints_,
-                timePointInterval_,
-                postMoveDelay_,
-                numChannels_,
-                channelGroup_,
-                channels_
-        );
-    }
+//    /**
+//     * Creates a Builder populated with settings of this DefaultAcquisitionSettingsDISPIM instance.
+//     *
+//     * @return DefaultAcquisitionSettingsDISPIM.Builder pre-populated with settings of this instance.
+//     */
+//    @Override
+//    public DefaultAcquisitionSettingsDISPIM.Builder copyBuilder() {
+//        return new Builder(
+//                timingSettings_.copyBuilder(),
+//                volumeSettings_.copyBuilder(),
+//                sliceSettings_.copyBuilder(),
+//                sliceSettingsLS_.copyBuilder(),
+//                acquisitionMode_,
+//                channelMode_,
+//                cameraMode_,
+//                useChannels_,
+//                useTimePoints_,
+//                useAutofocus_,
+//                useStageScanning_,
+//                useMultiplePositions_,
+//                useHardwareTimePoints_,
+//                useAdvancedTiming_,
+//                numTimePoints_,
+//                timePointInterval_,
+//                postMoveDelay_,
+//                numChannels_,
+//                channelGroup_,
+//                channels_
+//        );
+//    }
+
+//    @Override
+//    public AcquisitionSettingsDISPIM.Builder copyBuilder() {
+//        return null;
+//    }
 
     /**
      * Returns the immutable DefaultTimingSettings instance.
@@ -587,4 +627,16 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
         return channels_;
     }
 
+    public String toJson() {
+        return new Gson().toJson(this);
+    }
+
+    public String toPrettyJson() {
+        final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(this);
+    }
+
+    public static DefaultAcquisitionSettingsDISPIM fromJson(final String json) {
+        return new Gson().fromJson(json, DefaultAcquisitionSettingsDISPIM.class);
+    }
 }

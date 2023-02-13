@@ -15,7 +15,8 @@ import javax.swing.table.TableColumn;
 
 import org.micromanager.PositionList;
 import org.micromanager.Studio;
-import org.micromanager.lightsheetmanager.model.AcquisitionSettings;
+import org.micromanager.lightsheetmanager.api.AcquisitionSettings;
+import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.model.playlist.AcquisitionMetadata;
 import org.micromanager.lightsheetmanager.model.playlist.AcquisitionTableData;
 
@@ -140,7 +141,7 @@ public class AcquisitionTable extends JScrollPane {
             // save current settings in AcquisitionTableData
             if (!currentAcqName_.equals(DEFAULT_ACQ_NAME)) {
                 // TODO: check this
-                data_.updateAcquisitionSettings(currentAcqName_, new AcquisitionSettings()); //acqPanel_.getCurrentAcquisitionSettings());
+                data_.updateAcquisitionSettings(currentAcqName_, new DefaultAcquisitionSettingsDISPIM.Builder().build()); //acqPanel_.getCurrentAcquisitionSettings());
                 //System.out.println("SAVING ACQ: " + currentAcqName);
             }
             // set the current acquisition name
@@ -373,7 +374,8 @@ public class AcquisitionTable extends JScrollPane {
         //System.out.println("currentAcq: " + currentAcq);
         final AcquisitionSettings settings = data_.getAcquisitionSettings(currentAcqName_);
         if (settings != null) {
-            settings.setSaveDirectory(name);
+            // FIXME: update the table
+            //settings.setSaveDirectory(name);
             repaint();
         }
     }
@@ -387,7 +389,8 @@ public class AcquisitionTable extends JScrollPane {
     public void updateSaveNamePrefix(final String name) {
         final AcquisitionSettings settings = data_.getAcquisitionSettings(currentAcqName_);
         if (settings != null) {
-            settings.setSaveNamePrefix(name);
+            // FIXME: update the table
+            //settings.setSaveNamePrefix(name);
             repaint();
         }
     }

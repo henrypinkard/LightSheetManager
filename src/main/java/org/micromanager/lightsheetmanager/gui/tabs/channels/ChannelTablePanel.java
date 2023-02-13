@@ -1,6 +1,7 @@
 package org.micromanager.lightsheetmanager.gui.tabs.channels;
 
 import mmcorej.StrVector;
+import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;
 import org.micromanager.lightsheetmanager.gui.components.ComboBox;
@@ -48,7 +49,7 @@ public class ChannelTablePanel extends Panel {
         cmbChannelGroup_ = new ComboBox(groupLabels, groupLabels[0]);
 
         cmbChannelMode_ = new ComboBox(MultiChannelModes.toArray(),
-                model_.acquisitions().getAcquisitionSettings().getChannelMode().toString());
+                model_.acquisitions().getAcquisitionSettings().channelMode().toString());
 
         add(lblChannelGroup_, "split 2");
         add(cmbChannelGroup_, "wrap");
@@ -60,6 +61,7 @@ public class ChannelTablePanel extends Panel {
     }
 
     private void createEventHandlers() {
+        final DefaultAcquisitionSettingsDISPIM.Builder asb_ = model_.acquisitions().getAcquisitionSettingsBuilder();
 
         btnAddChannel_.registerListener(e -> {
             table_.getData().addEmptyChannel();
@@ -69,14 +71,14 @@ public class ChannelTablePanel extends Panel {
 //            repaint();
             System.out.println("add channel");
             table_.getData().printChannelData();
-            model_.acquisitions().getAcquisitionSettings().setChannels(table_.getData().getChannelArray());
+            asb_.channels(table_.getData().getChannelArray());
         });
 
         btnRemoveChannel_.registerListener(e -> {
             final int row = table_.getTable().getSelectedRow();
             if (row != -1) {
                 table_.getData().removeChannel(row);
-                model_.acquisitions().getAcquisitionSettings().setChannels(table_.getData().getChannelArray());
+                asb_.channels(table_.getData().getChannelArray());
                 table_.refreshData();
                 System.out.println("remove row index: " + row);
             }
@@ -84,13 +86,13 @@ public class ChannelTablePanel extends Panel {
 
         cmbChannelMode_.registerListener(e -> {
             final int index = cmbChannelMode_.getSelectedIndex();
-            model_.acquisitions().getAcquisitionSettings().setChannelMode(MultiChannelModes.getByIndex(index));
-            System.out.println("getChannelMode: " + model_.acquisitions().getAcquisitionSettings().getChannelMode());
+            asb_.channelMode(MultiChannelModes.getByIndex(index));
+            //System.out.println("getChannelMode: " + model_.acquisitions().getAcquisitionSettings().getChannelMode());
         });
 
         cmbChannelGroup_.registerListener(e -> {
-            model_.acquisitions().getAcquisitionSettings().setChannelGroup(cmbChannelGroup_.getSelected());
-            System.out.println("getChannelGroup: " + model_.acquisitions().getAcquisitionSettings().getChannelGroup());
+            asb_.channelGroup(cmbChannelGroup_.getSelected());
+            //System.out.println("getChannelGroup: " + model_.acquisitions().getAcquisitionSettings().getChannelGroup());
         });
     }
 
