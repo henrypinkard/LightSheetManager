@@ -16,11 +16,9 @@ import org.micromanager.acquisition.internal.acqengjcompat.speedtest.SpeedTest;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.lightsheetmanager.api.AcquisitionManager;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
-import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettings;
-import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettingsLS;
+import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.api.internal.DefaultTimingSettings;
 import org.micromanager.lightsheetmanager.api.data.GeometryType;
-import org.micromanager.lightsheetmanager.api.internal.DefaultVolumeSettings;
 import org.micromanager.lightsheetmanager.model.data.AcquisitionModes;
 import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 import org.micromanager.lightsheetmanager.model.devices.cameras.AndorCamera;
@@ -37,18 +35,10 @@ public class AcquisitionEngine implements AcquisitionManager {
     private final Studio studio_;
     private final CMMCore core_;
 
-    private AcquisitionSettings acqSettings_;
+    private DefaultAcquisitionSettingsDISPIM.Builder asb_;
+    private DefaultAcquisitionSettingsDISPIM acqSettings_;
 
     private DataStorage data_;
-
-    // TODO: these are not related to acqSettings, probably needs to be clarified
-    // (used to get builder objects for acqSettings related objects)
-    // TODO: come up with a way to abstract this for different kinds of microscopes
-    // diSPIM builders
-    DefaultTimingSettings.Builder tsb_;
-    DefaultVolumeSettings.Builder vsb_;
-    DefaultSliceSettingsLS.Builder ssbLS_;
-    DefaultSliceSettings.Builder ssb_;
 
     private ExecutorService acquistitonExecutor_ = Executors.newSingleThreadExecutor(
           new ThreadFactory() {
@@ -67,31 +57,19 @@ public class AcquisitionEngine implements AcquisitionManager {
 
         data_ = new DataStorage(studio_);
 
-        acqSettings_ = new AcquisitionSettings();
+        // default settings
+        asb_ = new DefaultAcquisitionSettingsDISPIM.Builder();
+        acqSettings_ = asb_.build();
     }
 
     /**
-     * Create builders from loaded acquisition settings.
+     * Sets the acquisition settings and populates the acquisition settings builder with its values.
+     *
+     * @param acqSettings the acquisition settings to set
      */
-    public void setupBuilders() {
-        tsb_ = new DefaultTimingSettings.Builder();
-        vsb_ = new DefaultVolumeSettings.Builder(acqSettings_.getVolumeSettings());
-        ssb_ = new DefaultSliceSettings.Builder(acqSettings_.getSliceSettings());
-        ssbLS_ = new DefaultSliceSettingsLS.Builder(acqSettings_.getSliceSettingsLS());
-    }
-
-    public void setAcquisitionSettings(final AcquisitionSettings acqSettings) {
+    public void setAcquisitionSettings(final DefaultAcquisitionSettingsDISPIM acqSettings) {
+        asb_ = new DefaultAcquisitionSettingsDISPIM.Builder(acqSettings);
         acqSettings_ = acqSettings;
-    }
-
-    /**
-     * Used make sure the acquisition settings and updated to the current builder settings.
-     */
-    public void setAcqSettingsFromBuilders() {
-        acqSettings_.setTimingSettings(tsb_.build());
-        acqSettings_.setVolumeSettings(vsb_.build());
-        acqSettings_.setSliceSettings(ssb_.build());
-        acqSettings_.setSliceSettingsLS(ssbLS_.build());
     }
 
     @Override
@@ -105,21 +83,19 @@ public class AcquisitionEngine implements AcquisitionManager {
                     return;
                 }
 
-                // TODO: build the settings objects here...
-                // build settings objects
-                //model_.acquisitions().getAcquisitionSettings().build
+                // make sure AcquisitionSettings are up-to-date
+                acqSettings_ = asb_.build();
 
                 if (speedTest) {
                     try {
-                        SpeedTest.runSpeedTest(acqSettings_.getSaveDirectory(), acqSettings_.getSaveNamePrefix(),
-                              core_, acqSettings_.getNumTimePoints(), true);
+                        SpeedTest.runSpeedTest(acqSettings_.saveDirectory(), acqSettings_.saveNamePrefix(),
+                                core_, acqSettings_.numTimePoints(), true);
                     } catch (Exception e) {
                         studio_.logs().showError(e);
                     }
                 } else {
-
                     // Every one of these modality-specific functions should block until the
-                    // acquisiton is complete
+                    // acquisition is complete
                     GeometryType geometryType =
                           model_.devices().getDeviceAdapter().getMicroscopeGeometry();
                     switch (geometryType) {
@@ -185,7 +161,7 @@ public class AcquisitionEngine implements AcquisitionManager {
         // make sure slice timings are up-to-date
 
         recalculateSliceTiming(acqSettings_);
-        System.out.println(acqSettings_.getTimingSettings());
+        System.out.println(acqSettings_.timingSettings());
 
 
         // TODO: was only checked in light sheet mode
@@ -194,8 +170,8 @@ public class AcquisitionEngine implements AcquisitionManager {
 //        }
 
         // setup channels
-        int nrChannelsSoftware = acqSettings_.getNumChannels();  // how many times we trigger the controller per stack
-        int nrSlicesSoftware = acqSettings_.getVolumeSettings().slicesPerView();
+        int nrChannelsSoftware = acqSettings_.numChannels();  // how many times we trigger the controller per stack
+        int nrSlicesSoftware = acqSettings_.volumeSettings().slicesPerView();
         // TODO: channels
 
 
@@ -203,30 +179,32 @@ public class AcquisitionEngine implements AcquisitionManager {
         AndorCamera camera = (AndorCamera)model_.devices().getDevice("Imaging1Camera");
         CameraModes camMode = camera.getTriggerMode();
         final float cameraReadoutTime = camera.getReadoutTime(camMode);
-        final double exposureTime = acqSettings_.getCameraExposure();
+        final double exposureTime = 1.0f; // TODO: camera exposure? acqSettings_.getCameraExposure();
 
         // test acq was here
 
         double volumeDuration = computeActualVolumeDuration(acqSettings_);
         double timepointDuration = computeTimePointDuration();
-        long timepointIntervalMs = Math.round(acqSettings_.getTimePointInterval()*1000);
+        long timepointIntervalMs = Math.round(acqSettings_.timePointInterval()*1000);
 
         // use hardware timing if < 1 second between time points
         // experimentally need ~0.5 sec to set up acquisition, this gives a bit of cushion
         // cannot do this in getCurrentAcquisitionSettings because of mutually recursive
         // call with computeActualVolumeDuration()
         if (acqSettings_.isUsingTimePoints()
-              && acqSettings_.getNumTimePoints() > 1
+              && acqSettings_.numTimePoints() > 1
               && timepointIntervalMs < (timepointDuration + 750)
-              && !acqSettings_.isStageScanning()) {
-            acqSettings_.setHardwareTimesPoints(true);
+              && !acqSettings_.isUsingStageScanning()) {
+           // acqSettings_.useHardwareTimesPoints(true);
+            asb_.useHardwareTimePoints(true);
         }
 
         if (acqSettings_.isUsingMultiplePositions()) {
             if ((acqSettings_.isUsingHardwareTimePoints()
-                  || acqSettings_.getNumTimePoints() > 1)
+                  || acqSettings_.numTimePoints() > 1)
                   && (timepointIntervalMs < timepointDuration*1.2)) {
-                acqSettings_.setHardwareTimesPoints(false);
+                //acqSettings_.setHardwareTimesPoints(false);
+                asb_.useHardwareTimePoints(false);
                 // TODO: WARNING
             }
         }
@@ -236,7 +214,7 @@ public class AcquisitionEngine implements AcquisitionManager {
 
 
 
-        double sliceDuration = acqSettings_.getTimingSettings().sliceDuration();
+        double sliceDuration = acqSettings_.timingSettings().sliceDuration();
         if (exposureTime + cameraReadoutTime > sliceDuration) {
             // should only possible to mess this up using advanced timing settings
             // or if there are errors in our own calculations
@@ -279,7 +257,6 @@ public class AcquisitionEngine implements AcquisitionManager {
         return controller;
     }
 
-
     private void runAcquisitionDISPIM() {
 
         // create the datastore
@@ -304,8 +281,8 @@ public class AcquisitionEngine implements AcquisitionManager {
         // Create and NDViewer and NDTiffStorage wrapped in a package that implements
         // the org.micromanager.acqj.api.DataSink interface that the acquisition engine
         // requires
-        String saveDir = acqSettings_.getSaveDirectory();
-        String saveName = acqSettings_.getSaveNamePrefix();
+        String saveDir = acqSettings_.saveDirectory();
+        String saveName = acqSettings_.saveNamePrefix();
 
         boolean showViewer = false;
         NDTiffAndViewerAdapter ndTiffAndViewerAdapter = new NDTiffAndViewerAdapter(showViewer, saveDir, saveName
@@ -340,7 +317,7 @@ public class AcquisitionEngine implements AcquisitionManager {
                 // TODO: does the Tiger controller need to be cleared and/or checked for errors here?
 
                 if (event.isAcquisitionFinishedEvent()) {
-                    // Acqusitiion is finished, pass along event so things shut down properly
+                    // Acquisition is finished, pass along event so things shut down properly
                     return event;
                 }
 
@@ -510,7 +487,7 @@ public class AcquisitionEngine implements AcquisitionManager {
             } else {
                 // Loop 2: Multiple time points
                 for (int timeIndex = 0; timeIndex < (acqSettings_.isUsingTimePoints() ?
-                      acqSettings_.getNumTimePoints() : 1); timeIndex++) {
+                      acqSettings_.numTimePoints() : 1); timeIndex++) {
                     baseEvent.setTimeIndex(timeIndex);
                     // Loop 3: Channels; Loop 4: Z slices (non-interleaved)
                     // Loop 3: Channels; Loop 4: Z slices (interleaved)
@@ -518,7 +495,7 @@ public class AcquisitionEngine implements AcquisitionManager {
                         currentAcquisition_.submitEventIterator(
                               LSMAcquisitionEvents.createMultiChannelVolumeAcqEvents(
                                     baseEvent.copy(), acqSettings_, eventMonitor,
-                                    acqSettings_.getAcquisitionMode() ==
+                                    acqSettings_.acquisitionMode() ==
                                           AcquisitionModes.STAGE_SCAN_INTERLEAVED));
                     } else {
                         currentAcquisition_.submitEventIterator(
@@ -571,8 +548,8 @@ public class AcquisitionEngine implements AcquisitionManager {
         currentAcquisition_ = null;
     }
 
-    private void stopSPIMStateMachines(AcquisitionSettings acqSettings) {
-        final int numViews = acqSettings_.getVolumeSettings().numViews();
+    private void stopSPIMStateMachines(DefaultAcquisitionSettingsDISPIM acqSettings) {
+        final int numViews = acqSettings_.volumeSettings().numViews();
         if (numViews == 1) {
             ASIScanner scanner = (ASIScanner) model_.devices().getDevice("IllumBeam");
             scanner.setSPIMState(ASIScanner.SPIMState.IDLE);
@@ -584,17 +561,18 @@ public class AcquisitionEngine implements AcquisitionManager {
         // TODO: ASI stage scanning conditionals
     }
 
-    public void recalculateSliceTiming(AcquisitionSettings acqSettings) {
+    public void recalculateSliceTiming(DefaultAcquisitionSettingsDISPIM acqSettings) {
         // don't change timing settings if user is using advanced timing
         if (acqSettings.isUsingAdvancedTiming()) {
             return;
         }
-        acqSettings.setTimingSettings(getTimingFromPeriodAndLightExposure(acqSettings));
+        // TODO: update builder here
+        //acqSettings.timingSettings(getTimingFromPeriodAndLightExposure(acqSettings));
         // TODO: update gui (but not in the model)
     }
 
     // TODO: only using acqSettings for cameraExposure which maybe should not exist?
-    public DefaultTimingSettings getTimingFromPeriodAndLightExposure(AcquisitionSettings acqSettings) {
+    public DefaultTimingSettings getTimingFromPeriodAndLightExposure(DefaultAcquisitionSettingsDISPIM acqSettings) {
         // uses algorithm Jon worked out in Octave code; each slice period goes like this:
         // 1. camera readout time (none if in overlap mode, 0.25ms in pseudo-overlap)
         // 2. any extra delay time
@@ -628,7 +606,7 @@ public class AcquisitionEngine implements AcquisitionManager {
         // this will also be in 0.25ms increment
         final float globalExposureDelayMax = cameraReadoutMax + cameraResetMax;
 
-        float laserDuration = MyNumberUtils.roundToQuarterMs((float)acqSettings.getCameraExposure());
+        float laserDuration = 1.0f; // TODO: camera exposure? //MyNumberUtils.roundToQuarterMs((float)acqSettings.getCameraExposure());
         float scanDuration = laserDuration + 2*scanLaserBufferTime;
         // scan will be longer than laser by 0.25ms at both start and end
 
@@ -669,7 +647,7 @@ public class AcquisitionEngine implements AcquisitionManager {
         // TODO: skipped PVCAM case, update comment
         float cameraExposure = MyNumberUtils.ceilToQuarterMs(cameraResetTime) + laserDuration;
 
-        switch (acqSettings_.getCameraMode()) {
+        switch (acqSettings_.cameraMode()) {
             case EDGE:
                 cameraDuration = 1;  // doesn't really matter, 1ms should be plenty fast yet easy to see for debugging
                 cameraExposure += 0.1f; // add 0.1ms as safety margin, may require adding an additional 0.25ms to slice
@@ -709,8 +687,8 @@ public class AcquisitionEngine implements AcquisitionManager {
                 // 5. laser turns on 0.25ms before camera trigger and stays on until exposure is ending
                 // TODO revisit this after further experimentation
                 cameraDuration = 1;  // only need to trigger camera
-                final float shutterWidth = (float) acqSettings_.getSliceSettingsLS().shutterWidth();
-                final float shutterSpeed = (float) acqSettings_.getSliceSettingsLS().shutterSpeedFactor();
+                final float shutterWidth = (float) acqSettings_.sliceSettingsLS().shutterWidth();
+                final float shutterSpeed = (float) acqSettings_.sliceSettingsLS().shutterSpeedFactor();
                 ///final float shutterWidth = props_.getPropValueFloat(Devices.Keys.PLUGIN, Properties.Keys.PLUGIN_LS_SHUTTER_WIDTH);
                 //final int shutterSpeed = props_.getPropValueInteger(Devices.Keys.PLUGIN, Properties.Keys.PLUGIN_LS_SHUTTER_SPEED);
                 float pixelSize = (float) core_.getPixelSizeUm();
@@ -721,8 +699,8 @@ public class AcquisitionEngine implements AcquisitionManager {
                 cameraExposure = (float)(rowReadoutTime * (int)(shutterWidth/pixelSize) * shutterSpeed);
                 // s.cameraExposure = (float) (rowReadoutTime * shutterWidth / pixelSize * shutterSpeed);
                 final float totalExposureMax = MyNumberUtils.ceilToQuarterMs(cameraReadoutTime + cameraExposure + 0.05f);  // 50-300us extra cushion time
-                final float scanSettle = (float) acqSettings_.getSliceSettingsLS().scanSettleTime();
-                final float scanReset = (float) acqSettings_.getSliceSettingsLS().scanResetTime();
+                final float scanSettle = (float) acqSettings_.sliceSettingsLS().scanSettleTime();
+                final float scanReset = (float) acqSettings_.sliceSettingsLS().scanResetTime();
                 delayBeforeScan = scanReset - scanDelayFilter;
                 scanDuration = scanSettle + (totalExposureMax*shutterSpeed) + scanLaserBufferTime;
                 delayBeforeCamera = scanReset + scanSettle;
@@ -791,19 +769,19 @@ public class AcquisitionEngine implements AcquisitionManager {
      * @param acqSettings Settings for the acquisition
      * @return duration in ms
      */
-    public double computeActualVolumeDuration(final AcquisitionSettings acqSettings) {
-        final MultiChannelModes channelMode = acqSettings.getChannelMode();
-        final int numChannels = acqSettings.getNumChannels();
-        final int numViews = acqSettings.getVolumeSettings().numViews();
-        final double delayBeforeSide = acqSettings.getVolumeSettings().delayBeforeView();
-        int numCameraTriggers = acqSettings.getVolumeSettings().slicesPerView();
-        if (acqSettings.getCameraMode() == CameraModes.OVERLAP) {
+    public double computeActualVolumeDuration(final DefaultAcquisitionSettingsDISPIM acqSettings) {
+        final MultiChannelModes channelMode = acqSettings.channelMode();
+        final int numChannels = acqSettings.numChannels();
+        final int numViews = acqSettings.volumeSettings().numViews();
+        final double delayBeforeSide = acqSettings.volumeSettings().delayBeforeView();
+        int numCameraTriggers = acqSettings.volumeSettings().slicesPerView();
+        if (acqSettings.cameraMode() == CameraModes.OVERLAP) {
             numCameraTriggers += 1;
         }
         // stackDuration is per-side, per-channel, per-position
 
-        final double stackDuration = numCameraTriggers * acqSettings.getTimingSettings().sliceDuration();
-        if (acqSettings.isStageScanning()) { // || acqSettings.isStageStepping) {
+        final double stackDuration = numCameraTriggers * acqSettings.timingSettings().sliceDuration();
+        if (acqSettings.isUsingStageScanning()) { // || acqSettings.isStageStepping) {
             // TODO: stage scanning code
             return 0;
         } else {
@@ -838,7 +816,7 @@ public class AcquisitionEngine implements AcquisitionManager {
             // could estimate the actual time by analyzing the position's relative locations
             //   and using the motor speed and acceleration time
             return studio_.positions().getPositionList().getNumberOfPositions() *
-                    (volumeDuration + 1500 + acqSettings_.getPostMoveDelay());
+                    (volumeDuration + 1500 + acqSettings_.postMoveDelay());
         }
         return volumeDuration;
     }
@@ -847,24 +825,12 @@ public class AcquisitionEngine implements AcquisitionManager {
 
     }
 
-    public DefaultTimingSettings.Builder getTimingSettingsBuilder() {
-        return tsb_;
-    }
 
-    public DefaultVolumeSettings.Builder getVolumeSettingsBuilder() {
-        return vsb_;
-    }
-
-    public DefaultSliceSettingsLS.Builder getSliceSettingsBuilderLS() {
-        return ssbLS_;
-    }
-
-    public DefaultSliceSettings.Builder getSliceSettingsBuilder() {
-        return ssb_;
-    }
-
-
-    public AcquisitionSettings getAcquisitionSettings() {
+    public DefaultAcquisitionSettingsDISPIM getAcquisitionSettings() {
         return acqSettings_;
+    }
+
+    public DefaultAcquisitionSettingsDISPIM.Builder getAcquisitionSettingsBuilder() {
+        return asb_;
     }
 }
