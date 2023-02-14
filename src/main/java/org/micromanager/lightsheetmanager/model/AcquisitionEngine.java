@@ -41,12 +41,7 @@ public class AcquisitionEngine implements AcquisitionManager {
     private DataStorage data_;
 
     private ExecutorService acquistitonExecutor_ = Executors.newSingleThreadExecutor(
-          new ThreadFactory() {
-              @Override
-              public Thread newThread(Runnable r) {
-                  return new Thread(r, "Acquisition Thread");
-              }
-          });
+            r -> new Thread(r, "Acquisition Thread"));
     private LightSheetManagerModel model_;
     private volatile Acquisition currentAcquisition_ = null;
 
@@ -75,41 +70,38 @@ public class AcquisitionEngine implements AcquisitionManager {
     @Override
     public Future requestRun(boolean speedTest) {
         // Run on a new thread, so it doesn't block the EDT
-        Future acqFinished = acquistitonExecutor_.submit(new Runnable() {
-            @Override
-            public void run() {
-                if (currentAcquisition_ != null) {
-                    studio_.logs().showError("Acquisition is already running.");
-                    return;
+        Future acqFinished = acquistitonExecutor_.submit(() -> {
+            if (currentAcquisition_ != null) {
+                studio_.logs().showError("Acquisition is already running.");
+                return;
+            }
+
+            // make sure AcquisitionSettings are up-to-date
+            acqSettings_ = asb_.build();
+
+            if (speedTest) {
+                try {
+                    SpeedTest.runSpeedTest(acqSettings_.saveDirectory(), acqSettings_.saveNamePrefix(),
+                            core_, acqSettings_.numTimePoints(), true);
+                } catch (Exception e) {
+                    studio_.logs().showError(e);
                 }
-
-                // make sure AcquisitionSettings are up-to-date
-                acqSettings_ = asb_.build();
-
-                if (speedTest) {
-                    try {
-                        SpeedTest.runSpeedTest(acqSettings_.saveDirectory(), acqSettings_.saveNamePrefix(),
-                                core_, acqSettings_.numTimePoints(), true);
-                    } catch (Exception e) {
-                        studio_.logs().showError(e);
-                    }
-                } else {
-                    // Every one of these modality-specific functions should block until the
-                    // acquisition is complete
-                    GeometryType geometryType =
-                          model_.devices().getDeviceAdapter().getMicroscopeGeometry();
-                    switch (geometryType) {
-                        case DISPIM:
-                            runAcquisitionDISPIM();
-                            break;
-                        case SCAPE:
-                            runAcquisitionSCAPE();
-                            break;
-                        default:
-                            studio_.logs().showError(
-                                  "Acquisition Engine is not implemented for " + geometryType);
-                            break;
-                    }
+            } else {
+                // Every one of these modality-specific functions should block until the
+                // acquisition is complete
+                GeometryType geometryType =
+                      model_.devices().getDeviceAdapter().getMicroscopeGeometry();
+                switch (geometryType) {
+                    case DISPIM:
+                        runAcquisitionDISPIM();
+                        break;
+                    case SCAPE:
+                        runAcquisitionSCAPE();
+                        break;
+                    default:
+                        studio_.logs().showError(
+                              "Acquisition Engine is not implemented for " + geometryType);
+                        break;
                 }
             }
         });
@@ -409,19 +401,16 @@ public class AcquisitionEngine implements AcquisitionManager {
 
         ///////////// Event monitor /////////////////////////
         //    The event monitor will be run on the thread that gets successive acquisition
-        //    events from the lazy sequences produced by Iterator<AcquisitonEvent> objects created
-        //    below. This can be used to keeps tabs on the acquisition process. The monitor
-        //    will not fire until the AcquisitonEvent is supplied by the Iterator in preparation
+        //    events from the lazy sequences produced by Iterator<AcquisitionEvent> objects created
+        //    below. This can be used to keep tabs on the acquisition process. The monitor
+        //    will not fire until the AcquisitionEvent is supplied by the Iterator in preparation
         //    for the hardware being set up to execute it.
-        Function<AcquisitionEvent, AcquisitionEvent> eventMonitor = new Function<AcquisitionEvent, AcquisitionEvent>() {
-            @Override
-            public AcquisitionEvent apply(AcquisitionEvent acquisitionEvent) {
-                // TODO: this will execute as each acquisition event is generated. Add code here
-                //  can be used, for example, to provide status updates to the GUI about what is
-                //  happening, by reading the contect of each acquisiton event
+        Function<AcquisitionEvent, AcquisitionEvent> eventMonitor = acquisitionEvent -> {
+            // TODO: this will execute as each acquisition event is generated. Add code here
+            //  can be used, for example, to provide status updates to the GUI about what is
+            //  happening, by reading the contect of each acquisiton event
 
-                return acquisitionEvent;
-            }
+            return acquisitionEvent;
         };
 
 
