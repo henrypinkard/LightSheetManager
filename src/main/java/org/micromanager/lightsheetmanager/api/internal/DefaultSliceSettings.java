@@ -69,7 +69,7 @@ public class DefaultSliceSettings implements SliceSettings {
     }
 
     @Override
-    public SliceSettings.Builder copyBuilder() {
+    public DefaultSliceSettings.Builder copyBuilder() {
         return new Builder(
                 slicePeriod_,
                 sampleExposure_,

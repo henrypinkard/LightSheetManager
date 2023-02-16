@@ -7,10 +7,10 @@ public class DefaultSliceSettingsLS implements SliceSettingsLS {
 
     public static class Builder implements SliceSettingsLS.Builder {
 
-        double scanResetTime_ = 3.0;
-        double scanSettleTime_ = 1.0;
-        double shutterWidth_ = 5.0;
-        double shutterSpeedFactor_ = 1.0;
+        private double scanResetTime_ = 3.0;
+        private double scanSettleTime_ = 1.0;
+        private double shutterWidth_ = 5.0;
+        private double shutterSpeedFactor_ = 1.0;
 
         public Builder() {
         }
@@ -33,25 +33,25 @@ public class DefaultSliceSettingsLS implements SliceSettingsLS {
         }
 
         @Override
-        public SliceSettingsLS.Builder shutterWidth(double um) {
+        public SliceSettingsLS.Builder shutterWidth(final double um) {
             shutterWidth_ = um;
             return this;
         }
 
         @Override
-        public SliceSettingsLS.Builder shutterSpeedFactor(double factor) {
+        public SliceSettingsLS.Builder shutterSpeedFactor(final double factor) {
             shutterSpeedFactor_ = factor;
             return this;
         }
 
         @Override
-        public SliceSettingsLS.Builder scanSettleTime(double ms) {
+        public SliceSettingsLS.Builder scanSettleTime(final double ms) {
             scanSettleTime_ = ms;
             return this;
         }
 
         @Override
-        public SliceSettingsLS.Builder scanResetTime(double ms) {
+        public SliceSettingsLS.Builder scanResetTime(final double ms) {
             scanResetTime_ = ms;
             return this;
         }
@@ -67,10 +67,10 @@ public class DefaultSliceSettingsLS implements SliceSettingsLS {
         }
     }
 
-    final double scanResetTime_;
-    final double scanSettleTime_;
-    final double shutterWidth_;
-    final double shutterSpeedFactor_;
+    private final double scanResetTime_;
+    private final double scanSettleTime_;
+    private final double shutterWidth_;
+    private final double shutterSpeedFactor_;
 
     private DefaultSliceSettingsLS(
             final double scanResetTime,
@@ -84,7 +84,7 @@ public class DefaultSliceSettingsLS implements SliceSettingsLS {
     }
 
     @Override
-    public SliceSettingsLS.Builder copyBuilder() {
+    public DefaultSliceSettingsLS.Builder copyBuilder() {
         return new Builder(
                 scanResetTime_,
                 scanSettleTime_,

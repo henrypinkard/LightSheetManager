@@ -10,7 +10,7 @@ import org.micromanager.PositionList;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.micromanager.lightsheetmanager.model.AcquisitionSettings;
+import org.micromanager.lightsheetmanager.api.AcquisitionSettings;
 
 /**
  * The class contains the data needed to run multiple acquisitions.<P>

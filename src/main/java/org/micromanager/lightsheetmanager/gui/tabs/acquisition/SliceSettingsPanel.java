@@ -4,13 +4,11 @@ import org.micromanager.lightsheetmanager.api.SliceSettings;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettings;
 import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettingsLS;
-import org.micromanager.lightsheetmanager.api.internal.DefaultVolumeSettings;
 import org.micromanager.lightsheetmanager.gui.frames.AdvancedTimingFrame;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;
 import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.components.Spinner;
-import org.micromanager.lightsheetmanager.model.AcquisitionSettings;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
 import java.util.Objects;
@@ -36,9 +34,6 @@ public class SliceSettingsPanel extends Panel {
     private Spinner spnShutterWidth_;
     private Spinner spnShutterSpeed_;
 
-    private DefaultSliceSettingsLS.Builder ssbLS_;
-    private DefaultSliceSettings.Builder ssb_;
-
     private AdvancedTimingFrame advTimingFrame_;
 
     private LightSheetManagerModel model_;
@@ -47,8 +42,6 @@ public class SliceSettingsPanel extends Panel {
         super("Slice Settings");
         model_ = Objects.requireNonNull(model);
         advTimingFrame_ = Objects.requireNonNull(advTimingFrame);
-        ssbLS_ = model_.acquisitions().getSliceSettingsBuilderLS();
-        ssb_ = model_.acquisitions().getSliceSettingsBuilder();
         createUserInterface();
         createEventHandlers();
     }
@@ -56,10 +49,10 @@ public class SliceSettingsPanel extends Panel {
     private void createUserInterface() {
 
         final DefaultSliceSettingsLS sliceSettingsLS = model_.acquisitions()
-                .getAcquisitionSettings().getSliceSettingsLS();
+                .getAcquisitionSettings().sliceSettingsLS();
 
         final DefaultSliceSettings sliceSettings = model_.acquisitions()
-                .getAcquisitionSettings().getSliceSettings();
+                .getAcquisitionSettings().sliceSettings();
 
         final boolean isSlicePeriodMinimized = sliceSettings.isSlicePeriodMinimized();
 
@@ -94,14 +87,15 @@ public class SliceSettingsPanel extends Panel {
         }
 
         // create the ui based on the camera trigger mode
-        switchUI(model_.acquisitions().getAcquisitionSettings().getCameraMode());
+        switchUI(model_.acquisitions().getAcquisitionSettings().cameraMode());
     }
 
     /**
      * Setup event handlers for the regular and virtual slit camera trigger mode versions of the ui.
      */
     private void createEventHandlers() {
-        final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
+        final DefaultSliceSettings.Builder ssb_ = model_.acquisitions().getAcquisitionSettingsBuilder().sliceSettingsBuilder();
+        final DefaultSliceSettingsLS.Builder ssbLS_ = model_.acquisitions().getAcquisitionSettingsBuilder().sliceSettingsLSBuilder();
 
         // regular panel
         chkMinimizeSlicePeriod_.registerListener(e -> {
@@ -109,45 +103,38 @@ public class SliceSettingsPanel extends Panel {
             lblSlicePeriod_.setEnabled(selected);
             spnSlicePeriod_.setEnabled(selected);
             ssb_.minimizeSlicePeriod(!selected);
-            acqSettings.setSliceSettings(ssb_.build());
-            System.out.println("isSlicePeriodMinimized: " + acqSettings.getSliceSettings().isSlicePeriodMinimized());
+            //System.out.println("isSlicePeriodMinimized: " + acqSettings.getSliceSettings().isSlicePeriodMinimized());
         });
 
         spnSlicePeriod_.registerListener(e -> {
             ssb_.slicePeriod(spnSlicePeriod_.getDouble());
-            acqSettings.setSliceSettings(ssb_.build());
-            System.out.println("slicePeriod: " + acqSettings.getSliceSettings().slicePeriod());
+            //System.out.println("slicePeriod: " + acqSettings.getSliceSettings().slicePeriod());
         });
 
         spnSampleExposure_.registerListener(e -> {
             ssb_.sampleExposure(spnSampleExposure_.getDouble());
-            acqSettings.setSliceSettings(ssb_.build());
-            System.out.println("sampleExposure: " + acqSettings.getSliceSettings().sampleExposure());
+            //System.out.println("sampleExposure: " + acqSettings.getSliceSettings().sampleExposure());
         });
 
         // virtual slit panel
         spnScanResetTime_.registerListener(e -> {
             ssbLS_.scanResetTime(spnScanResetTime_.getDouble());
-            acqSettings.setSliceSettingsLS(ssbLS_.build());
-            System.out.println("scanResetTime: " + acqSettings.getSliceSettingsLS().scanResetTime());
+            //System.out.println("scanResetTime: " + acqSettings.getSliceSettingsLS().scanResetTime());
         });
 
         spnScanSettleTime_.registerListener(e -> {
             ssbLS_.scanSettleTime(spnScanSettleTime_.getDouble());
-            acqSettings.setSliceSettingsLS(ssbLS_.build());
-            System.out.println("scanSettleTime: " + acqSettings.getSliceSettingsLS().scanSettleTime());
+            //System.out.println("scanSettleTime: " + acqSettings.getSliceSettingsLS().scanSettleTime());
         });
 
         spnShutterWidth_.registerListener(e -> {
             ssbLS_.shutterWidth(spnShutterWidth_.getDouble());
-            acqSettings.setSliceSettingsLS(ssbLS_.build());
-            System.out.println("shutterWidth: " + acqSettings.getSliceSettingsLS().shutterWidth());
+            //System.out.println("shutterWidth: " + acqSettings.getSliceSettingsLS().shutterWidth());
         });
 
         spnShutterSpeed_.registerListener(e -> {
             ssbLS_.shutterSpeedFactor(spnShutterSpeed_.getDouble());
-            acqSettings.setSliceSettingsLS(ssbLS_.build());
-            System.out.println("shutterSpeedFactor: " + acqSettings.getSliceSettingsLS().shutterSpeedFactor());
+            //System.out.println("shutterSpeedFactor: " + acqSettings.getSliceSettingsLS().shutterSpeedFactor());
         });
 
         // disable ui elements
@@ -156,7 +143,7 @@ public class SliceSettingsPanel extends Panel {
             final boolean selected = !chkUseAdvancedTiming_.isSelected();
             chkMinimizeSlicePeriod_.setEnabled(selected);
 
-            if (acqSettings.getSliceSettings().isSlicePeriodMinimized()) {
+            if (model_.acquisitions().getAcquisitionSettings().sliceSettings().isSlicePeriodMinimized()) {
                 lblSlicePeriod_.setEnabled(false);
                 spnSlicePeriod_.setEnabled(false);
             } else {
@@ -179,8 +166,8 @@ public class SliceSettingsPanel extends Panel {
                 advTimingFrame_.setVisible(true);
                 advTimingFrame_.toFront();
             }
-            model_.acquisitions().getAcquisitionSettings().setUseAdvancedTiming(!selected);
-            System.out.println("useAdvancedTiming: " + model_.acquisitions().getAcquisitionSettings().isUsingAdvancedTiming());
+            model_.acquisitions().getAcquisitionSettingsBuilder().useAdvancedTiming(!selected);
+            //System.out.println("useAdvancedTiming: " + model_.acquisitions().getAcquisitionSettings().isUsingAdvancedTiming());
         });
     }
 

@@ -1,14 +1,12 @@
 package org.micromanager.lightsheetmanager.gui.tabs;
 
-import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Future;
 import javax.swing.SwingUtilities;
 import org.micromanager.Studio;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
-import org.micromanager.lightsheetmanager.gui.components.Method;
+import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.gui.data.Icons;
-import org.micromanager.lightsheetmanager.model.AcquisitionSettings;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 import org.micromanager.lightsheetmanager.gui.tabs.channels.ChannelTablePanel;
 import org.micromanager.lightsheetmanager.gui.tabs.acquisition.SliceSettingsPanel;
@@ -97,7 +95,7 @@ public class AcquisitionTab extends Panel {
 
     private void createUserInterface() {
         //JLabel lblTitle = new JLabel("Acquisitions");
-        final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
+        final DefaultAcquisitionSettingsDISPIM acqSettings = model_.acquisitions().getAcquisitionSettings();
 
         Panel.setMigLayoutDefault(
                 "",
@@ -111,6 +109,8 @@ public class AcquisitionTab extends Panel {
         volumeSettingsPanel_ = new VolumeSettingsPanel(model_);
         sliceSettingsPanel_ = new SliceSettingsPanel(model_, advTimingFrame_);
 
+        System.out.println("isUsingTimePoints: " + acqSettings.isUsingTimePoints());
+        System.out.println("isUsingChannels: " + acqSettings.isUsingChannels());
         // check boxes for panels
         chkUseMultiplePositions_ = new CheckBox("Multiple positions (XY)", acqSettings.isUsingMultiplePositions());
         chkUseTimePoints_ = new CheckBox("Time Points", acqSettings.isUsingTimePoints());
@@ -135,15 +135,15 @@ public class AcquisitionTab extends Panel {
         // time points
         lblNumTimePoints_ = new Label("Number:");
         lblTimePointInterval_ = new Label("Interval [s]:");
-        spnNumTimePoints_ = Spinner.createIntegerSpinner(acqSettings.getNumTimePoints(), 1, Integer.MAX_VALUE,1);
-        spnTimePointInterval_ = Spinner.createIntegerSpinner(acqSettings.getTimePointInterval(), 1, Integer.MAX_VALUE, 1);
+        spnNumTimePoints_ = Spinner.createIntegerSpinner(acqSettings.numTimePoints(), 1, Integer.MAX_VALUE,1);
+        spnTimePointInterval_ = Spinner.createIntegerSpinner(acqSettings.timePointInterval(), 1, Integer.MAX_VALUE, 1);
 
         // disable elements based on acqSettings
         setTimePointSpinnersEnabled(acqSettings.isUsingTimePoints());
 
         // multiple positions
         lblPostMoveDelay_ = new Label("Post-move delay [ms]:");
-        spnPostMoveDelay_ = Spinner.createIntegerSpinner(acqSettings.getPostMoveDelay(), 0, Integer.MAX_VALUE, 100);
+        spnPostMoveDelay_ = Spinner.createIntegerSpinner(acqSettings.postMoveDelay(), 0, Integer.MAX_VALUE, 100);
         btnEditPositionList_ = new Button("Edit Position List", 120, 20);
         btnOpenXYZGrid_ = new Button("XYZ Grid", 80, 20);
 
@@ -176,7 +176,7 @@ public class AcquisitionTab extends Panel {
         }
 
         cmbAcquisitionModes_ = new ComboBox(AcquisitionModes.toArray(),
-                model_.acquisitions().getAcquisitionSettings().getAcquisitionMode().toString());
+                model_.acquisitions().getAcquisitionSettings().acquisitionMode().toString());
 
         // durations
         panelDurations_.add(lblSliceTime_, "");
@@ -244,7 +244,7 @@ public class AcquisitionTab extends Panel {
         }
     }
 
-    private void runAcquisiton(boolean speedTest) {
+    private void runAcquisition(boolean speedTest) {
         btnPauseAcquisition_.setEnabled(true);
         btnSpeedTest_.setEnabled(false);
         Future acqFinished = model_.acquisitions().requestRun(speedTest);
@@ -264,10 +264,12 @@ public class AcquisitionTab extends Panel {
     }
 
     private void createEventHandlers() {
+        final DefaultAcquisitionSettingsDISPIM.Builder asb_ = model_.acquisitions().getAcquisitionSettingsBuilder();
+
         // start/stop acquisitions
         btnRunAcquisition_.registerListener(e -> {
             if (btnRunAcquisition_.isSelected()) {
-                runAcquisiton(false);
+                runAcquisition(false);
                 System.out.println("request run");
             } else {
                 model_.acquisitions().requestStop();
@@ -288,7 +290,7 @@ public class AcquisitionTab extends Panel {
         btnOpenPlaylist_.registerListener(e -> acqTableFrame_.setVisible(true));
 
         btnSpeedTest_.registerListener(e -> {
-            runAcquisiton(true);
+            runAcquisition(true);
         });
 
         btnOpenXYZGrid_.registerListener(e -> xyzGridFrame_.setVisible(true));
@@ -296,47 +298,47 @@ public class AcquisitionTab extends Panel {
 
         chkUseMultiplePositions_.registerListener(e -> {
             final boolean isSelected = chkUseMultiplePositions_.isSelected();
-            model_.acquisitions().getAcquisitionSettings().setUsingMultiplePositions(isSelected);
+            asb_.useMultiplePositions(isSelected);
             setMultiPositionsEnabled(isSelected);
         });
 
         spnPostMoveDelay_.registerListener(e -> {
-            model_.acquisitions().getAcquisitionSettings().setPostMoveDelay(spnPostMoveDelay_.getInt());
-            System.out.println("getPostMoveDelay: " + model_.acquisitions().getAcquisitionSettings().getPostMoveDelay());
+            asb_.postMoveDelay(spnPostMoveDelay_.getInt());
+            //System.out.println("getPostMoveDelay: " + model_.acquisitions().getAcquisitionSettings().getPostMoveDelay());
         });
 
         // time points
 
         chkUseTimePoints_.registerListener(e -> {
             final boolean selected = chkUseTimePoints_.isSelected();
-            model_.acquisitions().getAcquisitionSettings().setUsingTimePoints(selected);
+            asb_.useTimePoints(selected);
             setTimePointSpinnersEnabled(selected);
             updateDurationLabels();
         });
 
         spnNumTimePoints_.registerListener(e -> {
-            model_.acquisitions().getAcquisitionSettings().setNumTimePoints(spnNumTimePoints_.getInt());
+            asb_.numTimePoints(spnNumTimePoints_.getInt());
             updateDurationLabels();
-            System.out.println("getNumTimePoints: " + model_.acquisitions().getAcquisitionSettings().getNumTimePoints());
+            //System.out.println("getNumTimePoints: " + model_.acquisitions().getAcquisitionSettings().getNumTimePoints());
         });
 
         spnTimePointInterval_.registerListener(e -> {
-            model_.acquisitions().getAcquisitionSettings().setTimePointInterval(spnTimePointInterval_.getInt());
+            asb_.timePointInterval(spnTimePointInterval_.getInt());
             updateDurationLabels();
-            System.out.println("getTimePointInterval: " + model_.acquisitions().getAcquisitionSettings().getTimePointInterval());
+            //System.out.println("getTimePointInterval: " + model_.acquisitions().getAcquisitionSettings().getTimePointInterval());
         });
 
         // use channels
         chkUseChannels_.registerListener(e -> {
             final boolean state = chkUseChannels_.isSelected();
-            model_.acquisitions().getAcquisitionSettings().setUsingChannels(state);
+            asb_.useChannels(state);
             channelTablePanel_.setItemsEnabled(state);
         });
 
         cmbAcquisitionModes_.registerListener(e -> {
             final int index = cmbAcquisitionModes_.getSelectedIndex();
-            model_.acquisitions().getAcquisitionSettings().setAcquisitionMode(AcquisitionModes.getByIndex(index));
-            System.out.println("getAcquisitionMode: " + model_.acquisitions().getAcquisitionSettings().getAcquisitionMode());
+            asb_.acquisitionMode(AcquisitionModes.getByIndex(index));
+            //System.out.println("getAcquisitionMode: " + model_.acquisitions().getAcquisitionSettings().getAcquisitionMode());
         });
     }
 
@@ -364,9 +366,9 @@ public class AcquisitionTab extends Panel {
     }
 
     private void updateSlicePeriodLabel() {
-        final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
+        final DefaultAcquisitionSettingsDISPIM acqSettings = model_.acquisitions().getAcquisitionSettings();
         model_.getAcquisitionEngine().recalculateSliceTiming(acqSettings);
-        lblSliceTimeValue_.setText(Double.toString(acqSettings.getTimingSettings().sliceDuration()));
+        lblSliceTimeValue_.setText(Double.toString(acqSettings.timingSettings().sliceDuration()));
         //System.out.println("updating slice label to: " + acqSettings.getTimingSettings().sliceDuration());
     }
 
@@ -403,8 +405,8 @@ public class AcquisitionTab extends Panel {
     }
 
     private double computeTotalTimeDuration() {
-        final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
-        final double duration = (acqSettings.getNumTimePoints() - 1) * acqSettings.getTimePointInterval()
+        final DefaultAcquisitionSettingsDISPIM acqSettings = model_.acquisitions().getAcquisitionSettings();
+        final double duration = (acqSettings.numTimePoints() - 1) * acqSettings.timePointInterval()
                 + computeTimePointDuration()/1000;
         return duration;
     }
@@ -415,7 +417,7 @@ public class AcquisitionTab extends Panel {
      * @return duration in ms
      */
     private double computeTimePointDuration() {
-        final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
+        final DefaultAcquisitionSettingsDISPIM acqSettings = model_.acquisitions().getAcquisitionSettings();
         final double volumeDuration = computeVolumeDuration(acqSettings);
         if (acqSettings.isUsingMultiplePositions()) {
             try {
@@ -434,24 +436,24 @@ public class AcquisitionTab extends Panel {
         return volumeDuration;
     }
 
-    public double computeVolumeDuration(final AcquisitionSettings acqSettings) {
-        final MultiChannelModes channelMode = acqSettings.getChannelMode();
-        final int numChannels = acqSettings.getNumChannels();
-        final int numViews = acqSettings.getVolumeSettings().numViews();
-        final double delayBeforeView = acqSettings.getVolumeSettings().delayBeforeView();
-        int numCameraTriggers = acqSettings.getVolumeSettings().slicesPerView();
-        if (acqSettings.getCameraMode() == CameraModes.OVERLAP) {
+    public double computeVolumeDuration(final DefaultAcquisitionSettingsDISPIM acqSettings) {
+        final MultiChannelModes channelMode = acqSettings.channelMode();
+        final int numChannels = acqSettings.numChannels();
+        final int numViews = acqSettings.volumeSettings().numViews();
+        final double delayBeforeView = acqSettings.volumeSettings().delayBeforeView();
+        int numCameraTriggers = acqSettings.volumeSettings().slicesPerView();
+        if (acqSettings.cameraMode() == CameraModes.OVERLAP) {
             numCameraTriggers += 1;
         }
 
         //System.out.println(acqSettings.getTimingSettings().sliceDuration());
 
         // stackDuration is per-side, per-channel, per-position
-        final double stackDuration = numCameraTriggers * acqSettings.getTimingSettings().sliceDuration();
+        final double stackDuration = numCameraTriggers * acqSettings.timingSettings().sliceDuration();
         //System.out.println("stackDuration: " + stackDuration);
         //System.out.println("numViews: " + numViews);
         //System.out.println("numCameraTriggers: " + numCameraTriggers);
-        if (acqSettings.isStageScanning()) {
+        if (acqSettings.isUsingStageScanning()) {
 
         } else {
             double channelSwitchDelay = 0;

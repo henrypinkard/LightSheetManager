@@ -5,30 +5,31 @@ import org.micromanager.lightsheetmanager.api.TimingSettings;
 public class DefaultTimingSettings implements TimingSettings {
 
     public static class Builder implements TimingSettings.Builder {
-        int scansPerSlice_ = 1;
-        double delayBeforeScan_ = 0.0;
-        double scanDuration_ = 10.0;
-        double delayBeforeLaser_ = 1.0;
-        double laserTriggerDuration_ = 1.0;
-        double delayBeforeCamera_ = 0.0;
-        double cameraTriggerDuration_ = 1.0;
-        double cameraExposure_ = 1.0;
-        double sliceDuration_ = 0.0;
-        boolean alternateScanDirection_ = false;
+        private int scansPerSlice_ = 1;
+        private double delayBeforeScan_ = 0.0;
+        private double scanDuration_ = 10.0;
+        private double delayBeforeLaser_ = 1.0;
+        private double laserTriggerDuration_ = 1.0;
+        private double delayBeforeCamera_ = 0.0;
+        private double cameraTriggerDuration_ = 1.0;
+        private double cameraExposure_ = 1.0;
+        private double sliceDuration_ = 0.0;
+        private boolean alternateScanDirection_ = false;
 
         public Builder() {
         }
 
-        private Builder(final int scansPerSlice,
-                        final double delayBeforeScan,
-                        final double scanDuration,
-                        final double delayBeforeLaser,
-                        final double laserTriggerDuration,
-                        final double delayBeforeCamera,
-                        final double cameraDuration,
-                        final double cameraExposure,
-                        final double sliceDuration,
-                        final boolean alternateScanDirection) {
+        private Builder(
+                final int scansPerSlice,
+                final double delayBeforeScan,
+                final double scanDuration,
+                final double delayBeforeLaser,
+                final double laserTriggerDuration,
+                final double delayBeforeCamera,
+                final double cameraDuration,
+                final double cameraExposure,
+                final double sliceDuration,
+                final boolean alternateScanDirection) {
             scansPerSlice_ = scansPerSlice;
             delayBeforeScan_ = delayBeforeScan;
             scanDuration_ = scanDuration;
@@ -47,7 +48,7 @@ public class DefaultTimingSettings implements TimingSettings {
          * @param delayMs the delay time in milliseconds
          */
         @Override
-        public TimingSettings.Builder delayBeforeScan(double delayMs) {
+        public TimingSettings.Builder delayBeforeScan(final double delayMs) {
             delayBeforeScan_ = delayMs;
             return this;
         }
@@ -58,7 +59,7 @@ public class DefaultTimingSettings implements TimingSettings {
          * @param numScans the number of scans
          */
         @Override
-        public TimingSettings.Builder scansPerSlice(int numScans) {
+        public TimingSettings.Builder scansPerSlice(final int numScans) {
             scansPerSlice_ = numScans;
             return this;
         }
@@ -69,7 +70,7 @@ public class DefaultTimingSettings implements TimingSettings {
          * @param durationMs the duration in milliseconds
          */
         @Override
-        public TimingSettings.Builder scanDuration(double durationMs) {
+        public TimingSettings.Builder scanDuration(final double durationMs) {
             scanDuration_ = durationMs;
             return this;
         }
@@ -80,7 +81,7 @@ public class DefaultTimingSettings implements TimingSettings {
          * @param delayMs the delay in milliseconds
          */
         @Override
-        public TimingSettings.Builder delayBeforeLaser(double delayMs) {
+        public TimingSettings.Builder delayBeforeLaser(final double delayMs) {
             delayBeforeLaser_ = delayMs;
             return this;
         }
@@ -91,7 +92,7 @@ public class DefaultTimingSettings implements TimingSettings {
          * @param durationMs the duration in milliseconds
          */
         @Override
-        public TimingSettings.Builder laserTriggerDuration(double durationMs) {
+        public TimingSettings.Builder laserTriggerDuration(final double durationMs) {
             laserTriggerDuration_ = durationMs;
             return this;
         }
@@ -102,7 +103,7 @@ public class DefaultTimingSettings implements TimingSettings {
          * @param delayMs the delay in milliseconds
          */
         @Override
-        public TimingSettings.Builder delayBeforeCamera(double delayMs) {
+        public TimingSettings.Builder delayBeforeCamera(final double delayMs) {
             delayBeforeCamera_ = delayMs;
             return this;
         }
@@ -113,7 +114,7 @@ public class DefaultTimingSettings implements TimingSettings {
          * @param durationMs the duration in milliseconds
          */
         @Override
-        public TimingSettings.Builder cameraTriggerDuration(double durationMs) {
+        public TimingSettings.Builder cameraTriggerDuration(final double durationMs) {
             cameraTriggerDuration_ = durationMs;
             return this;
         }
@@ -124,7 +125,7 @@ public class DefaultTimingSettings implements TimingSettings {
          * @param exposureMs the exposure time in milliseconds
          */
         @Override
-        public TimingSettings.Builder cameraExposure(double exposureMs) {
+        public TimingSettings.Builder cameraExposure(final double exposureMs) {
             cameraExposure_ = exposureMs;
             return this;
         }
@@ -135,7 +136,7 @@ public class DefaultTimingSettings implements TimingSettings {
          * @param durationMs the duration in milliseconds
          */
         @Override
-        public TimingSettings.Builder sliceDuration(double durationMs) {
+        public TimingSettings.Builder sliceDuration(final double durationMs) {
             sliceDuration_ = durationMs;
             return this;
         }
@@ -146,7 +147,7 @@ public class DefaultTimingSettings implements TimingSettings {
          * @param state true to invert the scan direction
          */
         @Override
-        public TimingSettings.Builder useAlternateScanDirection(boolean state) {
+        public TimingSettings.Builder useAlternateScanDirection(final boolean state) {
             alternateScanDirection_ = state;
             return this;
         }
@@ -173,16 +174,16 @@ public class DefaultTimingSettings implements TimingSettings {
         }
     }
 
-    final int scansPerSlice_;
-    final double delayBeforeScan_;
-    final double scanDuration_;
-    final double delayBeforeLaser_;
-    final double laserTriggerDuration_;
-    final double delayBeforeCamera_;
-    final double cameraTriggerDuration_;
-    final double cameraExposure_;
-    final double sliceDuration_;
-    final boolean alternateScanDirection_;
+    private final int scansPerSlice_;
+    private final double delayBeforeScan_;
+    private final double scanDuration_;
+    private final double delayBeforeLaser_;
+    private final double laserTriggerDuration_;
+    private final double delayBeforeCamera_;
+    private final double cameraTriggerDuration_;
+    private final double cameraExposure_;
+    private final double sliceDuration_;
+    private final boolean alternateScanDirection_;
 
     private DefaultTimingSettings(
                 final int scansPerSlice,
@@ -213,7 +214,7 @@ public class DefaultTimingSettings implements TimingSettings {
      * @return TimingSettings.Builder pre-populated with settings of this instance.
      */
     @Override
-    public TimingSettings.Builder copyBuilder() {
+    public DefaultTimingSettings.Builder copyBuilder() {
         return new Builder(
                 scansPerSlice_,
                 delayBeforeScan_,

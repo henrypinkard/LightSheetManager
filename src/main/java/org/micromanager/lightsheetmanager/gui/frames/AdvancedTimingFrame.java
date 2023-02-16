@@ -3,7 +3,6 @@ package org.micromanager.lightsheetmanager.gui.frames;
 import net.miginfocom.swing.MigLayout;
 import org.micromanager.lightsheetmanager.api.internal.DefaultTimingSettings;
 import org.micromanager.lightsheetmanager.gui.data.Icons;
-import org.micromanager.lightsheetmanager.model.AcquisitionSettings;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;
 import org.micromanager.lightsheetmanager.gui.components.Label;
@@ -36,13 +35,11 @@ public class AdvancedTimingFrame extends JFrame {
 
     private CheckBox chkAlternateScanDirection_;
 
-    private DefaultTimingSettings.Builder tsb_;
     private LightSheetManagerModel model_;
 
     public AdvancedTimingFrame(final LightSheetManagerModel model) {
         model_ = Objects.requireNonNull(model);
         WindowPositioning.setUpBoundsMemory(this, this.getClass(), this.getClass().getSimpleName());
-        tsb_ = model_.acquisitions().getTimingSettingsBuilder();
         createUserInterface();
         createEventHandlers();
     }
@@ -66,7 +63,7 @@ public class AdvancedTimingFrame extends JFrame {
         lblScansPerSlice_ = new Label("Scans Per Slice: ");
         lblCameraExposure_ = new Label("Camera Exposure [ms]: ");
 
-        final DefaultTimingSettings timingSettings = model_.acquisitions().getAcquisitionSettings().getTimingSettings();
+        final DefaultTimingSettings timingSettings = model_.acquisitions().getAcquisitionSettings().timingSettings();
 
         spnDelayBeforeScan_ = Spinner.createDoubleSpinner(timingSettings.delayBeforeScan(), 0.0, 10000.0, 0.25);
         spnDelayBeforeLaser_ = Spinner.createDoubleSpinner(timingSettings.delayBeforeLaser(), 1.0, 10000.0, 0.25);
@@ -102,60 +99,60 @@ public class AdvancedTimingFrame extends JFrame {
     }
 
     private void createEventHandlers() {
-        final AcquisitionSettings acqSettings = model_.acquisitions().getAcquisitionSettings();
+        final DefaultTimingSettings.Builder tsb_ = model_.acquisitions().getAcquisitionSettingsBuilder().timingSettingsBuilder();
 
         spnDelayBeforeScan_.registerListener(e -> {
             tsb_.delayBeforeScan(spnDelayBeforeScan_.getDouble());
-            acqSettings.setTimingSettings(tsb_.build());
-            System.out.println("delayBeforeScan: " + acqSettings.getTimingSettings().delayBeforeScan());
+            //acqSettings.setTimingSettings(tsb_.build());
+            //System.out.println("delayBeforeScan: " + acqSettings.getTimingSettings().delayBeforeScan());
         });
 
         spnScansPerSlice_.registerListener(e -> {
             tsb_.scansPerSlice(spnScansPerSlice_.getInt());
-            acqSettings.setTimingSettings(tsb_.build());
-            System.out.println("scansPerSlice: " + acqSettings.getTimingSettings().scansPerSlice());
+            //acqSettings.setTimingSettings(tsb_.build());
+            //System.out.println("scansPerSlice: " + acqSettings.getTimingSettings().scansPerSlice());
         });
 
         spnScanDuration_.registerListener(e -> {
             tsb_.scanDuration(spnScanDuration_.getDouble());
-            acqSettings.setTimingSettings(tsb_.build());
-            System.out.println("scanDuration: " + acqSettings.getTimingSettings().scanDuration());
+            //.setTimingSettings(tsb_.build());
+            //System.out.println("scanDuration: " + acqSettings.getTimingSettings().scanDuration());
         });
 
         spnDelayBeforeLaser_.registerListener(e -> {
             tsb_.delayBeforeLaser(spnDelayBeforeLaser_.getDouble());
-            acqSettings.setTimingSettings(tsb_.build());
-            System.out.println("delayBeforeLaser: " + acqSettings.getTimingSettings().delayBeforeLaser());
+            //acqSettings.setTimingSettings(tsb_.build());
+            //System.out.println("delayBeforeLaser: " + acqSettings.getTimingSettings().delayBeforeLaser());
         });
 
         spnLaserTriggerDuration_.registerListener(e -> {
             tsb_.laserTriggerDuration(spnLaserTriggerDuration_.getDouble());
-            acqSettings.setTimingSettings(tsb_.build());
-            System.out.println("laserTriggerDuration: " + acqSettings.getTimingSettings().laserTriggerDuration());
+            //acqSettings.setTimingSettings(tsb_.build());
+            //System.out.println("laserTriggerDuration: " + acqSettings.getTimingSettings().laserTriggerDuration());
         });
 
         spnDelayBeforeCamera_.registerListener(e -> {
             tsb_.delayBeforeCamera(spnDelayBeforeCamera_.getDouble());
-            acqSettings.setTimingSettings(tsb_.build());
-            System.out.println("delayBeforeCamera: " + acqSettings.getTimingSettings().delayBeforeCamera());
+            //acqSettings.setTimingSettings(tsb_.build());
+            //System.out.println("delayBeforeCamera: " + acqSettings.getTimingSettings().delayBeforeCamera());
         });
 
         spnCameraTriggerDuration_.registerListener(e -> {
             tsb_.cameraTriggerDuration(spnCameraTriggerDuration_.getDouble());
-            acqSettings.setTimingSettings(tsb_.build());
-            System.out.println("cameraTriggerDuration: " + acqSettings.getTimingSettings().cameraTriggerDuration());
+            //acqSettings.setTimingSettings(tsb_.build());
+            //System.out.println("cameraTriggerDuration: " + acqSettings.getTimingSettings().cameraTriggerDuration());
         });
 
         spnCameraExposure_.registerListener(e -> {
             tsb_.cameraExposure(spnCameraExposure_.getDouble());
-            acqSettings.setTimingSettings(tsb_.build());
-            System.out.println("cameraExposure: " + acqSettings.getTimingSettings().cameraExposure());
+            //acqSettings.setTimingSettings(tsb_.build());
+            //System.out.println("cameraExposure: " + acqSettings.getTimingSettings().cameraExposure());
         });
 
         chkAlternateScanDirection_.registerListener(e -> {
             tsb_.useAlternateScanDirection(chkAlternateScanDirection_.isSelected());
-            acqSettings.setTimingSettings(tsb_.build());
-            System.out.println("useAlternateScanDirection: " + acqSettings.getTimingSettings().useAlternateScanDirection());
+            //acqSettings.setTimingSettings(tsb_.build());
+            //System.out.println("useAlternateScanDirection: " + acqSettings.getTimingSettings().useAlternateScanDirection());
         });
 
     }

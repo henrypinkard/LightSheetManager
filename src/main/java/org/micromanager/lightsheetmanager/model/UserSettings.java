@@ -2,6 +2,7 @@ package org.micromanager.lightsheetmanager.model;
 
 import org.micromanager.Studio;
 import org.micromanager.UserProfile;
+import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.propertymap.MutablePropertyMapView;
 
 import java.util.Objects;
@@ -55,11 +56,11 @@ public class UserSettings {
      * Load user settings.
      */
     public void load() {
-        final String json = settings.getString(DEVICES_KEY, ""); // TODO: better default
+        final String json = settings.getString(DEVICES_KEY, "DEFAULT"); // TODO: better default
         System.out.println("loaded json: " + json);
         // use default settings if no saved data found
-        if (!json.equals("")) {
-            AcquisitionSettings acqSettings = AcquisitionSettings.fromJson(json);
+        if (!json.equals("DEFAULT")) {
+            DefaultAcquisitionSettingsDISPIM acqSettings = DefaultAcquisitionSettingsDISPIM.fromJson(json);
             model_.acquisitions().setAcquisitionSettings(acqSettings);
             //System.out.println("acqSettings: " + acqSettings);
         }
@@ -69,9 +70,13 @@ public class UserSettings {
      * Save user settings.
      */
     public void save() {
-        System.out.println("saved json: " + model_.acquisitions().getAcquisitionSettings().toPrettyJson());
+        // build settings before saving to make sure updates are saved
+        model_.acquisitions().setAcquisitionSettings(
+                model_.acquisitions().getAcquisitionSettingsBuilder().build());
+        // save in user settings
         settings.putString(DEVICES_KEY,
                 model_.acquisitions().getAcquisitionSettings().toPrettyJson());
+        System.out.println("saved json: " + model_.acquisitions().getAcquisitionSettings().toPrettyJson());
     }
 
 }

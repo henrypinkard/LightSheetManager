@@ -11,6 +11,7 @@ import org.micromanager.acqj.main.AcqEngMetadata;
 import org.micromanager.acqj.main.Acquisition;
 import org.micromanager.acqj.main.AcquisitionEvent;
 import org.micromanager.acqj.util.AcquisitionEventIterator;
+import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.model.channels.ChannelSpec;
 
 /**
@@ -24,25 +25,25 @@ public class LSMAcquisitionEvents {
 
 
    public static Iterator<AcquisitionEvent> createTimelapseMultiChannelVolumeAcqEvents(
-         AcquisitionEvent baseEvent, AcquisitionSettings acquisitionSettings,
+         AcquisitionEvent baseEvent, DefaultAcquisitionSettingsDISPIM acquisitionSettings,
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor) {
 
-      if (acquisitionSettings.getNumTimePoints() <= 1) {
+      if (acquisitionSettings.numTimePoints() <= 1) {
          throw new RuntimeException("timelapse selected but only one timepoint");
       }
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> timelapse =
-            timelapse(acquisitionSettings.getNumTimePoints(),
-                  (double) acquisitionSettings.getTimePointInterval());
+            timelapse(acquisitionSettings.numTimePoints(),
+                  (double) acquisitionSettings.timePointInterval());
 
-      if (acquisitionSettings.getNumChannels() == 1) {
+      if (acquisitionSettings.numChannels() == 1) {
          throw new RuntimeException("Expected multiple channels but only one found");
       }
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> channels = null;
-      channels = channels(acquisitionSettings.getChannels());
+      channels = channels(acquisitionSettings.channels());
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
-            acquisitionSettings.getVolumeSettings().slicesPerView() - 1);
+            acquisitionSettings.volumeSettings().slicesPerView() - 1);
 
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
@@ -54,17 +55,17 @@ public class LSMAcquisitionEvents {
    }
 
    public static Iterator<AcquisitionEvent> createTimelapseVolumeAcqEvents(
-         AcquisitionEvent baseEvent, AcquisitionSettings acquisitionSettings,
+         AcquisitionEvent baseEvent, DefaultAcquisitionSettingsDISPIM acquisitionSettings,
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor) {
 
-      if (acquisitionSettings.getNumTimePoints() <= 1) {
+      if (acquisitionSettings.numTimePoints() <= 1) {
          throw new RuntimeException("timelapse selected but only one timepoint");
       }
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> timelapse =
-            timelapse(acquisitionSettings.getNumTimePoints(), null);
+            timelapse(acquisitionSettings.numTimePoints(), null);
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
-            acquisitionSettings.getVolumeSettings().slicesPerView() - 1);
+            acquisitionSettings.volumeSettings().slicesPerView() - 1);
 
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
@@ -81,14 +82,14 @@ public class LSMAcquisitionEvents {
     *                    false: do an entire volume in one channel, then the next one
     */
    public static Iterator<AcquisitionEvent> createMultiChannelVolumeAcqEvents(
-         AcquisitionEvent baseEvent, AcquisitionSettings acquisitionSettings,
+         AcquisitionEvent baseEvent, DefaultAcquisitionSettingsDISPIM acquisitionSettings,
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor, boolean interleaved) {
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> channels = null;
-      channels = channels(acquisitionSettings.getChannels());
+      channels = channels(acquisitionSettings.channels());
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
-            acquisitionSettings.getVolumeSettings().slicesPerView() - 1);
+            acquisitionSettings.volumeSettings().slicesPerView() - 1);
 
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
@@ -112,11 +113,11 @@ public class LSMAcquisitionEvents {
    }
 
    public static Iterator<AcquisitionEvent> createVolumeAcqEvents(
-         AcquisitionEvent baseEvent, AcquisitionSettings acquisitionSettings,
+         AcquisitionEvent baseEvent, DefaultAcquisitionSettingsDISPIM acquisitionSettings,
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor) {
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
-            acquisitionSettings.getVolumeSettings().slicesPerView() - 1);
+            acquisitionSettings.volumeSettings().slicesPerView() - 1);
 
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
