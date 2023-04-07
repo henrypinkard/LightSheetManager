@@ -155,8 +155,7 @@ public class AcquisitionTab extends Panel {
                 "Start Acquisition", "Stop Acquisition",
                 Icons.ARROW_RIGHT, Icons.CANCEL
         );
-        //TODO enable this once the plugin works with hardware
-        btnRunAcquisition_.setEnabled(false);
+        btnRunAcquisition_.setEnabled(true);
 
         btnPauseAcquisition_ = new ToggleButton(
                 "Pause", "Resume",
