@@ -1,5 +1,7 @@
 package org.micromanager.lightsheetmanager.api;
 
+import org.micromanager.lightsheetmanager.model.DataStorage;
+
 /**
  * Base acquisition settings for all microscopes.
  */
@@ -34,6 +36,13 @@ public interface AcquisitionSettings {
          * @param state true if in demo mode
          */
         T demoMode(final boolean state);
+
+        /**
+         * Sets the save mode for the acquisition.
+         *
+         * @param saveMode the save mode
+         */
+        T saveMode(final DataStorage.SaveMode saveMode);
 
         T self();
 
@@ -79,4 +88,11 @@ public interface AcquisitionSettings {
      * @return true if using demo mode
      */
     boolean demoMode();
+
+    /**
+     * Returns the save mode of the acquisition.
+     *
+     * @return the save mode of the acquisition.
+     */
+    DataStorage.SaveMode saveMode();
 }

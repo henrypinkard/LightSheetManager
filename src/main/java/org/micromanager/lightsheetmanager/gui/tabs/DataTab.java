@@ -38,6 +38,8 @@ public class DataTab extends Panel {
     private void createUserInterface() {
         final JLabel lblTitle = new JLabel("Data");
 
+        final DefaultAcquisitionSettingsDISPIM acqSettings = model_.acquisitions().getAcquisitionSettings();
+
         fileSelect_ = new FileSelect(
                 "Please select a directory to save image data...",
                 FileSelect.DIRECTORIES_ONLY
@@ -50,7 +52,7 @@ public class DataTab extends Panel {
         final JLabel lblSaveFileName = new JLabel("Save File Name:");
 
         radSaveMode_ = new RadioButton(DataStorage.SaveMode.toArray(),
-                DataStorage.SaveMode.SINGLEPLANE_TIFF_SERIES.toString());
+                acqSettings.saveMode().toString());
 
         txtSaveDirectory_ = new TextField();
         txtSaveDirectory_.setEditable(false);
@@ -101,6 +103,11 @@ public class DataTab extends Panel {
         txtSaveFileName_.addDocumentListener(e -> {
             asb_.saveNamePrefix(txtSaveFileName_.getText());
             //System.out.println("getSaveNamePrefix: " + model_.acquisitions().getAcquisitionSettings().getSaveNamePrefix());
+        });
+
+        radSaveMode_.registerListener(e -> {
+            System.out.println("radSaveMode: " + radSaveMode_.getSelectedButtonText());
+            asb_.saveMode(DataStorage.SaveMode.fromString(radSaveMode_.getSelectedButtonText()));
         });
     }
 
