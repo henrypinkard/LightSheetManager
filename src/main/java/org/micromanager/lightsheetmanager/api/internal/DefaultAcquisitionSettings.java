@@ -3,6 +3,7 @@ package org.micromanager.lightsheetmanager.api.internal;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.micromanager.lightsheetmanager.api.AcquisitionSettings;
+import org.micromanager.lightsheetmanager.model.DataStorage;
 
 // TODO: make public instead of abstract? use this in demo mode?
 
@@ -17,6 +18,7 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
         private String saveNamePrefix_ = "";
         private boolean saveDuringAcq_ = false;
         private boolean demoMode_ = false;
+        private DataStorage.SaveMode saveMode_ = DataStorage.SaveMode.NDTIFF;
 
         public Builder() {
         }
@@ -26,6 +28,7 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
             saveNamePrefix_ = acqSettings.saveNamePrefix_;
             saveDuringAcq_ = acqSettings.saveDuringAcq_;
             demoMode_ = acqSettings.demoMode_;
+            saveMode_ = acqSettings.saveMode_;
         }
 
         /**
@@ -72,6 +75,12 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
             return self();
         }
 
+        @Override
+        public T saveMode(final DataStorage.SaveMode saveMode) {
+            saveMode_ = saveMode;
+            return self();
+        }
+
         /**
          * Creates an immutable instance of DefaultAcquisitionSettings
          *
@@ -99,6 +108,7 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
     private final String saveDirectory_;
     private final boolean saveDuringAcq_;
     private final boolean demoMode_;
+    private final DataStorage.SaveMode saveMode_;
 
 //    public DefaultAcquisitionSettings() {
 //        saveNamePrefix_ = "";
@@ -111,6 +121,7 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
         saveNamePrefix_ = builder.saveNamePrefix_;
         saveDuringAcq_ = builder.saveDuringAcq_;
         demoMode_ = builder.demoMode_;
+        saveMode_ = builder.saveMode_;
     }
 
     /**
@@ -153,11 +164,21 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
         return demoMode_;
     }
 
+    /**
+     * Returns the save mode.
+     *
+     * @return the save mode
+     */
+    @Override
+    public DataStorage.SaveMode saveMode() {
+        return saveMode_;
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "%s[saveDirectory=%s, saveNamePrefix=%s, saveDuringAcq=%s, demoMode=%s]",
-                getClass().getSimpleName(), saveDirectory_, saveNamePrefix_, saveDuringAcq_, demoMode_
+                "%s[saveDirectory=%s, saveNamePrefix=%s, saveDuringAcq=%s, demoMode=%s, saveMode=%s]",
+                getClass().getSimpleName(), saveDirectory_, saveNamePrefix_, saveDuringAcq_, demoMode_, saveMode_
         );
     }
 

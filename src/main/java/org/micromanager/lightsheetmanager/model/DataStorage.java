@@ -4,10 +4,14 @@ import org.micromanager.Studio;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.Image;
 import org.micromanager.lightsheetmanager.api.DataSink;
+import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // TODO: set acq name from playlist to datastore name?
 
@@ -18,11 +22,15 @@ public class DataStorage implements DataSink {
      * Easier to convert to a String.
      */
     public enum SaveMode {
-
         SINGLEPLANE_TIFF_SERIES("Single Plane TIFF"),
-        MULTIPAGE_TIFF("Multi Page TIFF");
+        MULTIPAGE_TIFF("Multi Page TIFF"),
+
+        NDTIFF("NDTiff");
 
         private String text_;
+
+        private static final Map<String, SaveMode> stringToEnum =
+                Stream.of(values()).collect(Collectors.toMap(Object::toString, e -> e));
 
         SaveMode(final String text) {
             text_ = text;
@@ -32,6 +40,10 @@ public class DataStorage implements DataSink {
             return Arrays.stream(values())
                     .map(SaveMode::toString)
                     .toArray(String[]::new);
+        }
+
+        public static SaveMode fromString(final String symbol) {
+            return stringToEnum.getOrDefault(symbol, SaveMode.NDTIFF);
         }
 
         @Override
