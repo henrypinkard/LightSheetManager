@@ -12,11 +12,20 @@ public class ASIPiezo extends ASITigerBase {
         super(studio, deviceName);
     }
 
-    public void setPosition(final float position) {
+    public void setPosition(final double position) {
         try {
             core_.setPosition(deviceName_, position);
         } catch (Exception e) {
-            studio_.logs().showError("Could not move asi piezo!");
+            studio_.logs().showError("Could not move piezo!");
+        }
+    }
+
+
+    public void home() {
+        try {
+            core_.home(deviceName_);
+        } catch (Exception e) {
+            studio_.logs().showError("Could not move piezo to home!");
         }
     }
 

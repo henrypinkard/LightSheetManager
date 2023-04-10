@@ -14,7 +14,9 @@ public enum AcquisitionModes {
     NO_SCAN("No Scan (Fixed Sheet)"),
     STAGE_SCAN("Stage Scan"),
     STAGE_SCAN_INTERLEAVED("Stage Scan Interleaved"),
-    STAGE_SCAN_UNIDIRECTIONAL("Stage Scan Unidirectional");
+    STAGE_SCAN_UNIDIRECTIONAL("Stage Scan Unidirectional"),
+    SLICE_SCAN_ONLY("Slice scan only"),
+    PIEZO_SCAN_ONLY("Piezo scan only");
 
     private final String text_;
 

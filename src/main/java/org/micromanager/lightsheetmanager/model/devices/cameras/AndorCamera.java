@@ -45,6 +45,10 @@ public class AndorCamera extends CameraBase implements LightSheetCamera {
         super(studio, deviceName);
     }
 
+    public String getDeviceName() {
+        return getProperty(Properties.CAMERA_NAME);
+    }
+
     @Override
     public void setTriggerMode(CameraModes cameraMode) {
         mode_ = cameraMode;

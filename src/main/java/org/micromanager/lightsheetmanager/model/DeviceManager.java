@@ -204,9 +204,9 @@ public class DeviceManager {
     }
 
     // Note: clients should use var when we support Java 11
-    public DeviceBase getDevice(final String deviceName) {
-        return deviceMap_.get(deviceName);
-    }
+//    public DeviceBase getDevice(final String deviceName) {
+//        return deviceMap_.get(deviceName);
+//    }
 
     /**
      * Returns the device given by {@code deviceName} as type {@code T}.
@@ -221,7 +221,7 @@ public class DeviceManager {
      * @param <T> the generic type to cast the result to
      */
     @SuppressWarnings("unchecked")
-    public <T extends DeviceBase> T getDevice2(final String deviceName) {
+    public <T extends DeviceBase> T getDevice(final String deviceName) {
         return (T) deviceMap_.get(deviceName);
     }
 
