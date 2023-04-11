@@ -18,6 +18,7 @@ import org.micromanager.lightsheetmanager.model.devices.vendor.ASIPLogic;
 import org.micromanager.lightsheetmanager.model.devices.vendor.ASIPiezo;
 import org.micromanager.lightsheetmanager.model.devices.vendor.ASIScanner;
 import org.micromanager.lightsheetmanager.model.devices.vendor.ASIXYStage;
+import org.micromanager.lightsheetmanager.model.devices.vendor.ASIZStage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -126,7 +127,10 @@ public class DeviceManager {
                         ASIPiezo piezo = new ASIPiezo(studio_, deviceName);
                         addDevice(propertyName, deviceName, piezo);
                     }
-                    // TODO: ASIZStage
+                    if (deviceName.contains("ZStage")) {
+                        ASIZStage zStage = new ASIZStage(studio_, deviceName);
+                        addDevice(propertyName, deviceName, zStage);
+                    }
                 } else {
                     // generic stage device
                     Stage stage = new Stage(studio_, deviceName);
@@ -222,6 +226,7 @@ public class DeviceManager {
      */
     @SuppressWarnings("unchecked")
     public <T extends DeviceBase> T getDevice(final String deviceName) {
+        //System.out.println(deviceName + " " + deviceMap_.get(deviceName).getDeviceName());
         return (T) deviceMap_.get(deviceName);
     }
 

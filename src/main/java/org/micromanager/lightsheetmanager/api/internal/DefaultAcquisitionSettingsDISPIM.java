@@ -307,6 +307,10 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
             return useAdvancedTiming_;
         }
 
+        public int numChannels() {
+            return numChannels_;
+        }
+
         public void timingSettingsBuilder(DefaultTimingSettings.Builder tsb) {
             tsb_ = tsb;
         }

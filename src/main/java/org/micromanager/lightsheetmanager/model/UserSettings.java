@@ -61,7 +61,7 @@ public class UserSettings {
         // use default settings if no saved data found
         if (!json.equals("DEFAULT")) {
             DefaultAcquisitionSettingsDISPIM acqSettings = DefaultAcquisitionSettingsDISPIM.fromJson(json);
-            //model_.acquisitions().setAcquisitionSettings(acqSettings);
+            model_.acquisitions().setAcquisitionSettings(acqSettings);
             //System.out.println("acqSettings: " + acqSettings);
         }
     }

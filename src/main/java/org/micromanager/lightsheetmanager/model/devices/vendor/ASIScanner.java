@@ -201,8 +201,8 @@ public class ASIScanner extends ASITigerBase {
         return getPropertyFloat(Properties.SPIM_DELAY_BEFORE_SIDE);
     }
 
-    public void setSPIMFirstSide(final SPIMSide side) {
-        setProperty(Properties.SPIM_FIRST_SIDE, side.toString());
+    public void setSPIMFirstSide(final SPIMSide view) {
+        setProperty(Properties.SPIM_FIRST_SIDE, view.toString());
     }
 
     public SPIMSide getSPIMFirstSide() {
@@ -462,8 +462,8 @@ public class ASIScanner extends ASITigerBase {
     }
 
     public enum SPIMSide {
-        A("internal input"),
-        B("external input");
+        A("A"),
+        B("B");
         private final String text_;
 
         private static final Map<String, SPIMSide> stringToEnum =

@@ -1,6 +1,7 @@
 package org.micromanager.lightsheetmanager.model;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -179,8 +180,9 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 //        }
 
         // setup channels
-        int nrChannelsSoftware = acqSettings_.numChannels();  // how many times we trigger the controller per stack
-        int nrSlicesSoftware = acqSettings_.volumeSettings().slicesPerView();
+        int nrChannelsSoftware = asb_.numChannels();  // how many times we trigger the controller per stack
+        int nrSlicesSoftware = asb_.volumeSettingsBuilder().slicesPerVolume();
+                //acqSettings_.volumeSettings().slicesPerView();
         // TODO: channels
 
 
@@ -188,7 +190,8 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         AndorCamera camera = model_.devices().getDevice("Imaging1Camera");
         CameraModes camMode = camera.getTriggerMode();
         final float cameraReadoutTime = camera.getReadoutTime(camMode);
-        final double exposureTime = acqSettings_.timingSettings().cameraExposure();
+        //final double exposureTime = acqSettings_.timingSettings().cameraExposure();
+        final double exposureTime = asb_.timingSettingsBuilder().cameraExposure();
 
         // test acq was here
 
@@ -221,9 +224,8 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
         // TODO: make sure position updater is turned off!
 
-
-
-        double sliceDuration = acqSettings_.timingSettings().sliceDuration();
+        //double sliceDuration = acqSettings_.timingSettings().sliceDuration();
+        double sliceDuration = asb_.timingSettingsBuilder().sliceDuration();
         if (exposureTime + cameraReadoutTime > sliceDuration) {
             // should only possible to mess this up using advanced timing settings
             // or if there are errors in our own calculations
@@ -254,8 +256,6 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 //                sideActiveB = true;
 //            }
 //        }
-
-
 
 
         // TODO: make static?
@@ -331,6 +331,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         PLogicDISPIM controller = null;
         // Assume demo mode if default camera is DemoCamera
 
+
         boolean demoMode = false;
         try {
             demoMode = core_.getDeviceLibrary(core_.getCameraDevice()).equals("DemoCamera");
@@ -338,9 +339,63 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
             studio_.logs().logError(e);
         }
 //        boolean demoMode = acqSettings_.demoMode();
+
         if (!demoMode) {
             controller = doHardwareCalculations();
+
+            String plcName = "PLogic:E:36";
+            try {
+                core_.setProperty(plcName, "EnableAdvancedProperties", "Yes");
+            } catch (Exception e1) {
+                System.out.println("failed to enable adv props");
+            }
+//        StrVector propertyNames;
+//            propertyNames = core_.getDevicePropertyNames(plcName);
+//        } catch (Exception e) {
+//            propertyNames = null;
+//        }
+//        Gson gsonObj = new Gson();
+//        HashMap<String, String> deviceProps = new HashMap<>();
+//        for (String propName : propertyNames) {
+//            String propValue;
+//            try {
+//                propValue = core_.getProperty(plcName, propName);
+//            } catch (Exception e) {
+//                propValue = "";
+//                System.out.println("failed!");
+//            }
+//            deviceProps.put(propName, propValue);
+//            //System.out.println(propName);
+//        }
+//        String jsonStr = gsonObj.toJson(deviceProps);
+//        System.out.println(jsonStr);
+            String jsonStr = "{\"PCell_03_CellType\":\"0 - constant\",\"PCell_09_CellType\":\"0 - constant\",\"BackplaneOutputState\":\"130\",\"IOFrontpanel_7_SourceAddress\":\"0\",\"PCell_12_CellType\":\"3 - 3-input LUT\",\"IOBackplane_2_SourceAddress\":\"0\",\"IOFrontpanel_2_SourceAddress\":\"43\",\"PCell_14_Input2\":\"0\",\"PCell_14_Input1\":\"0\",\"PCell_09_Config\":\"0\",\"PCell_16_Config\":\"0\",\"PCell_10_Input1\":\"42\",\"PCell_10_Input2\":\"8\",\"PointerPosition\":\"48\",\"PCell_05_Config\":\"0\",\"PCell_07_Config\":\"0\",\"PCell_12_Input2\":\"10\",\"PCell_16_Input2\":\"0\",\"PCell_12_Input1\":\"44\",\"PCell_16_Input1\":\"0\",\"PCell_10_Input3\":\"0\",\"PCell_12_Input4\":\"0\",\"PCell_14_Input4\":\"0\",\"PCell_16_Input4\":\"0\",\"PCell_10_Input4\":\"0\",\"PCell_12_Input3\":\"1\",\"PCell_14_Input3\":\"0\",\"PCell_16_Input3\":\"0\",\"PCell_03_Config\":\"0\",\"IOFrontpanel_5_SourceAddress\":\"0\",\"PCell_12_Config\":\"168\",\"PCell_14_Config\":\"0\",\"PCell_10_Config\":\"0\",\"PCell_04_CellType\":\"0 - constant\",\"Description\":\"ASI Programmable Logic HexAddr\u003d36\",\"RefreshPropertyValues\":\"No\",\"EditCellUpdateAutomatically\":\"Yes\",\"IOBackplane_6_SourceAddress\":\"0\",\"IOBackplane_0_SourceAddress\":\"0\",\"NumLogicCells\":\"16\",\"OutputChannel\":\"none of outputs 5-8\",\"PCell_14_CellType\":\"0 - constant\",\"PCell_08_CellType\":\"0 - constant\",\"PCell_06_Input3\":\"0\",\"PCell_06_Input2\":\"0\",\"PCell_13_Input1\":\"0\",\"IOFrontpanel_8_SourceAddress\":\"0\",\"PCell_06_Input4\":\"0\",\"PCell_06_Input1\":\"0\",\"PCell_02_Input1\":\"0\",\"PCell_02_Input2\":\"0\",\"PCell_02_Input3\":\"0\",\"PCell_02_Input4\":\"0\",\"PCell_08_Config\":\"0\",\"PCell_13_Input4\":\"0\",\"PCell_13_Input2\":\"0\",\"IOBackplane_7_SourceAddress\":\"0\",\"PCell_13_Input3\":\"0\",\"FirmwareDate\":\"Oct 05 2020:06:42:01\",\"PCell_04_Config\":\"0\",\"SetCardPreset\":\"14 - diSPIM TTL\",\"PCell_11_Config\":\"0\",\"PCell_15_Config\":\"0\",\"PCell_01_CellType\":\"0 - constant\",\"EditCellConfig\":\"0\",\"PCell_15_CellType\":\"0 - constant\",\"IOBackplane_2_IOType\":\"0 - input\",\"PCell_06_CellType\":\"0 - constant\",\"PLogicOutputState\":\"1\",\"IOBackplane_1_IOType\":\"0 - input\",\"IOBackplane_3_IOType\":\"0 - input\",\"IOBackplane_4_IOType\":\"0 - input\",\"IOBackplane_5_IOType\":\"0 - input\",\"IOBackplane_6_IOType\":\"0 - input\",\"IOBackplane_7_IOType\":\"0 - input\",\"Name\":\"PLogic:E:36\",\"IOBackplane_0_IOType\":\"0 - input\",\"IOFrontpanel_3_IOType\":\"2 - output (push-pull)\",\"EditCellCellType\":\"0 - input\",\"IOFrontpanel_2_IOType\":\"2 - output (push-pull)\",\"IOFrontpanel_4_IOType\":\"2 - output (push-pull)\",\"IOFrontpanel_6_SourceAddress\":\"0\",\"IOFrontpanel_1_IOType\":\"2 - output (push-pull)\",\"IOFrontpanel_5_IOType\":\"2 - output (push-pull)\",\"FrontpanelOutputState\":\"0\",\"IOFrontpanel_7_IOType\":\"2 - output (push-pull)\",\"IOFrontpanel_6_IOType\":\"2 - output (push-pull)\",\"TriggerSource\":\"1 - Micro-mirror card\",\"PCell_05_Input1\":\"0\",\"PCell_05_Input2\":\"0\",\"PCell_05_Input3\":\"0\",\"PCell_07_Input3\":\"0\",\"PCell_05_Input4\":\"0\",\"PCell_07_Input4\":\"0\",\"PCell_16_CellType\":\"0 - constant\",\"PCell_07_Input1\":\"0\",\"PCell_07_Input2\":\"0\",\"PCell_03_Input2\":\"0\",\"PCell_03_Input1\":\"0\",\"PCell_03_Input4\":\"0\",\"PCell_09_Input2\":\"0\",\"PCell_03_Input3\":\"0\",\"PCell_09_Input1\":\"0\",\"PCell_09_Input4\":\"0\",\"PCell_09_Input3\":\"0\",\"AxisLetter\":\"E\",\"IOBackplane_1_SourceAddress\":\"0\",\"PCell_01_Input4\":\"0\",\"PCell_01_Input3\":\"0\",\"PCell_01_Input2\":\"0\",\"PCell_01_Input1\":\"0\",\"IOFrontpanel_1_SourceAddress\":\"41\",\"PCell_10_CellType\":\"5 - 2-input AND\",\"EnableAdvancedProperties\":\"Yes\",\"IOBackplane_5_SourceAddress\":\"0\",\"PCell_01_Config\":\"1\",\"ClearAllCellStates\":\"Not done\",\"EditCellInput1\":\"0\",\"PCell_02_CellType\":\"0 - constant\",\"EditCellInput2\":\"0\",\"EditCellInput3\":\"0\",\"PCell_05_CellType\":\"0 - constant\",\"PCell_11_CellType\":\"0 - constant\",\"EditCellInput4\":\"0\",\"IOFrontpanel_4_SourceAddress\":\"12\",\"SaveCardSettings\":\"no action\",\"PCell_15_Input4\":\"0\",\"IOFrontpanel_3_SourceAddress\":\"0\",\"PCell_13_CellType\":\"0 - constant\",\"PCell_08_Input4\":\"0\",\"PCell_04_Input3\":\"0\",\"PCell_08_Input3\":\"0\",\"IOBackplane_4_SourceAddress\":\"0\",\"IOFrontpanel_8_IOType\":\"2 - output (push-pull)\",\"PCell_04_Input2\":\"0\",\"PCell_08_Input2\":\"0\",\"PCell_04_Input1\":\"0\",\"PCell_08_Input1\":\"0\",\"PCell_11_Input4\":\"0\",\"PCell_07_CellType\":\"0 - constant\",\"PCell_04_Input4\":\"0\",\"PCell_06_Config\":\"0\",\"PCell_11_Input1\":\"0\",\"PCell_15_Input1\":\"0\",\"FirmwareVersion\":\"3.3300\",\"PCell_11_Input2\":\"0\",\"PCell_15_Input2\":\"0\",\"PCell_11_Input3\":\"0\",\"PCell_15_Input3\":\"0\",\"PCell_02_Config\":\"0\",\"FirmwareBuild\":\"PLOGIC_16\",\"PCell_13_Config\":\"0\",\"TigerHexAddress\":\"36\",\"PLogicMode\":\"diSPIM Shutter\",\"IOBackplane_3_SourceAddress\":\"0\"}";
+
+            System.out.println("create JSON...");
+            JSONObject jsonObj = null;
+            try {
+                jsonObj = new JSONObject(jsonStr);
+            } catch (JSONException e) {
+                System.out.println("failed to create json object!");
+            }
+            for (Iterator<String> it = jsonObj.keys(); it.hasNext(); ) {
+                String s = it.next();
+                String value;
+                try {
+                    value = jsonObj.getString(s);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    core_.setProperty(plcName, s, value);
+                } catch (Exception e) {
+                    System.out.println("failed to set property " + s + " " + value);
+                }
+                System.out.println(s + " " + value);
+            }
+
         }
+
         String saveDir = acqSettings_.saveDirectory();
         String saveName = acqSettings_.saveNamePrefix();
 
