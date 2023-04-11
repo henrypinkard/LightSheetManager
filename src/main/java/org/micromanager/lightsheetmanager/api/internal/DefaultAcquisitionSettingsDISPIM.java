@@ -299,6 +299,22 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
             return ssbLS_;
         }
 
+        public CameraModes cameraMode() {
+            return cameraMode_;
+        }
+
+        public boolean isUsingAdvancedTiming() {
+            return useAdvancedTiming_;
+        }
+
+        public void timingSettingsBuilder(DefaultTimingSettings.Builder tsb) {
+            tsb_ = tsb;
+        }
+
+        public void volumeSettingsBuilde(DefaultVolumeSettings.Builder vsb) {
+            vsb_ = vsb;
+        }
+
 //        /**
 //         * Creates an immutable instance of DefaultAcquisitionSettingsDISPIM
 //         *

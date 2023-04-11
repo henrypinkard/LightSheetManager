@@ -152,6 +152,23 @@ public class DefaultTimingSettings implements TimingSettings {
             return this;
         }
 
+        public double cameraExposure() {
+            System.out.println("set exposure!!");
+            return cameraExposure_;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("[scansPerSlice_=%s, delayBeforeScan_=%s, scanDuration_=%s, " +
+                            "delayBeforeLaser_=%s, laserTriggerDuration_=%s, delayBeforeCamera_=%s, " +
+                            "cameraTriggerDuration_=%s, cameraExposure_=%s, sliceDuration_=%s, alternateScanDirection_=%s]",
+                    scansPerSlice_, delayBeforeScan_, scanDuration_, delayBeforeLaser_,
+                    laserTriggerDuration_, delayBeforeCamera_, cameraTriggerDuration_,
+                    cameraExposure_, sliceDuration_, alternateScanDirection_
+
+            );
+        }
+
         /**
          * Creates an immutable instance of TimingSettings
          *
