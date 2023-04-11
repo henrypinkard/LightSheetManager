@@ -129,7 +129,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
     @Override
     public void requestStop() {
-        if (currentAcquisition_ == null || currentAcquisition_.areEventsFinished()) {
+        if (currentAcquisition_ == null || currentAcquisition_.getDataSink().isFinished()) {
             studio_.logs().showError("Acquisition is not running.");
             return;
         }
@@ -422,8 +422,6 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        studio_.displays().createDisplay(result);
-
 
         //////////////////////////////////////
         // Begin AcqEngJ integration
