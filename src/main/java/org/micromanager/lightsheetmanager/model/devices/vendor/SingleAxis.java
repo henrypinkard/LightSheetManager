@@ -45,6 +45,13 @@ public class SingleAxis extends DeviceBase {
         return getPropertyInt(Properties.PERIOD_Y);
     }
 
+    public void setAmplitude(final float um) {
+        setPropertyFloat(Properties.AMPLITUDE, um);
+    }
+    public float getAmplitude() {
+        return getPropertyFloat(Properties.AMPLITUDE);
+    }
+
     public void setAmplitudeX(final float degrees) {
         setPropertyFloat(Properties.AMPLITUDE_X, degrees);
     }
@@ -59,6 +66,14 @@ public class SingleAxis extends DeviceBase {
 
     public float getAmplitudeY() {
         return getPropertyFloat(Properties.AMPLITUDE_Y);
+    }
+
+    public void setOffset(final float um) {
+        setPropertyFloat(Properties.OFFSET, um);
+    }
+
+    public float getOffset() {
+        return getPropertyFloat(Properties.OFFSET);
     }
 
     public void setOffsetX(final float degrees) {

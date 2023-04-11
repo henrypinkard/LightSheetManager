@@ -366,8 +366,8 @@ public class AcquisitionTab extends Panel {
 
     private void updateSlicePeriodLabel() {
         final DefaultAcquisitionSettingsDISPIM acqSettings = model_.acquisitions().getAcquisitionSettings();
-        model_.getAcquisitionEngine().recalculateSliceTiming(acqSettings);
-        lblSliceTimeValue_.setText(Double.toString(acqSettings.timingSettings().sliceDuration()));
+        //model_.getAcquisitionEngine().recalculateSliceTiming(acqSettings);
+        //lblSliceTimeValue_.setText(Double.toString(acqSettings.timingSettings().sliceDuration()));
         //System.out.println("updating slice label to: " + acqSettings.getTimingSettings().sliceDuration());
     }
 

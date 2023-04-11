@@ -8,8 +8,15 @@ import java.util.stream.Stream;
 
 public class ASIPiezo extends ASITigerBase {
 
+    private SingleAxis singleAxis_;
+
     public ASIPiezo(final Studio studio, final String deviceName) {
         super(studio, deviceName);
+        singleAxis_ = new SingleAxis(studio, deviceName);
+    }
+
+    public SingleAxis sa() {
+        return singleAxis_;
     }
 
     public void setPosition(final double position) {
@@ -20,6 +27,14 @@ public class ASIPiezo extends ASITigerBase {
         }
     }
 
+    public double getPosition() {
+        try {
+            return core_.getPosition(deviceName_);
+        } catch (Exception e) {
+            studio_.logs().showError("Could get the piezo position!");
+            return 0.0;
+        }
+    }
 
     public void home() {
         try {
@@ -69,7 +84,7 @@ public class ASIPiezo extends ASITigerBase {
         setPropertyFloat(Properties.LOWER_LIMIT, limit);
     }
 
-    public float getLowerlimit() {
+    public float getLowerLimit() {
         return getPropertyFloat(Properties.LOWER_LIMIT);
     }
 
@@ -118,11 +133,11 @@ public class ASIPiezo extends ASITigerBase {
         setProperty(Properties.RUN_PIEZO_CALIBRATION, Values.DO_IT);
     }
 
-    public void setNumSlices(final int numSlices) {
+    public void setSPIMNumSlices(final int numSlices) {
         setPropertyInt(Properties.SPIM_NUM_SLICES, numSlices);
     }
 
-    public int getNumSlices() {
+    public int getSPIMNumSlices() {
         return getPropertyInt(Properties.SPIM_NUM_SLICES);
     }
 

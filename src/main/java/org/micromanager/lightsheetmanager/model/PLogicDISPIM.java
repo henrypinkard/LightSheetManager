@@ -4,7 +4,6 @@ import mmcorej.CMMCore;
 import mmcorej.Configuration;
 import org.micromanager.Studio;
 import org.micromanager.lightsheetmanager.api.AcquisitionSettingsDISPIM;
-import org.micromanager.lightsheetmanager.api.LightSheetCamera;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.api.data.DISPIMDevice;
 import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
@@ -98,14 +97,14 @@ public class PLogicDISPIM {
         final int firstView = settings.volumeSettings().firstView();
 
         if (numViews > 1 || firstView == 1) {
-            final boolean success = prepareControllerForAquisitionSide(settings, 1, channelOffset, true);
+            final boolean success = prepareControllerForAcquisitionSide(settings, 1, channelOffset, true);
             if (!success) {
                 return false;
             }
         }
 
         if (numViews > 1 || firstView != 1) {
-            final boolean success = prepareControllerForAquisitionSide(settings, 2, channelOffset, true);
+            final boolean success = prepareControllerForAcquisitionSide(settings, 2, channelOffset, true);
             if (!success) {
                 return false;
             }
@@ -143,13 +142,13 @@ public class PLogicDISPIM {
         //   case where MM devices reside on different controller cards
         // Note: firstView starts counting from 1...n views
         if (numViews > 1 || firstView == 1) {
-            final boolean success = prepareControllerForAquisitionSide(settings, 1, channelOffset, false);
+            final boolean success = prepareControllerForAcquisitionSide(settings, 1, channelOffset, false);
             if (!success) {
                 return false;
             }
         }
         if (numViews > 1 || firstView != 1) {
-            final boolean success = prepareControllerForAquisitionSide(settings, 2, channelOffset, false);
+            final boolean success = prepareControllerForAcquisitionSide(settings, 2, channelOffset, false);
             if (!success) {
                 return false;
             }
@@ -400,7 +399,7 @@ public class PLogicDISPIM {
     }
 
     // TODO: side => view
-    public boolean prepareControllerForAquisitionSide(
+    public boolean prepareControllerForAcquisitionSide(
             final AcquisitionSettingsDISPIM settings,
             final int view,
             final double channelOffset,
@@ -446,7 +445,7 @@ public class PLogicDISPIM {
                     numVolumesPerTrigger = settings.numChannels();
                 }
 
-                // can either trigger controller once for all the timepoints and
+                // can either trigger controller once for all the time points and
                 //  have the number of repeats pre-programmed (hardware timing)
                 //  or let plugin send trigger for each time point (software timing)
                 float delayRepeats = 0.0f;
@@ -470,7 +469,13 @@ public class PLogicDISPIM {
                 //    and by convention we'll do it for all stage scanning
                 piezoCenter = piezo.getHomePosition();
             } else {
-                // FIXME: !!!
+                // TODO: add centerAtCurrentZ to acqSettings
+                final boolean centerAtCurrentZ = true;
+                if (centerAtCurrentZ) {
+                    piezoCenter = (float)piezo.getPosition(); //(float) positions_.getUpdatedPosition(piezoDevice, Joystick.Directions.NONE);
+                } else {
+                    //piezoCenter = 0.0f; // FIXME: get from ui
+                }
             }
 
             // if we set piezoAmplitude to 0 here then sliceAmplitude will also be 0
@@ -496,12 +501,12 @@ public class PLogicDISPIM {
             }
 
             // FIXME: more light sheet setup
-            float sliceRate = 1.0f; // TODO: get value
+            float sliceRate = (float)channelOffset; // FIXME: get value
             if (NumberUtils.floatsEqual(sliceRate, 0.0f)) {
                 studio_.logs().showError("Calibration slope for view " + view + " cannot be zero. Re-do calibration on Setup tab.");
                 return false;
             }
-            float sliceOffset = 1.0f; // TODO: get value
+            float sliceOffset = 1.0f; // FIXME: get value
             float sliceAmplitude = piezoAmplitude / sliceRate;
             float sliceCenter = (piezoCenter - sliceOffset) / sliceRate;
 
@@ -519,12 +524,12 @@ public class PLogicDISPIM {
             if (offsetOnly) {
                 scanner.sa().setOffsetY(sliceCenter);
             } else { // normal case
-                // only do alternating scan directions if the user is using advanced timing
+                // only alternate scan directions if the user is using advanced timing
                 //    and user has option enabled on the advanced timing panel
                 final boolean oppositeDirections = false;
 
                 scanner.setSPIMAlternateDirections(oppositeDirections);
-                //scanner.setSPIMScanDuration(); // FIXME: !!!
+                scanner.setSPIMScanDuration((float) settings.timingSettings().scanDuration());
                 scanner.sa().setAmplitudeY(sliceAmplitude);
                 scanner.sa().setOffsetY(sliceCenter);
                 scanner.setSPIMNumSides(numSlicesHW);
@@ -550,7 +555,7 @@ public class PLogicDISPIM {
                     piezoAmplitude = 0.0f;
                 }
 
-                float piezoMin = piezo.getLowerlimit() * 1000;
+                float piezoMin = piezo.getLowerLimit() * 1000;
                 float piezoMax = piezo.getUpperLimit() * 1000;
 
                 if (NumberUtils.outsideRange(piezoCenter - piezoAmplitude / 2, piezoMin, piezoMax)
@@ -563,10 +568,11 @@ public class PLogicDISPIM {
                 // round to nearest 0.001 micron, which is approximately the DAC resolution
                 piezoAmplitude = NumberUtils.roundFloatToPlace(piezoAmplitude, 3);
                 piezoCenter = NumberUtils.roundFloatToPlace(piezoCenter, 3);
-                // FIXME: !!! SA MODES FOR PIEZO
+                piezo.sa().setAmplitude(piezoAmplitude);
+                piezo.sa().setOffset(piezoCenter);
 
                 if (!settings.isUsingStageScanning()) {
-                    //piezo.setSPIMNumSides(numSlicesHW); // FIXME: !!!
+                    piezo.setSPIMNumSlices(numSlicesHW);
                     piezo.setSPIMState(ASIPiezo.SPIMState.ARMED);
                 }
 
@@ -604,8 +610,8 @@ public class PLogicDISPIM {
 //                    // width should be increased by ratio (1 + settle_fraction)
 //                    sheetWidth += (sheetWidth * settleTime/readoutTime);
                 }
-//                scanner.sa().setAmplitudeX();
-//                scanner.sa().setOffsetX();
+//                scanner.sa().setAmplitudeX(sheetWidth);
+//                scanner.sa().setOffsetX(sheetOffset);
             }
         }
         return true;

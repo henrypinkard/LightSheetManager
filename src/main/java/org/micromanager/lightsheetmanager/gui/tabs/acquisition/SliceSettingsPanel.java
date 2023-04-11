@@ -1,7 +1,7 @@
 package org.micromanager.lightsheetmanager.gui.tabs.acquisition;
 
-import org.micromanager.lightsheetmanager.api.SliceSettings;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
+import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettings;
 import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettingsLS;
 import org.micromanager.lightsheetmanager.gui.frames.AdvancedTimingFrame;
@@ -13,7 +13,6 @@ import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
 import java.util.Objects;
 
-// TODO: changes based on camera trigger mode
 public class SliceSettingsPanel extends Panel {
 
     // regular panel
@@ -47,7 +46,6 @@ public class SliceSettingsPanel extends Panel {
     }
 
     private void createUserInterface() {
-
         final DefaultSliceSettingsLS sliceSettingsLS = model_.acquisitions()
                 .getAcquisitionSettings().sliceSettingsLS();
 
@@ -96,6 +94,9 @@ public class SliceSettingsPanel extends Panel {
     private void createEventHandlers() {
         final DefaultSliceSettings.Builder ssb_ = model_.acquisitions().getAcquisitionSettingsBuilder().sliceSettingsBuilder();
         final DefaultSliceSettingsLS.Builder ssbLS_ = model_.acquisitions().getAcquisitionSettingsBuilder().sliceSettingsLSBuilder();
+        final DefaultAcquisitionSettingsDISPIM.Builder asb =
+                model_.acquisitions().getAcquisitionSettingsBuilder();
+
 
         // regular panel
         chkMinimizeSlicePeriod_.registerListener(e -> {
