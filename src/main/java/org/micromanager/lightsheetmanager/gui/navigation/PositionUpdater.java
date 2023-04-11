@@ -22,7 +22,7 @@ public class PositionUpdater {
         if (!isPollingPositions) {
             timer_.stop();
         }
-        timer_.start();
+        //timer_.start();
         //System.out.println("isRunning: " + timer_.isRunning());
     }
 

@@ -157,6 +157,10 @@ public class DefaultTimingSettings implements TimingSettings {
             return cameraExposure_;
         }
 
+        public double sliceDuration() {
+            return sliceDuration_;
+        }
+
         @Override
         public String toString() {
             return String.format("[scansPerSlice_=%s, delayBeforeScan_=%s, scanDuration_=%s, " +

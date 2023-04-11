@@ -74,12 +74,12 @@ public class PLogicDISPIM {
         // populate devices
         scanner1_ = devices_.getDevice(DISPIMDevice.getIllumBeam(1));
         scanner2_ = devices_.getDevice(DISPIMDevice.getIllumBeam(2));
-        piezo1_ = devices_.getDevice(DISPIMDevice.getIllumBeam(1));
-        piezo2_ = devices_.getDevice(DISPIMDevice.getIllumBeam(2));
-        xyStage_ = devices_.getDevice(DISPIMDevice.SAMPLE_XY);
-        zStage_ = devices_.getDevice(DISPIMDevice.SAMPLE_Z);
+        piezo1_ = devices_.getDevice(DISPIMDevice.getImagingFocus(1));
+        piezo2_ = devices_.getDevice(DISPIMDevice.getImagingFocus(2));
         plcCamera_ = devices_.getDevice(DISPIMDevice.TRIGGER_CAMERA);
         plcLaser_ = devices_.getDevice(DISPIMDevice.TRIGGER_LASER);
+        xyStage_ = devices_.getDevice(DISPIMDevice.SAMPLE_XY);
+        zStage_ = devices_.getDevice(DISPIMDevice.SAMPLE_Z);
     }
 
     // TODO: numViews > 2
@@ -255,7 +255,7 @@ public class PLogicDISPIM {
         plcLaser_.setPreset(3);
 
         studio_.logs().logMessage("Finished preparing controller for acquisition with offset " + channelOffset +
-                " with mode " + settings.acquisitionMode() + " and settings " + settings);
+                " with mode " + settings.acquisitionMode() + " and settings:\n" + settings);
         return true;
     }
 
@@ -501,12 +501,12 @@ public class PLogicDISPIM {
             }
 
             // FIXME: more light sheet setup
-            float sliceRate = (float)channelOffset; // FIXME: get value
+            float sliceRate = (view == 1) ? 109.081f : 105.883f;//(float)channelOffset; // FIXME: get value
             if (NumberUtils.floatsEqual(sliceRate, 0.0f)) {
                 studio_.logs().showError("Calibration slope for view " + view + " cannot be zero. Re-do calibration on Setup tab.");
                 return false;
             }
-            float sliceOffset = 1.0f; // FIXME: get value
+            float sliceOffset = (view == 1) ? 3.667f : 1.008f; //1.0f; // FIXME: get value
             float sliceAmplitude = piezoAmplitude / sliceRate;
             float sliceCenter = (piezoCenter - sliceOffset) / sliceRate;
 
@@ -532,7 +532,7 @@ public class PLogicDISPIM {
                 scanner.setSPIMScanDuration((float) settings.timingSettings().scanDuration());
                 scanner.sa().setAmplitudeY(sliceAmplitude);
                 scanner.sa().setOffsetY(sliceCenter);
-                scanner.setSPIMNumSides(numSlicesHW);
+                scanner.setSPIMNumSlices(numSlicesHW);
                 scanner.setSPIMNumSides(settings.volumeSettings().numViews());
 
                 if (settings.volumeSettings().firstView() == 1) {
