@@ -569,7 +569,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
                     int side = 0;
                     // TODO: enable 2 sided acquisition
                     controllerInstance.triggerControllerStartAcquisition(
-                          acqSettings_.acquisitionMode(), side);
+                          asb_.acquisitionMode(), side);
                 }
                 return event;
             }

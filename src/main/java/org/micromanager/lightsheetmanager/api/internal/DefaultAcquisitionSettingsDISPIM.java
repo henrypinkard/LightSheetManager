@@ -299,6 +299,9 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
             return ssbLS_;
         }
 
+        public AcquisitionModes acquisitionMode() {
+            return acquisitionMode_;
+        }
         public CameraModes cameraMode() {
             return cameraMode_;
         }
