@@ -319,12 +319,6 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
     private void runAcquisitionDISPIM() {
 
-        // create the datastore
-//        final String saveDirectory = model_.acquisitions().getAcquisitionSettings().getSaveDirectory();
-//        final String saveNamePrefix = model_.acquisitions().getAcquisitionSettings().getSaveNamePrefix();
-//        data_.createDatastore(saveDirectory + File.separator + saveNamePrefix);
-//        System.out.println("getDatastoreSavePath: " + data_.getDatastoreSavePath());
-
         final boolean isLiveModeOn = studio_.live().isLiveModeOn();
         if (isLiveModeOn) {
             studio_.live().setLiveModeOn(false);
@@ -335,17 +329,35 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         }
 
         PLogicDISPIM controller = null;
-        controller = doHardwareCalculations();
+        // Assume demo mode if default camera is DemoCamera
 
+        boolean demoMode = false;
+        try {
+            demoMode = core_.getDeviceLibrary(core_.getCameraDevice()).equals("DemoCamera");
+        } catch (Exception e) {
+            studio_.logs().logError(e);
+        }
+//        boolean demoMode = acqSettings_.demoMode();
+        if (!demoMode) {
+            controller = doHardwareCalculations();
+        }
         String saveDir = acqSettings_.saveDirectory();
         String saveName = acqSettings_.saveNamePrefix();
 
-        // TODO: where is the Datastore type listed in the acq settings that is present
-        //  on the LSM GUI? For now, just use ND_TIFF
-        DefaultDatastore.setPreferredSaveMode(studio_, Datastore.SaveMode.ND_TIFF);
+
 
         DefaultDatastore result = new DefaultDatastore(studio_);
         try {
+            if (acqSettings_.saveMode() == DataStorage.SaveMode.NDTIFF) {
+                DefaultDatastore.setPreferredSaveMode(studio_, Datastore.SaveMode.ND_TIFF);
+            } else if (acqSettings_.saveMode() == DataStorage.SaveMode.MULTIPAGE_TIFF) {
+                DefaultDatastore.setPreferredSaveMode(studio_, Datastore.SaveMode.MULTIPAGE_TIFF);
+            } else if (acqSettings_.saveMode() == DataStorage.SaveMode.SINGLEPLANE_TIFF_SERIES) {
+                DefaultDatastore.setPreferredSaveMode(studio_, Datastore.SaveMode.SINGLEPLANE_TIFF_SERIES);
+            } else {
+                studio_.logs().showError("Unsupported save mode: " + acqSettings_.saveMode());
+                return;
+            }
             result.setStorage(new NDTiffAdapter(result, saveDir, true));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -381,7 +393,6 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 //        studio_.events().post(new DefaultAcquisitionStartedEvent(curStore_, this,
 //              acquisitionSettings));
 
-        // Start pumping images through the pipeline and into the datastore.
 
         // TODO if position time ordering ever implemented, this should be reactivated and the
         //  timelapse hook copied from org.micromanager.acquisition.internal.acqengjcompat.AcqEngJAdapter
@@ -416,6 +427,10 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
                     return event;
                 }
 
+                if (event.getMinimumStartTimeAbsolute() != null) {
+                    nextWakeTime_ = event.getMinimumStartTimeAbsolute();
+                }
+
                 // Translate event to timeIndex/channel/etc
                 AcquisitionEvent firstAcqEvent = event.getSequence().get(0);
                 int timePoint = firstAcqEvent.getTIndex();
@@ -426,6 +441,8 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
                 // TODO: where should these come from? In diSPIM they appear to come from preferences,
                 //  not settings...
+                boolean doAutofocus = acqSettings_.isUsingAutofocus();
+
                 boolean autofocusAtT0 = false;
                 // TODO: this is where they come from in diSPIM?
 //                prefs_.getBoolean(org.micromanager.asidispim.Data.MyStrings.PanelNames.AUTOFOCUS.toString(),
@@ -484,6 +501,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
 
 
+        final PLogicDISPIM controllerInstance = controller;
         // TODO This after camera hook is called after the camera has been readied to acquire a
         //  sequence. I assume we want to tell the Tiger to start sending TTLs etc here
         currentAcquisition_.addHook(new AcquisitionHook() {
@@ -492,6 +510,12 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
                 // TODO: Cameras are now ready to receive triggers, so we can send (software) trigger
                 //  to the tiger to tell it to start outputting TTLs
 
+                if (controllerInstance != null) { // if not in demo mode
+                    int side = 0;
+                    // TODO: enable 2 sided acquisition
+                    controllerInstance.triggerControllerStartAcquisition(
+                          acqSettings_.acquisitionMode(), side);
+                }
                 return event;
             }
 
@@ -500,24 +524,6 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
             }
         }, Acquisition.AFTER_CAMERA_HOOK);
-
-
-        ///////////// Event monitor /////////////////////////
-        //    The event monitor will be run on the thread that gets successive acquisition
-        //    events from the lazy sequences produced by Iterator<AcquisitionEvent> objects created
-        //    below. This can be used to keep tabs on the acquisition process. The monitor
-        //    will not fire until the AcquisitionEvent is supplied by the Iterator in preparation
-        //    for the hardware being set up to execute it.
-        Function<AcquisitionEvent, AcquisitionEvent> eventMonitor = acquisitionEvent -> {
-            // TODO: this will execute as each acquisition event is generated. Add code here
-            //  can be used, for example, to provide status updates to the GUI about what is
-            //  happening, by reading the context of each acquisition event
-            if (acquisitionEvent.getMinimumStartTimeAbsolute() != null) {
-                nextWakeTime_ = acquisitionEvent.getMinimumStartTimeAbsolute();
-            }
-
-            return acquisitionEvent;
-        };
 
 
         ///////////// Turn off autoshutter /////////////////
@@ -573,11 +579,11 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
                 if (acqSettings_.isUsingChannels()) {
                     currentAcquisition_.submitEventIterator(
                           LSMAcquisitionEvents.createTimelapseMultiChannelVolumeAcqEvents(
-                                baseEvent.copy(), acqSettings_, eventMonitor));
+                                baseEvent.copy(), acqSettings_, null));
                 } else {
                     currentAcquisition_.submitEventIterator(
                           LSMAcquisitionEvents.createTimelapseVolumeAcqEvents(
-                                baseEvent.copy(), acqSettings_, eventMonitor));
+                                baseEvent.copy(), acqSettings_, null));
                 }
             } else {
                 // Loop 2: Multiple time points
@@ -589,13 +595,13 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
                     if (acqSettings_.isUsingChannels()) {
                         currentAcquisition_.submitEventIterator(
                               LSMAcquisitionEvents.createMultiChannelVolumeAcqEvents(
-                                    baseEvent.copy(), acqSettings_, eventMonitor,
+                                    baseEvent.copy(), acqSettings_, null,
                                     acqSettings_.acquisitionMode() ==
                                           AcquisitionModes.STAGE_SCAN_INTERLEAVED));
                     } else {
                         currentAcquisition_.submitEventIterator(
                               LSMAcquisitionEvents.createVolumeAcqEvents(
-                                    baseEvent.copy(), acqSettings_, eventMonitor));
+                                    baseEvent.copy(), acqSettings_, null));
                     }
                 }
             }
