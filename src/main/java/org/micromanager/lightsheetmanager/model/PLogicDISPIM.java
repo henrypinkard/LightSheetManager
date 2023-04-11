@@ -60,10 +60,14 @@ public class PLogicDISPIM {
     static final int triggerSPIMAddr = 46;  // backplane signal, same as XY card's TTL output
     static final int laserTriggerAddress = 10;  // this should be set to (42 || 8) = (TTL1 || manual laser on)
 
-    public PLogicDISPIM(final Studio studio, final DeviceManager devices) {
+    private final DefaultAcquisitionSettingsDISPIM.Builder asb_;
+
+    public PLogicDISPIM(final Studio studio, final DeviceManager devices, final DefaultAcquisitionSettingsDISPIM.Builder asb) {
         studio_ = Objects.requireNonNull(studio);
         devices_ = Objects.requireNonNull(devices);
         core_ = studio_.core();
+
+        asb_ = asb;
 
         scanDistance_ = 0;
         actualStepSizeUm_ = 0;
@@ -597,8 +601,8 @@ public class PLogicDISPIM {
                 scanner.setSPIMInterleaveSides(isInterleaved);
 
                 // send sheet width/offset
-                //float sheetWidth = getSheetWidth(settings.cameraMode, cameraDevice, side);
-                //float sheetOffset = getSheetOffset(settings.cameraMode, side);
+                //float sheetWidth = getSheetWidth(asb_.cameraMode(), view);
+                //float sheetOffset = getSheetOffset(asb_.cameraMode(), view);
                 if (cameraMode == CameraModes.VIRTUAL_SLIT) {
                     // adjust sheet width and offset to account for settle time where scan is going but we aren't imaging yet
                     // FIXME: !!!
@@ -610,8 +614,8 @@ public class PLogicDISPIM {
 //                    // width should be increased by ratio (1 + settle_fraction)
 //                    sheetWidth += (sheetWidth * settleTime/readoutTime);
                 }
-//                scanner.sa().setAmplitudeX(sheetWidth);
-//                scanner.sa().setOffsetX(sheetOffset);
+                //scanner.sa().setAmplitudeX(sheetWidth);
+                //scanner.sa().setOffsetX(sheetOffset);
             }
         }
         return true;

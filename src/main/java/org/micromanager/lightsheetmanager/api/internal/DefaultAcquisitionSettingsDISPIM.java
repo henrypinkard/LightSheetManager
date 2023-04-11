@@ -302,6 +302,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
         public AcquisitionModes acquisitionMode() {
             return acquisitionMode_;
         }
+
         public CameraModes cameraMode() {
             return cameraMode_;
         }

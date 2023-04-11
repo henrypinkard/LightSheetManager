@@ -32,6 +32,7 @@ import org.micromanager.data.internal.ndtiff.NDTiffAdapter;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.lightsheetmanager.api.AcquisitionManager;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
+import org.micromanager.lightsheetmanager.api.data.DISPIMDevice;
 import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.api.internal.DefaultTimingSettings;
 import org.micromanager.lightsheetmanager.api.data.GeometryType;
@@ -259,7 +260,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
 
         // TODO: make static?
-        PLogicDISPIM controller = new PLogicDISPIM(studio_, model_.devices());
+        PLogicDISPIM controller = new PLogicDISPIM(studio_, model_.devices(), asb_);
 
         double extraChannelOffset = 0.0;
         controller.prepareControllerForAquisition(acqSettings_, extraChannelOffset);
@@ -395,6 +396,10 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
             }
 
         }
+
+        ASIScanner scanner = model_.devices().getDevice(DISPIMDevice.getIllumBeam(1));
+        scanner.sa().setAmplitudeX(4.1f);
+        scanner.sa().setOffsetY(-0.0336f);
 
         String saveDir = acqSettings_.saveDirectory();
         String saveName = acqSettings_.saveNamePrefix();
