@@ -379,6 +379,10 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
             } catch (JSONException e) {
                 System.out.println("failed to create json object!");
             }
+//            jsonObj.keys().forEachRemaining(key -> {
+//
+//            });
+
             for (Iterator<String> it = jsonObj.keys(); it.hasNext(); ) {
                 String s = it.next();
                 String value;
