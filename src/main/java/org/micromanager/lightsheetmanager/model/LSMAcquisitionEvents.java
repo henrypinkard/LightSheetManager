@@ -22,10 +22,12 @@ public class LSMAcquisitionEvents {
 
 
    public static final String POSITION_AXIS = "position";
+    public static final String CAMERA_AXIS = "view";
 
 
-   public static Iterator<AcquisitionEvent> createTimelapseMultiChannelVolumeAcqEvents(
+      public static Iterator<AcquisitionEvent> createTimelapseMultiChannelVolumeAcqEvents(
          AcquisitionEvent baseEvent, DefaultAcquisitionSettingsDISPIM acquisitionSettings,
+         String[] cameraDeviceNames,
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor) {
 
       if (acquisitionSettings.numTimePoints() <= 1) {
@@ -45,17 +47,21 @@ public class LSMAcquisitionEvents {
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
             acquisitionSettings.volumeSettings().slicesPerView());
 
+      Function<AcquisitionEvent, Iterator<AcquisitionEvent>> cameras = cameras(cameraDeviceNames);
+
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
 
       acqFunctions.add(timelapse);
       acqFunctions.add(channels);
+      acqFunctions.add(cameras);
       acqFunctions.add(zStack);
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
    }
 
    public static Iterator<AcquisitionEvent> createTimelapseVolumeAcqEvents(
          AcquisitionEvent baseEvent, DefaultAcquisitionSettingsDISPIM acquisitionSettings,
+         String[] cameraDeviceNames,
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor) {
 
       if (acquisitionSettings.numTimePoints() <= 1) {
@@ -64,6 +70,8 @@ public class LSMAcquisitionEvents {
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> timelapse =
             timelapse(acquisitionSettings.numTimePoints(), null);
 
+      Function<AcquisitionEvent, Iterator<AcquisitionEvent>> cameras = cameras(cameraDeviceNames);
+
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
             acquisitionSettings.volumeSettings().slicesPerView());
 
@@ -71,6 +79,7 @@ public class LSMAcquisitionEvents {
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
 
       acqFunctions.add(timelapse);
+      acqFunctions.add(cameras);
       acqFunctions.add(zStack);
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
    }
@@ -83,48 +92,74 @@ public class LSMAcquisitionEvents {
     */
    public static Iterator<AcquisitionEvent> createMultiChannelVolumeAcqEvents(
          AcquisitionEvent baseEvent, DefaultAcquisitionSettingsDISPIM acquisitionSettings,
+         String[] cameraDeviceNames,
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor, boolean interleaved) {
 
-      Function<AcquisitionEvent, Iterator<AcquisitionEvent>> channels = null;
-      channels = channels(acquisitionSettings.channels());
+      Function<AcquisitionEvent, Iterator<AcquisitionEvent>> channels =
+            channels(acquisitionSettings.channels());
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
             acquisitionSettings.volumeSettings().slicesPerView());
 
+      Function<AcquisitionEvent, Iterator<AcquisitionEvent>> cameras = cameras(cameraDeviceNames);
+
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
 
+
       if (interleaved) {
+         acqFunctions.add(cameras);
          acqFunctions.add(zStack);
          acqFunctions.add(channels);
       } else {
          acqFunctions.add(channels);
+         acqFunctions.add(cameras);
          acqFunctions.add(zStack);
       }
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
    }
 
-   public static Iterator<AcquisitionEvent> createSpeedTestEvents(Acquisition a, int numTimePoints) {
-      AcquisitionEvent baseEvent = new AcquisitionEvent(a);
-      ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
-            = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
-      acqFunctions.add(timelapse(numTimePoints, 0.0));
-      return new AcquisitionEventIterator(baseEvent, acqFunctions);
-   }
-
    public static Iterator<AcquisitionEvent> createVolumeAcqEvents(
          AcquisitionEvent baseEvent, DefaultAcquisitionSettingsDISPIM acquisitionSettings,
+         String[] cameraDeviceNames,
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor) {
+
+      Function<AcquisitionEvent, Iterator<AcquisitionEvent>> cameras = cameras(cameraDeviceNames);
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
             acquisitionSettings.volumeSettings().slicesPerView());
 
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
+      acqFunctions.add(cameras);
       acqFunctions.add(zStack);
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
    }
 
+
+   public static Function<AcquisitionEvent, Iterator<AcquisitionEvent>> cameras(String[] cameraDeviceNames) {
+      return (AcquisitionEvent event) -> {
+         return new Iterator<AcquisitionEvent>() {
+
+            private int cameraIndex_ = 0;
+            private String[] cameraDeviceNames_ = cameraDeviceNames;
+
+            @Override
+            public boolean hasNext() {
+               return cameraIndex_ < cameraDeviceNames_.length;
+            }
+
+            @Override
+            public AcquisitionEvent next() {
+               AcquisitionEvent cameraEvent = event.copy();
+               cameraEvent.setCameraDeviceName(cameraDeviceNames_[cameraIndex_]);
+               cameraEvent.setAxisPosition(CAMERA_AXIS, cameraIndex_);
+               cameraIndex_++;
+               return cameraEvent;
+            }
+         };
+      };
+   }
 
    public static Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack(int startSliceIndex,
                                                                                int stopSliceIndex) {

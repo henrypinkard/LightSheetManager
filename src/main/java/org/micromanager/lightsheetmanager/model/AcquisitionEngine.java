@@ -1,13 +1,16 @@
 package org.micromanager.lightsheetmanager.model;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import mmcorej.CMMCore;
+import mmcorej.StrVector;
 import mmcorej.org.json.JSONArray;
 import mmcorej.org.json.JSONException;
 import mmcorej.org.json.JSONObject;
@@ -25,6 +28,7 @@ import org.micromanager.acquisition.internal.acqengjcompat.speedtest.SpeedTest;
 import org.micromanager.data.DataProvider;
 import org.micromanager.data.Datastore;
 import org.micromanager.data.Pipeline;
+import org.micromanager.data.SummaryMetadata;
 import org.micromanager.data.internal.DefaultDatastore;
 import org.micromanager.data.internal.DefaultSummaryMetadata;
 import org.micromanager.data.internal.PropertyKey;
@@ -95,33 +99,38 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
                 return;
             }
 
-            // make sure AcquisitionSettings are up-to-date
-            acqSettings_ = asb_.build();
+            try {
+                // make sure AcquisitionSettings are up-to-date
+                acqSettings_ = asb_.build();
 
-            if (speedTest) {
-                try {
-                    SpeedTest.runSpeedTest(acqSettings_.saveDirectory(), acqSettings_.saveNamePrefix(),
-                            core_, acqSettings_.numTimePoints(), true);
-                } catch (Exception e) {
-                    studio_.logs().showError(e);
+                if (speedTest) {
+                    try {
+                        SpeedTest.runSpeedTest(acqSettings_.saveDirectory(),
+                              acqSettings_.saveNamePrefix(),
+                              core_, acqSettings_.numTimePoints(), true);
+                    } catch (Exception e) {
+                        studio_.logs().showError(e);
+                    }
+                } else {
+                    // Every one of these modality-specific functions should block until the
+                    // acquisition is complete
+                    GeometryType geometryType =
+                          model_.devices().getDeviceAdapter().getMicroscopeGeometry();
+                    switch (geometryType) {
+                        case DISPIM:
+                            runAcquisitionDISPIM();
+                            break;
+                        case SCAPE:
+                            runAcquisitionSCAPE();
+                            break;
+                        default:
+                            studio_.logs().showError(
+                                  "Acquisition Engine is not implemented for " + geometryType);
+                            break;
+                    }
                 }
-            } else {
-                // Every one of these modality-specific functions should block until the
-                // acquisition is complete
-                GeometryType geometryType =
-                      model_.devices().getDeviceAdapter().getMicroscopeGeometry();
-                switch (geometryType) {
-                    case DISPIM:
-                        runAcquisitionDISPIM();
-                        break;
-                    case SCAPE:
-                        runAcquisitionSCAPE();
-                        break;
-                    default:
-                        studio_.logs().showError(
-                              "Acquisition Engine is not implemented for " + geometryType);
-                        break;
-                }
+            } catch (Exception e) {
+                studio_.logs().showError(e);
             }
         });
         return acqFinished;
@@ -305,11 +314,23 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
             // MM MDA acquisitions have a defined order
             summaryMetadata.put(PropertyKey.SLICES_FIRST.key(),
-                  true); // currently only channel, slice ordering
+                  acqSettings_.acquisitionMode() == AcquisitionModes.STAGE_SCAN_INTERLEAVED);
             summaryMetadata.put(PropertyKey.TIME_FIRST.key(),
                   false); // currently only position, time ordering
 
-            DefaultSummaryMetadata dsmd = new DefaultSummaryMetadata.Builder().build();
+            SummaryMetadata.Builder dsmb = new DefaultSummaryMetadata.Builder();
+
+            List<String> axesOrdered = dsmb.build().getOrderedAxes();
+            axesOrdered.add(LSMAcquisitionEvents.CAMERA_AXIS);
+            // convert to JSON array
+            JSONArray axes = new JSONArray();
+            for (String axis : axesOrdered) {
+                axes.put(axis);
+            }
+            summaryMetadata.put(PropertyKey.AXIS_ORDER.key(), axes);
+
+            DefaultSummaryMetadata dsmd = (DefaultSummaryMetadata) dsmb.build();
+
             summaryMetadata.put(PropertyKey.MICRO_MANAGER_VERSION.key(),
                   dsmd.getMicroManagerVersion());
         } catch (JSONException e) {
@@ -399,13 +420,13 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
                 System.out.println(s + " " + value);
             }
 
+            System.out.println("isUsingHardwareTimePoints: " + acqSettings_.isUsingHardwareTimePoints());
+
+            ASIScanner scanner = model_.devices().getDevice(DISPIMDevice.getIllumBeam(1));
+            scanner.sa().setAmplitudeX(4.1f);
+            scanner.sa().setOffsetY(-0.0336f);
         }
 
-        System.out.println("isUsingHardwareTimePoints: " + acqSettings_.isUsingHardwareTimePoints());
-
-        ASIScanner scanner = model_.devices().getDevice(DISPIMDevice.getIllumBeam(1));
-        scanner.sa().setAmplitudeX(4.1f);
-        scanner.sa().setOffsetY(-0.0336f);
 
         setAcquisitionSettings(asb_.build());
 
@@ -628,6 +649,31 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         if (acqSettings_.isUsingMultiplePositions() && (pl.getNumberOfPositions() == 0)) {
             throw new RuntimeException("XY positions expected but position list is empty");
         }
+
+        String[] cameraNames;
+        if (demoMode) {
+            ArrayList<String> cameraDeviceNames = new ArrayList<String>();
+            StrVector loadedDevices = core_.getLoadedDevices();
+            for (int i = 0; i < loadedDevices.size(); i++) {
+                try {
+                    if (core_.getDeviceType(loadedDevices.get(i)).toString().equals("CameraDevice")) {
+                        cameraDeviceNames.add(loadedDevices.get(i));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            };
+            if (cameraDeviceNames.size() < 2) {
+                throw new RuntimeException("Need two cameras for diSPIM simulation");
+            }
+            cameraNames = cameraDeviceNames.toArray(new String[cameraDeviceNames.size()]);
+        } else {
+            cameraNames = new String[]{
+                model_.devices().getDevice("Imaging1Camera").getDeviceName(),
+                      model_.devices().getDevice("Imaging2Camera").getDeviceName()
+            };
+        }
+
         for (int positionIndex = 0; positionIndex < (acqSettings_.isUsingMultiplePositions() ?
               pl.getNumberOfPositions() : 1); positionIndex++) {
             AcquisitionEvent baseEvent = new AcquisitionEvent(currentAcquisition_);
@@ -643,11 +689,11 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
                 if (acqSettings_.isUsingChannels()) {
                     currentAcquisition_.submitEventIterator(
                           LSMAcquisitionEvents.createTimelapseMultiChannelVolumeAcqEvents(
-                                baseEvent.copy(), acqSettings_, null));
+                                baseEvent.copy(), acqSettings_, cameraNames, null));
                 } else {
                     currentAcquisition_.submitEventIterator(
                           LSMAcquisitionEvents.createTimelapseVolumeAcqEvents(
-                                baseEvent.copy(), acqSettings_, null));
+                                baseEvent.copy(), acqSettings_, cameraNames, null));
                 }
             } else {
                 // Loop 2: Multiple time points
@@ -659,13 +705,13 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
                     if (acqSettings_.isUsingChannels()) {
                         currentAcquisition_.submitEventIterator(
                               LSMAcquisitionEvents.createMultiChannelVolumeAcqEvents(
-                                    baseEvent.copy(), acqSettings_, null,
+                                    baseEvent.copy(), acqSettings_, cameraNames, null,
                                     acqSettings_.acquisitionMode() ==
                                           AcquisitionModes.STAGE_SCAN_INTERLEAVED));
                     } else {
                         currentAcquisition_.submitEventIterator(
                               LSMAcquisitionEvents.createVolumeAcqEvents(
-                                    baseEvent.copy(), acqSettings_, null));
+                                    baseEvent.copy(), acqSettings_, cameraNames, null));
                     }
                 }
             }
