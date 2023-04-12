@@ -474,11 +474,11 @@ public class PLogicDISPIM {
                 piezoCenter = piezo.getHomePosition();
             } else {
                 // TODO: add centerAtCurrentZ to acqSettings
-                final boolean centerAtCurrentZ = true;
+                final boolean centerAtCurrentZ = false;
                 if (centerAtCurrentZ) {
                     piezoCenter = (float)piezo.getPosition(); //(float) positions_.getUpdatedPosition(piezoDevice, Joystick.Directions.NONE);
                 } else {
-                    //piezoCenter = 0.0f; // FIXME: get from ui
+                    piezoCenter = 0.0f; // FIXME: get from ui
                 }
             }
 

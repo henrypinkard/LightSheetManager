@@ -43,7 +43,7 @@ public class LSMAcquisitionEvents {
       channels = channels(acquisitionSettings.channels());
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
-            acquisitionSettings.volumeSettings().slicesPerView() - 1);
+            acquisitionSettings.volumeSettings().slicesPerView());
 
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
@@ -65,7 +65,7 @@ public class LSMAcquisitionEvents {
             timelapse(acquisitionSettings.numTimePoints(), null);
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
-            acquisitionSettings.volumeSettings().slicesPerView() - 1);
+            acquisitionSettings.volumeSettings().slicesPerView());
 
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
@@ -89,7 +89,7 @@ public class LSMAcquisitionEvents {
       channels = channels(acquisitionSettings.channels());
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
-            acquisitionSettings.volumeSettings().slicesPerView() - 1);
+            acquisitionSettings.volumeSettings().slicesPerView());
 
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
@@ -117,7 +117,7 @@ public class LSMAcquisitionEvents {
          Function<AcquisitionEvent, AcquisitionEvent> eventMonitor) {
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
-            acquisitionSettings.volumeSettings().slicesPerView() - 1);
+            acquisitionSettings.volumeSettings().slicesPerView());
 
       ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
             = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();

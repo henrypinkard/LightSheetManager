@@ -397,14 +397,16 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
         }
 
+        System.out.println("isUsingHardwareTimePoints: " + acqSettings_.isUsingHardwareTimePoints());
+
         ASIScanner scanner = model_.devices().getDevice(DISPIMDevice.getIllumBeam(1));
         scanner.sa().setAmplitudeX(4.1f);
         scanner.sa().setOffsetY(-0.0336f);
 
+        setAcquisitionSettings(asb_.build());
+
         String saveDir = acqSettings_.saveDirectory();
         String saveName = acqSettings_.saveNamePrefix();
-
-
 
         DefaultDatastore result = new DefaultDatastore(studio_);
         try {
