@@ -427,7 +427,6 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
             scanner.sa().setOffsetY(-0.0336f);
         }
 
-
         setAcquisitionSettings(asb_.build());
 
         String saveDir = acqSettings_.saveDirectory();
@@ -668,10 +667,16 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
             }
             cameraNames = cameraDeviceNames.toArray(new String[cameraDeviceNames.size()]);
         } else {
-            cameraNames = new String[]{
-                model_.devices().getDevice("Imaging1Camera").getDeviceName(),
-                      model_.devices().getDevice("Imaging2Camera").getDeviceName()
-            };
+            if (acqSettings_.volumeSettings().numViews() > 1) {
+                cameraNames = new String[]{
+                        model_.devices().getDevice("Imaging1Camera").getDeviceName(),
+                        model_.devices().getDevice("Imaging2Camera").getDeviceName()
+                };
+            } else {
+                cameraNames = new String[]{
+                        model_.devices().getDevice("Imaging1Camera").getDeviceName()
+                };
+            }
         }
 
         for (int positionIndex = 0; positionIndex < (acqSettings_.isUsingMultiplePositions() ?
