@@ -46,7 +46,7 @@ public class AndorCamera extends CameraBase implements LightSheetCamera {
     }
 
     public String getDeviceName() {
-        return getProperty(Properties.CAMERA_NAME);
+        return deviceName_;
     }
 
     @Override
