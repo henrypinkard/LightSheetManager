@@ -6,15 +6,17 @@ import ij.ImageStack;
 import ij.process.ImageProcessor;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -25,7 +27,7 @@ import mmcorej.org.json.JSONObject;
 import org.micromanager.acqj.main.AcqEngMetadata;
 import org.micromanager.acqj.util.ImageProcessorBase;
 
-public class ObliqueStackProcessor extends ImageProcessorBase {
+public class ObliqueStackProcessor  {
 
    public static final int YX_PROJECTION = 0;
    public static final int OTHOGONAL_VIEWS = 1;
@@ -50,10 +52,9 @@ public class ObliqueStackProcessor extends ImageProcessorBase {
 
    int[][] pixelCountSumProjectionYX_, pixelCountSumProjectionZX_, pixelCountSumProjectionZY_;
    int[][][] pixelCountReconVolumeZYX_;
+
    private BlockingQueue<TaggedImage> imageQueue_ = new LinkedBlockingDeque<TaggedImage>();
 
-   private ExecutorService processingExecutor_ = Executors.newSingleThreadExecutor();
-   private Future currentProcessingFuture_;
 
    public ObliqueStackProcessor(int mode, double theta, double cameraPixelSizeXyUm, double zStep_um,
                                 int zStackSlices, int cameraImageWidth, int cameraImageHeight) {
@@ -193,7 +194,7 @@ public class ObliqueStackProcessor extends ImageProcessorBase {
     * @param image
     * @param zStackIndex
     */
-   public void addImageToReconstructions(short[] image, int zStackIndex) {
+   public void computeImageConstributionsToReconstructions(short[] image, int zStackIndex) {
       // loop through all the lines on the image, each of which corresponds to a
       // different axial distance along the sheet
       for (int yIndexCamera = 0; yIndexCamera < cameraImageHeight_; yIndexCamera++) {
@@ -239,7 +240,7 @@ public class ObliqueStackProcessor extends ImageProcessorBase {
         return reconVolumeZYX_;
     }
 
-    private void initializeProjections() {
+    void initializeProjections() {
        if (mode_ == YX_PROJECTION) {
           sumProjectionYX_ = new int[reconstructedImageHeight_][reconstructedImageWidth_];
        } else if (mode_ == OTHOGONAL_VIEWS) {
@@ -256,7 +257,7 @@ public class ObliqueStackProcessor extends ImageProcessorBase {
        reconVolumeZYX_ = null;
     }
 
-    private void finalizeProjections() {
+    void finalizeProjections() {
        //finalize the projections by dividing by the number of pixels
        if (mode_ == YX_PROJECTION) {
           computeYXMeanProjection();
@@ -276,7 +277,7 @@ public class ObliqueStackProcessor extends ImageProcessorBase {
       IntStream.range(0, stack.size())
             .parallel()
             .forEach(zStackIndex -> {
-               this.addImageToReconstructions(stack.get(zStackIndex), zStackIndex);
+               this.computeImageConstributionsToReconstructions(stack.get(zStackIndex), zStackIndex);
             });
 
       finalizeProjections();
@@ -332,98 +333,70 @@ public class ObliqueStackProcessor extends ImageProcessorBase {
         }
     }
 
-   /**
-    * Pull images from the queue and process them in parallel until
-    * a full z stack is processed or a null pix null tags stop signal is received.
-    */
-   private Future startProcessing() {
-       Iterator<TaggedImage> iterator = new Iterator<TaggedImage>() {
-          private final AtomicInteger processedImages_ = new AtomicInteger(0);
-          private volatile boolean stop_ = false;
 
-          @Override
-          public boolean hasNext() {
-             return !stop_ && processedImages_.get() < numZStackSlices_;
-          }
-
-          @Override
-          public TaggedImage next() {
-             try {
-                TaggedImage element;
-                while ((element = imageQueue_.poll(1, TimeUnit.MILLISECONDS)) == null) {
-                   // Wait for non-null elements
-                }
-                if (element.tags == null && element.pix == null) {
-                   // This is the last image, stop processing
-                   stop_ = true;
-                   return null;
-                }
-                processedImages_.incrementAndGet();
-                return element;
-             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-             }
-          }
-       };
-
-       return processingExecutor_.submit(new Runnable() {
-          @Override
-          public void run() {
-             StreamSupport.stream(Spliterators.spliterator(iterator, numZStackSlices_,
-                   Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL), true)
-                   .forEach(taggedImage -> {
-                      ObliqueStackProcessor.this.addImageToReconstructions((short[]) taggedImage.pix,
-                            (Integer) AcqEngMetadata.getAxes(taggedImage.tags).get(AcqEngMetadata.Z_AXIS));
-                   });
-          }
-       });
-    }
-
-   @Override
-   protected TaggedImage processImage(TaggedImage img) {
-      if (img.tags == null && img.pix == null) {
-         // This is the last image, stop processing
-         imageQueue_.add(img);
-         processingExecutor_.shutdown();
-         return null;
-      }
-
-      int zIndex = (Integer) AcqEngMetadata.getAxes(img.tags).get(AcqEngMetadata.Z_AXIS);
-      if (zIndex == 0) {
-         // First image, initialize the processing
-         initializeProjections();
-         currentProcessingFuture_ = startProcessing();
-         imageQueue_.add(img);
-         return null;
-      } else if (zIndex == numZStackSlices_ - 1) {
-         imageQueue_.add(img);
-        // Its the final one, wait for processing to complete and propagate the result
-         try {
-            currentProcessingFuture_.get();
-         } catch (Exception e) {
-            throw new RuntimeException(e);
-         }
-         finalizeProjections();
-
-         // Return the projection image
-         try {
-            JSONObject newTags = new JSONObject(img.tags.toString());
-            AcqEngMetadata.getAxes(newTags).remove(AcqEngMetadata.Z_AXIS);
-            AcqEngMetadata.setHeight(newTags, reconstructedImageHeight_);
-            AcqEngMetadata.setWidth(newTags, reconstructedImageWidth_);
-            return new TaggedImage(getYXProjection(), newTags);
-
-         } catch (JSONException e) {
-            throw new RuntimeException(e);
-         }
-      } else {
-         imageQueue_.add(img);
-         return null;
+   public void addToProcessImageQueue(TaggedImage image) {
+      try {
+         imageQueue_.put(image);
+      } catch (InterruptedException e) {
+         e.printStackTrace();
+         throw new RuntimeException(e);
       }
    }
 
 
-    ////////////////////////////////////////////////////////////////////
+   /**
+    * Pull images from the queue and process them in parallel until
+    * a full z stack is processed or a null pix null tags stop signal is received.
+    * The future can be gotten when the stackis finished processing
+    */
+   Runnable startStackProcessing() {
+      Iterator<TaggedImage> iterator = new Iterator<TaggedImage>() {
+         private final AtomicInteger processedImages_ = new AtomicInteger(0);
+         private volatile boolean stop_ = false;
+
+         @Override
+         public boolean hasNext() {
+            return !stop_ && processedImages_.get() < numZStackSlices_;
+         }
+
+         @Override
+         public TaggedImage next() {
+            try {
+               TaggedImage element;
+               while ((element = imageQueue_.poll(1, TimeUnit.MILLISECONDS)) == null) {
+                  // Wait for non-null elements
+               }
+               if (element.tags == null && element.pix == null) {
+                  // This is the last image, stop processing
+                  stop_ = true;
+                  return null;
+               }
+               processedImages_.incrementAndGet();
+               return element;
+            } catch (InterruptedException e) {
+               throw new RuntimeException(e);
+            }
+         }
+      };
+
+      return new Runnable() {
+         @Override
+         public void run() {
+            StreamSupport.stream(Spliterators.spliterator(iterator, numZStackSlices_,
+                  Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL), true)
+                  .forEach(taggedImage -> {
+                     ObliqueStackProcessor.this.computeImageConstributionsToReconstructions((short[]) taggedImage.pix,
+                           (Integer) AcqEngMetadata.getAxes(taggedImage.tags).get(AcqEngMetadata.Z_AXIS));
+                  });
+         }
+      };
+   }
+
+
+
+
+
+   ////////////////////////////////////////////////////////////////////
    //////////// Testing methods ///////////////////////////////////////
    ////////////////////////////////////////////////////////////////////
 
@@ -456,6 +429,61 @@ public class ObliqueStackProcessor extends ImageProcessorBase {
    }
 
 
+   private static short[] testWithAcqEngJInterface(ArrayList<short[]> stack, int imageWidth, int imageHeight,
+         int mode, double theta, double pixelSizeXYUm, double zStepUm) {
+
+      int numToTime = 50;
+
+      // convert imageJ to tagged image
+      ArrayList<TaggedImage> taggedImages = new ArrayList<>();
+      for (int i = 0; i < stack.size(); i++) {
+         short[] image = stack.get(i);
+         JSONObject tags = new JSONObject();
+         try {
+            tags.put("Width", imageWidth);
+            tags.put("Height", imageHeight);
+            JSONObject axes = new JSONObject();
+            axes.put(AcqEngMetadata.Z_AXIS, i);
+            tags.put("Axes", axes);
+         } catch (JSONException e) {
+            e.printStackTrace();
+         }
+         taggedImages.add(new TaggedImage(image, tags));
+      }
+
+      // Simulate several z stacks in sequence
+      AcqEngJStackProcessors processor = new AcqEngJStackProcessors(
+            mode, theta, pixelSizeXYUm, zStepUm, stack.size(), imageWidth, imageHeight, 1);
+
+      TaggedImage result = null;
+      for (int i = 0; i < numToTime; i++) {
+         long startTime = System.currentTimeMillis();
+         for (TaggedImage taggedImage : taggedImages) {
+            result = processor.processImage(taggedImage);
+         }
+         long endTime = System.currentTimeMillis();
+         System.out.println("Processing time: " + (endTime - startTime) + " ms");
+      }
+      return (short[]) result.pix;
+   }
+
+   private static short[] testDirect(ArrayList<short[]> stack, int imageWidth, int imageHeight,
+         int mode, double theta, double pixelSizeXYUm, double zStepUm) {
+
+      int numToTest = 50;
+
+      ObliqueStackProcessor processor = new ObliqueStackProcessor(
+            mode, theta, pixelSizeXYUm, zStepUm, stack.size(), imageWidth, imageHeight);
+
+      for (int i = 0; i < numToTest; i++) {
+         long startTime = System.currentTimeMillis();
+         processor.processAllImages(stack);
+         long endTime = System.currentTimeMillis();
+         System.out.println("Processing time: " + (endTime - startTime) + " ms");
+
+      }
+      return processor.getYXProjection();
+   }
 
    public static void main(String[] args) {
       String tiffPath = "C:\\Users\\henry\\Desktop\\demo_snouty.tif";
@@ -495,58 +523,158 @@ public class ObliqueStackProcessor extends ImageProcessorBase {
 //         }
 //         imageWidth /= downsamplingFactor;
 
-
-        System.out.println("Stack size: " + stack.size());
-        System.out.println("Image width: " + imageWidth + " Image height: " + imageHeight);
-
-
-        int mode = ObliqueStackProcessor.YX_PROJECTION;
-
-      ObliqueStackProcessor processor = new ObliqueStackProcessor(
-            mode,
-            theta, pixelSizeXYUm, zStepUm,
-            stack.size(), imageWidth, imageHeight);
-//      int numLoops = 20;
-//      for (int i = 0; i < numLoops; i++) {
-//         long startTime = System.currentTimeMillis();
-//         processor.processAllImages(stack);
-//         long endTime = System.currentTimeMillis();
-//         System.out.println("Processing time: " + (endTime - startTime) + " ms");
-//
-//      }
+      System.out.println("Stack size: " + stack.size());
+      System.out.println("Image width: " + imageWidth + " Image height: " + imageHeight);
 
 
 
-      short[] projectionXY = processor.getYXProjection();
-      short[] projectionZY = processor.getZYProjection();
-      short[] projectionZX = processor.getZXProjection();
+      int mode = ObliqueStackProcessor.YX_PROJECTION;
+
+
+//      short[] projectionXY = testDirect(stack, imageWidth, imageHeight, mode, theta,
+//            pixelSizeXYUm, zStepUm);
+
+      short[] projectionXY = testWithAcqEngJInterface(stack, imageWidth, imageHeight, mode, theta,
+            pixelSizeXYUm, zStepUm);
+
 
       //display in imageJ
       //open the imagej toolbar
-        new ImageJ();
+      new ImageJ();
 
-      ImageStack imageStack = new ImageStack(
-            processor.getReconstructedImageWidth(), processor.getReconstructedImageHeight());
+      int reconImageWidth = imageWidth;
+      int reconImageHeight = projectionXY.length / reconImageWidth;
+
+      ImageStack imageStack = new ImageStack(reconImageWidth, reconImageHeight);
       imageStack.addSlice("projection", projectionXY);
       ImagePlus projectionImage = new ImagePlus("projection", imageStack);
       projectionImage.show();
 
-      if (mode == ObliqueStackProcessor.OTHOGONAL_VIEWS) {
-         // show X
-         ImageStack imageStackXZ = new ImageStack(
-               processor.getReconstructedImageWidth(), processor.getReconstructedImageDepth());
-         imageStackXZ.addSlice("projectionZX", projectionZX);
-         ImagePlus projectionImageXZ = new ImagePlus("projectionZX", imageStackXZ);
-         projectionImageXZ.show();
-         // show Y
-         ImageStack imageStackYZ = new ImageStack(
-               processor.getReconstructedImageHeight(), processor.getReconstructedImageDepth());
-         imageStackYZ.addSlice("projectionZY", projectionZY);
-         ImagePlus projectionImageYZ = new ImagePlus("projectionZY", imageStackYZ);
-         projectionImageYZ.show();
+   }
+
+}
+
+   /**
+    * This class allows acqEngJ to call this oblique processor. It splits images
+    * from different cameras/channels/etc onto different instances of ObligqueStackProcessor
+    */
+   class AcqEngJStackProcessors extends ImageProcessorBase {
+      // Map from non Z-axes to SingleStackProcessor that is managing the reconstruction for that stack
+      private HashMap<HashMap<String, Object>, ObliqueStackProcessor> singleStackProcessors_ =
+            new HashMap<HashMap<String, Object>, ObliqueStackProcessor>();
+
+      private ExecutorService processingExecutor_ =
+            new ThreadPoolExecutor(1, 12, 1000, TimeUnit.MILLISECONDS,
+                  new LinkedBlockingDeque<Runnable>());
+      private HashMap<HashMap<String, Object>, Future> processingFutures_ =
+            new HashMap<HashMap<String, Object>, Future>();
+      private LinkedList<ObliqueStackProcessor> freeProcessors_ = new LinkedList<ObliqueStackProcessor>();
+
+        private final int mode_;
+        private final double theta_;
+        private final double cameraPixelSizeXyUm_;
+        private final double zStep_um_;
+        private final int numZStackSlices_;
+        private final int cameraImageWidth_;
+        private final int cameraImageHeight_;
+
+
+      public AcqEngJStackProcessors(int mode, double theta, double cameraPixelSizeXyUm, double zStep_um,
+                                    int zStackSlices, int cameraImageWidth, int cameraImageHeight,
+                                    int numUniqueProcessorsNeeded) {
+         super();
+         mode_ = mode;
+         theta_ = theta;
+         cameraPixelSizeXyUm_ = cameraPixelSizeXyUm;
+         zStep_um_ = zStep_um;
+         numZStackSlices_ = zStackSlices;
+         cameraImageWidth_ = cameraImageWidth;
+         cameraImageHeight_ = cameraImageHeight;
+         for (int i = 0; i < numUniqueProcessorsNeeded; i++) {
+            freeProcessors_.add(new ObliqueStackProcessor(mode_, theta_, cameraPixelSizeXyUm_,
+                  zStep_um_, numZStackSlices_, cameraImageWidth_, cameraImageHeight_));
+         }
       }
+
+      public int getReconstructedImageWidth() {
+         return singleStackProcessors_.values().iterator().next().getReconstructedImageWidth();
+      }
+
+        public int getReconstructedImageHeight() {
+             return singleStackProcessors_.values().iterator().next().getReconstructedImageHeight();
+        }
+
+      @Override
+      protected TaggedImage processImage(TaggedImage img) {
+         // This gets called by acq engine. Sort through non-z axes to determine which
+         // which processing stack to use.
+         int zIndex = (Integer) AcqEngMetadata.getAxes(img.tags).get(AcqEngMetadata.Z_AXIS);
+         HashMap<String, Object> nonZAxes = AcqEngMetadata.getAxes(img.tags);
+         nonZAxes.remove(AcqEngMetadata.Z_AXIS);
+
+         ObliqueStackProcessor processor = singleStackProcessors_.containsKey(nonZAxes) ?
+               singleStackProcessors_.get(nonZAxes) : null;
+
+         if (img.tags == null && img.pix == null) {
+            // This is the last image because acquisition is ending,
+            // tell all processors to stop processing
+            for (ObliqueStackProcessor p : singleStackProcessors_.values()) {
+               p.addToProcessImageQueue(img);
+            }
+            processingExecutor_.shutdown();
+            return null;
+         }
+
+
+         if (zIndex == 0) {
+            singleStackProcessors_.put(nonZAxes, freeProcessors_.pop());
+            processor = singleStackProcessors_.get(nonZAxes);
+
+            // First image, initialize the processing
+            processor.initializeProjections();
+            Future f = processingExecutor_.submit(processor.startStackProcessing());
+            processingFutures_.put(nonZAxes, f);
+            processor.addToProcessImageQueue(img);
+            return null;
+         } else if (zIndex == numZStackSlices_ - 1) {
+            processor.addToProcessImageQueue(img);
+            // Its the final one, wait for processing to complete and propagate the result
+            try {
+               processingFutures_.get(nonZAxes).get();
+            } catch (InterruptedException e) {
+               e.printStackTrace();
+               throw new RuntimeException();
+            } catch (ExecutionException e) {
+               e.printStackTrace();
+               throw new RuntimeException();
+            } finally {
+                processingFutures_.remove(nonZAxes);
+            }
+
+            processor.finalizeProjections();
+            // Return the projection image
+            try {
+               JSONObject newTags = new JSONObject(img.tags.toString());
+               if (newTags.has(AcqEngMetadata.Z_UM_INTENDED)) {
+                  newTags.remove(AcqEngMetadata.Z_UM_INTENDED);
+               }
+               AcqEngMetadata.setAxisPosition(newTags, AcqEngMetadata.Z_AXIS, null);
+               AcqEngMetadata.setHeight(newTags, processor.getReconstructedImageHeight());
+               AcqEngMetadata.setWidth(newTags, processor.getReconstructedImageWidth());
+               short[] projection = processor.getYXProjection();
+                freeProcessors_.add(processor);
+                singleStackProcessors_.remove(nonZAxes);
+                return new TaggedImage(projection, newTags);
+
+            } catch (JSONException e) {
+               throw new RuntimeException(e);
+            }
+         } else {
+            processor.addToProcessImageQueue(img);
+            return null;
+         }
+      }
+
    }
 
 
-
-}
