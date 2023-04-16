@@ -40,6 +40,7 @@ public class AcquisitionTab extends Panel {
     private Button btnTestAcquisition_;
     private Button btnOpenPlaylist_;
     private Button btnSpeedTest_;
+    private Button btnRunOverviewAcq_;
 
     private CheckBox chkUseChannels_;
 
@@ -168,6 +169,9 @@ public class AcquisitionTab extends Panel {
         btnOpenPlaylist_ = new Button("Playlist...");
         btnSpeedTest_ = new Button("Speed test");
 
+        Button.setDefaultSize(140, 30);
+        btnRunOverviewAcq_ = new Button("Overview Acquisition");
+
         channelTablePanel_ = new ChannelTablePanel(model_, chkUseChannels_);
         // disable elements based on acqSettings
         if (!acqSettings.isUsingChannels()) {
@@ -203,6 +207,7 @@ public class AcquisitionTab extends Panel {
         panelButtons_.add(btnTestAcquisition_, "");
         panelButtons_.add(btnOpenPlaylist_, "");
         panelButtons_.add(btnSpeedTest_, "");
+        panelButtons_.add(btnRunOverviewAcq_, "");
 
         // 3 panel layout
         panelLeft.add(panelDurations_, "growx, growy");
@@ -247,7 +252,7 @@ public class AcquisitionTab extends Panel {
         btnPauseAcquisition_.setEnabled(true);
         btnSpeedTest_.setEnabled(false);
         Future acqFinished = model_.acquisitions().requestRun(speedTest);
-        // Launch new thread to update the button when the acquisiton is complete
+        // Launch new thread to update the button when the acquisition is complete
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -288,8 +293,10 @@ public class AcquisitionTab extends Panel {
 
         btnOpenPlaylist_.registerListener(e -> acqTableFrame_.setVisible(true));
 
-        btnSpeedTest_.registerListener(e -> {
-            runAcquisition(true);
+        btnSpeedTest_.registerListener(e -> runAcquisition(true));
+        btnRunOverviewAcq_.registerListener(e -> {
+            System.out.println("run overview acquisition");
+            // TODO: run the overview acq
         });
 
         btnOpenXYZGrid_.registerListener(e -> xyzGridFrame_.setVisible(true));
