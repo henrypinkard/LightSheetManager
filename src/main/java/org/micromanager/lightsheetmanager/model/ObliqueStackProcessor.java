@@ -39,7 +39,6 @@ public class ObliqueStackProcessor {
 //   private AtomicInteger[][][] reconVolume_;
 //   private AtomicInteger[][][] pixelCountReconVolume_;
 
-   private Object[] yLocks;
 
    public ObliqueStackProcessor(double theta, double cameraPixelSizeXyUm, double zStep_um,
                                 int zStackSlices, int cameraImageWidth, int cameraImageHeight) {
@@ -54,15 +53,10 @@ public class ObliqueStackProcessor {
       destZCoordLUT_ = new int[zStackSlices_][cameraImageHeight_];
       precomputeCoordTransformLUTs();
 
-      yLocks = new Object[reconstructedImageHeight_];
-      for (int i = 0; i < reconstructedImageHeight_; i++) {
-         yLocks[i] = new Object();
-      }
-
 
       pixelCountSumProjectionYX_ =  new int[reconstructedImageHeight_][reconstructedImageWidth_];
-      for (int x = 0; x < reconstructedImageWidth_; x++) {
-         for (int y = 0; y < reconstructedImageHeight_; y++) {
+      for (int y = 0; y < reconstructedImageHeight_; y++) {
+         for (int x = 0; x < reconstructedImageWidth_; x++) {
             pixelCountSumProjectionYX_[y][x] += 1;
          }
       }
@@ -160,9 +154,11 @@ public class ObliqueStackProcessor {
          synchronized (destination[stageYIndex]) {
             for (int stageXIndex = 0; stageXIndex < cameraImageWidth_; stageXIndex++) {
                short pixelValue = image[yIndexCamera * cameraImageWidth_ + stageXIndex];
-               if (pixelValue != 0) {
-                  destination[stageYIndex][stageXIndex] += (pixelValue & 0xffff);
-               }
+
+//                  destination[stageYIndex][stageXIndex] += (pixelValue & 0xffff);
+               destination[stageYIndex][stageXIndex] += (pixelValue & 0xffff);
+
+
             }
          }
       }
@@ -192,7 +188,7 @@ public class ObliqueStackProcessor {
       sumProjectionYX_ = new int[reconstructedImageHeight_][reconstructedImageWidth_];
 
       IntStream.range(0, stack.size())
-            .parallel()
+//            .parallel()
             .forEach(zStackIndex -> {
                this.processImage(stack.get(zStackIndex), zStackIndex, sumProjectionYX_);
             });
@@ -204,7 +200,8 @@ public class ObliqueStackProcessor {
             for (int x = 0; x < reconstructedImageWidth_; x++) {
                 if (pixelCountSumProjectionYX_[y][x] > 0) {
                     meanProjectionYX_[x + y * reconstructedImageWidth_] =
-                            (short) ((float) sumProjectionYX_[y][x] / (float)pixelCountSumProjectionYX_[y][x]);
+                            (short) ( sumProjectionYX_[y][x] );
+//                                  / (float)pixelCountSumProjectionYX_[y][x]);
                 }
             }
         }
@@ -308,14 +305,14 @@ public class ObliqueStackProcessor {
 //        System.out.println("Finalize time: " + (endTime2 - endTime) + " ms");
 
 
-      short[] projectionYX = processor.getYXProjection();
+      short[] projectionXY = processor.getYXProjection();
 //      short[] projectionYZ = processor.getYZProjection();
 //      short[] projectionXZ = processor.getXZProjection();
 
       //display in imageJ
       ImageStack imageStack = new ImageStack(
             processor.getReconstructedImageWidth(), processor.getReconstructedImageHeight());
-      imageStack.addSlice("projection", projectionYX);
+      imageStack.addSlice("projection", projectionXY);
       ImagePlus projectionImage = new ImagePlus("projection", imageStack);
       projectionImage.show();
       // show X
