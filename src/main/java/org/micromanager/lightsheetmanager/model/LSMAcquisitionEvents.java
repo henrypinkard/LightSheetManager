@@ -1,18 +1,18 @@
 package org.micromanager.lightsheetmanager.model;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.function.Function;
-import java.util.stream.Stream;
 import org.micromanager.MultiStagePosition;
 import org.micromanager.PositionList;
 import org.micromanager.acqj.internal.Engine;
 import org.micromanager.acqj.main.AcqEngMetadata;
-import org.micromanager.acqj.main.Acquisition;
 import org.micromanager.acqj.main.AcquisitionEvent;
 import org.micromanager.acqj.util.AcquisitionEventIterator;
 import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.model.channels.ChannelSpec;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * This function creates lazy sequences (i.e. iterators) of acquisition events by translating
@@ -20,8 +20,7 @@ import org.micromanager.lightsheetmanager.model.channels.ChannelSpec;
  */
 public class LSMAcquisitionEvents {
 
-
-   public static final String POSITION_AXIS = "position";
+    public static final String POSITION_AXIS = "position";
     public static final String CAMERA_AXIS = "view";
 
 
@@ -41,7 +40,7 @@ public class LSMAcquisitionEvents {
          throw new RuntimeException("Expected multiple channels but only one found");
       }
 
-      Function<AcquisitionEvent, Iterator<AcquisitionEvent>> channels = null;
+      Function<AcquisitionEvent, Iterator<AcquisitionEvent>> channels;
       channels = channels(acquisitionSettings.channels());
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
@@ -49,8 +48,7 @@ public class LSMAcquisitionEvents {
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> cameras = cameras(cameraDeviceNames);
 
-      ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
-            = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
+      ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions = new ArrayList<>();
 
       acqFunctions.add(timelapse);
       acqFunctions.add(channels);
@@ -75,8 +73,7 @@ public class LSMAcquisitionEvents {
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
             acquisitionSettings.volumeSettings().slicesPerView());
 
-      ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
-            = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
+      ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions = new ArrayList<>();
 
       acqFunctions.add(timelapse);
       acqFunctions.add(cameras);
@@ -103,9 +100,7 @@ public class LSMAcquisitionEvents {
 
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> cameras = cameras(cameraDeviceNames);
 
-      ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
-            = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
-
+      ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions = new ArrayList<>();
 
       if (interleaved) {
          acqFunctions.add(cameras);
@@ -129,8 +124,7 @@ public class LSMAcquisitionEvents {
       Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack = zStack(0,
             acquisitionSettings.volumeSettings().slicesPerView());
 
-      ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions
-            = new ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>>();
+      ArrayList<Function<AcquisitionEvent, Iterator<AcquisitionEvent>>> acqFunctions = new ArrayList<>();
       acqFunctions.add(cameras);
       acqFunctions.add(zStack);
       return new AcquisitionEventIterator(baseEvent, acqFunctions, eventMonitor);
@@ -236,7 +230,7 @@ public class LSMAcquisitionEvents {
                channelEvent.setConfigPreset(channelList[index].getName());
                channelEvent.setChannelName(channelList[index].getName());
 
-               Double zPos;
+               double zPos;
                if (channelEvent.getZPosition() == null) {
                   try {
                      zPos = Engine.getCore().getPosition() + channelList[index].getOffset();
