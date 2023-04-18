@@ -497,45 +497,47 @@ public class ObliqueStackProcessor  {
       ArrayList<short[]> stack = loadTiffStack(imagePlus);
 
       // downsample the stack taking every other
-//      int downsamplingFactorZ = 2;
-//      ArrayList<short[]> downsampledStack = new ArrayList<>();
-//        for (int i = 0; i < stack.size(); i++) {
-//             if (i % downsamplingFactorZ == 0) {
-//                downsampledStack.add(stack.get(i));
-//             }
-//        }
-//        stack = downsampledStack;
-//        zStepUm *= downsamplingFactorZ;
+      int downsamplingFactorZ = 2;
+      ArrayList<short[]> downsampledStack = new ArrayList<>();
+        for (int i = 0; i < stack.size(); i++) {
+             if (i % downsamplingFactorZ == 0) {
+                downsampledStack.add(stack.get(i));
+             }
+        }
+        stack = downsampledStack;
+        zStepUm *= downsamplingFactorZ;
 
 
       // keep only first 256 elements
 //        stack = new ArrayList<short[]>(stack.subList(0, 256));
 
 //         create a new stack of images with teh y axis downsized by a factor of
-//      int downsamplingFactor = 4;
-//        for (int i = 0; i < stack.size(); i++) {
-//             short[] image = stack.get(i);
-//             short[] newImage = new short[image.length / downsamplingFactor];
-//             for (int j = 0; j < newImage.length; j++) {
-//                 newImage[j] = image[j * downsamplingFactor];
-//             }
-//             stack.set(i, newImage);
-//         }
-//         imageWidth /= downsamplingFactor;
+      int downsamplingFactor = 2;
+        for (int i = 0; i < stack.size(); i++) {
+             short[] image = stack.get(i);
+             short[] newImage = new short[image.length / downsamplingFactor];
+             for (int j = 0; j < newImage.length; j++) {
+                 newImage[j] = image[j * downsamplingFactor];
+             }
+             stack.set(i, newImage);
+         }
+         imageWidth /= downsamplingFactor;
 
       System.out.println("Stack size: " + stack.size());
       System.out.println("Image width: " + imageWidth + " Image height: " + imageHeight);
 
 
 
-      int mode = ObliqueStackProcessor.YX_PROJECTION;
+//      int mode = ObliqueStackProcessor.YX_PROJECTION;
+//      int mode = ObliqueStackProcessor.OTHOGONAL_VIEWS;
+      int mode = ObliqueStackProcessor.FULL_VOLUME;
 
 
-//      short[] projectionXY = testDirect(stack, imageWidth, imageHeight, mode, theta,
-//            pixelSizeXYUm, zStepUm);
-
-      short[] projectionXY = testWithAcqEngJInterface(stack, imageWidth, imageHeight, mode, theta,
+      short[] projectionXY = testDirect(stack, imageWidth, imageHeight, mode, theta,
             pixelSizeXYUm, zStepUm);
+
+//      short[] projectionXY = testWithAcqEngJInterface(stack, imageWidth, imageHeight, mode, theta,
+//            pixelSizeXYUm, zStepUm);
 
 
       //display in imageJ
