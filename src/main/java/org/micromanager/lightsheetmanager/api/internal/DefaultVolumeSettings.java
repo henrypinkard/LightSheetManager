@@ -161,6 +161,10 @@ public class DefaultVolumeSettings implements VolumeSettings {
             return slicesPerVolume_;
         }
 
+        public int numViews() {
+            return numViews_;
+        }
+
         /**
          * Creates an immutable instance of VolumeSettings
          *

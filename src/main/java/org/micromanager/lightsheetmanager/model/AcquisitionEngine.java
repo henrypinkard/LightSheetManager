@@ -457,7 +457,12 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 //            scanner.sa().setAmplitudeX(4.1f);
 //            scanner.sa().setOffsetY(-0.0336f);
         }
-
+        try {
+            core_.setProperty("Andor sCMOS Camera A", "TriggerMode", "Internal (Recommended for fast acquisitions)");
+            core_.setProperty("Andor sCMOS Camera B", "TriggerMode", "Internal (Recommended for fast acquisitions)"); // External
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
         setAcquisitionSettings(asb_.build());
 
         String saveDir = acqSettings_.saveDirectory();
@@ -723,9 +728,9 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
             if (cameraDeviceNames.size() < 2) {
                 throw new RuntimeException("Need two cameras for diSPIM simulation");
             }
-            cameraNames = cameraDeviceNames.toArray(new String[cameraDeviceNames.size()]);
+            cameraNames = cameraDeviceNames.toArray(new String[0]);
         } else {
-            if (acqSettings_.volumeSettings().numViews() > 1) {
+            if (asb_.vsb().numViews() > 1) {
                 cameraNames = new String[]{
                         model_.devices().getDevice("Imaging1Camera").getDeviceName(),
                         model_.devices().getDevice("Imaging2Camera").getDeviceName()
