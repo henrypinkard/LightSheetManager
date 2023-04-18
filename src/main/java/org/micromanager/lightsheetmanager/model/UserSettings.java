@@ -61,16 +61,6 @@ public class UserSettings {
      */
     public void load() {
         String json = settings.getString(DEVICES_KEY, SETTINGS_NOT_FOUND);
-        try {
-            JSONObject jsonObj = new JSONObject(json);
-            //jsonObj.remove("volumeSettings_");
-            JSONObject volumeSettings = jsonObj.getJSONObject("volumeSettings_");
-            volumeSettings.remove("numViews_");
-            jsonObj.put("volumeSettings_", volumeSettings);
-            json = jsonObj.toString();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
         System.out.println("loaded json: " + json);
         // use default settings if settings data not found
         if (!json.equals(SETTINGS_NOT_FOUND)) {
