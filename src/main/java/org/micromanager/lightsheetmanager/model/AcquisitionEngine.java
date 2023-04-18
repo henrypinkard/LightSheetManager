@@ -681,7 +681,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
         String[] cameraNames;
         if (demoMode) {
-            ArrayList<String> cameraDeviceNames = new ArrayList<String>();
+            ArrayList<String> cameraDeviceNames = new ArrayList<>();
             StrVector loadedDevices = core_.getLoadedDevices();
             for (int i = 0; i < loadedDevices.size(); i++) {
                 try {

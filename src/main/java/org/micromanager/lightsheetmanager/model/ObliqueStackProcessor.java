@@ -53,7 +53,7 @@ public class ObliqueStackProcessor  {
    int[][] pixelCountSumProjectionYX_, pixelCountSumProjectionZX_, pixelCountSumProjectionZY_;
    int[][][] pixelCountReconVolumeZYX_;
 
-   private BlockingQueue<TaggedImage> imageQueue_ = new LinkedBlockingDeque<TaggedImage>();
+   private BlockingQueue<TaggedImage> imageQueue_ = new LinkedBlockingDeque<>();
 
 
    public ObliqueStackProcessor(int mode, double theta, double cameraPixelSizeXyUm, double zStep_um,
@@ -194,7 +194,7 @@ public class ObliqueStackProcessor  {
     * @param image
     * @param zStackIndex
     */
-   public void computeImageConstributionsToReconstructions(short[] image, int zStackIndex) {
+   public void computeImageContributionsToReconstructions(short[] image, int zStackIndex) {
       // loop through all the lines on the image, each of which corresponds to a
       // different axial distance along the sheet
       for (int yIndexCamera = 0; yIndexCamera < cameraImageHeight_; yIndexCamera++) {
@@ -276,9 +276,8 @@ public class ObliqueStackProcessor  {
       // Parallel process all images
       IntStream.range(0, stack.size())
             .parallel()
-            .forEach(zStackIndex -> {
-               this.computeImageConstributionsToReconstructions(stack.get(zStackIndex), zStackIndex);
-            });
+            .forEach(zStackIndex ->
+                    this.computeImageContributionsToReconstructions(stack.get(zStackIndex), zStackIndex));
 
       finalizeProjections();
    }
@@ -289,7 +288,7 @@ public class ObliqueStackProcessor  {
          for (int x = 0; x < reconstructedImageWidth_; x++) {
             if (pixelCountSumProjectionYX_[y][x] > 0) {
                meanProjectionYX_[x + y * reconstructedImageWidth_] =
-                     (short) ( sumProjectionYX_[y][x]  / (int) pixelCountSumProjectionYX_[y][x]);
+                     (short) ( sumProjectionYX_[y][x] / pixelCountSumProjectionYX_[y][x]);
             }
          }
       }
@@ -301,7 +300,7 @@ public class ObliqueStackProcessor  {
             for (int x = 0; x < reconstructedImageWidth_; x++) {
                 if (pixelCountSumProjectionZX_[z][x] > 0) {
                 meanProjectionZX_[x + z * reconstructedImageWidth_] =
-                        (short) ( sumProjectionZX_[z][x]  / pixelCountSumProjectionZX_[z][x]) ;
+                        (short) ( sumProjectionZX_[z][x] / pixelCountSumProjectionZX_[z][x]) ;
                 }
             }
         }
@@ -313,7 +312,7 @@ public class ObliqueStackProcessor  {
             for (int y = 0; y < reconstructedImageHeight_; y++) {
                 if (pixelCountSumProjectionZY_[z][y] > 0) {
                 meanProjectionZY_[y + z * reconstructedImageHeight_] =
-                        (short) ( sumProjectionZY_[z][y]  / pixelCountSumProjectionZY_[z][y]) ;
+                        (short) ( sumProjectionZY_[z][y] / pixelCountSumProjectionZY_[z][y]) ;
                 }
             }
         }
@@ -326,7 +325,7 @@ public class ObliqueStackProcessor  {
                 for (int x = 0; x < reconstructedImageWidth_; x++) {
                     if (pixelCountReconVolumeZYX_[z][y][x] > 0) {
                         reconVolumeZYX_[z][y * reconstructedImageWidth_ + x] =
-                                (short) ( sumReconVolumeZYX_[z][y][x]  / pixelCountReconVolumeZYX_[z][y][x]) ;
+                                (short) ( sumReconVolumeZYX_[z][y][x] / pixelCountReconVolumeZYX_[z][y][x]) ;
                     }
                 }
             }
@@ -347,7 +346,7 @@ public class ObliqueStackProcessor  {
    /**
     * Pull images from the queue and process them in parallel until
     * a full z stack is processed or a null pix null tags stop signal is received.
-    * The future can be gotten when the stackis finished processing
+    * The future can be gotten when the stack is finished processing
     */
    Runnable startStackProcessing() {
       Iterator<TaggedImage> iterator = new Iterator<TaggedImage>() {
@@ -379,17 +378,11 @@ public class ObliqueStackProcessor  {
          }
       };
 
-      return new Runnable() {
-         @Override
-         public void run() {
-            StreamSupport.stream(Spliterators.spliterator(iterator, numZStackSlices_,
-                  Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL), true)
-                  .forEach(taggedImage -> {
-                     ObliqueStackProcessor.this.computeImageConstributionsToReconstructions((short[]) taggedImage.pix,
-                           (Integer) AcqEngMetadata.getAxes(taggedImage.tags).get(AcqEngMetadata.Z_AXIS));
-                  });
-         }
-      };
+      return () -> StreamSupport.stream(Spliterators.spliterator(iterator, numZStackSlices_,
+            Spliterator.ORDERED | Spliterator.IMMUTABLE | Spliterator.NONNULL), true)
+            .forEach(taggedImage ->
+                    ObliqueStackProcessor.this.computeImageContributionsToReconstructions((short[]) taggedImage.pix,
+                            (Integer) AcqEngMetadata.getAxes(taggedImage.tags).get(AcqEngMetadata.Z_AXIS)));
    }
 
 
@@ -558,19 +551,18 @@ public class ObliqueStackProcessor  {
 
    /**
     * This class allows acqEngJ to call this oblique processor. It splits images
-    * from different cameras/channels/etc onto different instances of ObligqueStackProcessor
+    * from different cameras/channels/etc onto different instances of ObliqueStackProcessor
     */
    class AcqEngJStackProcessors extends ImageProcessorBase {
       // Map from non Z-axes to SingleStackProcessor that is managing the reconstruction for that stack
-      private HashMap<HashMap<String, Object>, ObliqueStackProcessor> singleStackProcessors_ =
-            new HashMap<HashMap<String, Object>, ObliqueStackProcessor>();
+      private HashMap<HashMap<String, Object>, ObliqueStackProcessor> singleStackProcessors_ = new HashMap<>();
 
       private ExecutorService processingExecutor_ =
             new ThreadPoolExecutor(1, 12, 1000, TimeUnit.MILLISECONDS,
-                  new LinkedBlockingDeque<Runnable>());
-      private HashMap<HashMap<String, Object>, Future> processingFutures_ =
-            new HashMap<HashMap<String, Object>, Future>();
-      private LinkedList<ObliqueStackProcessor> freeProcessors_ = new LinkedList<ObliqueStackProcessor>();
+                    new LinkedBlockingDeque<>());
+      private HashMap<HashMap<String, Object>, Future> processingFutures_ = new HashMap<>();
+
+      private LinkedList<ObliqueStackProcessor> freeProcessors_ = new LinkedList<>();
 
         private final int mode_;
         private final double theta_;
@@ -609,13 +601,12 @@ public class ObliqueStackProcessor  {
       @Override
       protected TaggedImage processImage(TaggedImage img) {
          // This gets called by acq engine. Sort through non-z axes to determine which
-         // which processing stack to use.
+         // processing stack to use.
          int zIndex = (Integer) AcqEngMetadata.getAxes(img.tags).get(AcqEngMetadata.Z_AXIS);
          HashMap<String, Object> nonZAxes = AcqEngMetadata.getAxes(img.tags);
          nonZAxes.remove(AcqEngMetadata.Z_AXIS);
 
-         ObliqueStackProcessor processor = singleStackProcessors_.containsKey(nonZAxes) ?
-               singleStackProcessors_.get(nonZAxes) : null;
+         ObliqueStackProcessor processor = singleStackProcessors_.getOrDefault(nonZAxes, null);
 
          if (img.tags == null && img.pix == null) {
             // This is the last image because acquisition is ending,
@@ -634,13 +625,13 @@ public class ObliqueStackProcessor  {
 
             // First image, initialize the processing
             processor.initializeProjections();
-            Future f = processingExecutor_.submit(processor.startStackProcessing());
+            Future<?> f = processingExecutor_.submit(processor.startStackProcessing());
             processingFutures_.put(nonZAxes, f);
             processor.addToProcessImageQueue(img);
             return null;
          } else if (zIndex == numZStackSlices_ - 1) {
             processor.addToProcessImageQueue(img);
-            // Its the final one, wait for processing to complete and propagate the result
+            // It's the final one, wait for processing to complete and propagate the result
             try {
                processingFutures_.get(nonZAxes).get();
             } catch (InterruptedException e) {
