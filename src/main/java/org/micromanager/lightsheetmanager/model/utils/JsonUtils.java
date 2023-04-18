@@ -22,7 +22,7 @@ public class JsonUtils {
         Objects.requireNonNull(json);
         Objects.requireNonNull(key);
         try {
-            return (String)json.get(key);
+            return json.getString(key);
         } catch (JSONException e) {
             return "";
         }
