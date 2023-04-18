@@ -78,11 +78,11 @@
      <version>LATEST</version>
       </dependency>
       <!-- TODO: switch to a remote repo for MMJ once it is mavenized -->
-<!--       <dependency>
+      <dependency>
          <groupId>org.micro-manager</groupId>
          <artifactId>MMJ_</artifactId>
          <version>10.1.1.0</version>
-      </dependency> -->
+      </dependency>
 
    <dependency>
        <groupId>com.sample</groupId>
