@@ -238,7 +238,8 @@ public class PLogicDISPIM {
             xyStage_.setScanPattern(isStageScan2Sided ? ASIXYStage.ScanPattern.SERPENTINE : ASIXYStage.ScanPattern.RASTER);
 
             if (xyStage_.getAxisPolarityX() != ASIXYStage.AxisPolarity.NORMAL) {
-                studio_.logs().showError("Stage scanning requires X axis polarity set to normal");
+                studio_.logs().showError(
+                        "Stage scanning requires X axis polarity set to " + ASIXYStage.AxisPolarity.NORMAL);
                 return false;
             }
 
@@ -756,7 +757,6 @@ public class PLogicDISPIM {
 
         } else {
             // original 4-channel mode
-
             // initialize cells 13-16 which control BNCs 5-8
             for (int cellNum = 13; cellNum <= 16; cellNum++) {
                 plcLaser_.setPointerPosition(cellNum);
@@ -886,7 +886,7 @@ public class PLogicDISPIM {
         }
     }
 
-    // TODO: need sheet width settings in AcquiositionSettings
+    // TODO: need sheet width settings in AcquisitionSettings
     /**
      * gets the sheet width for the specified settings in units of degrees
      * @param cameraMode
@@ -905,7 +905,7 @@ public class PLogicDISPIM {
 //        sheetWidth = props_.getPropValueFloat(Devices.Keys.PLUGIN, widthProp);
         sheetWidth = 1; // TODO: get from properties
 
-        if (cameraName == null || cameraName == "") {
+        if (cameraName == null || cameraName.equals("")) {
             studio_.logs().logDebugMessage("Could get sheet width for invalid device " + cameraName);
             return sheetWidth;
         }
