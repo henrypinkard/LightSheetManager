@@ -89,7 +89,7 @@ public class AcquisitionTab extends Panel {
         studio_ = model_.getStudio();
         acqTableFrame_ = new AcquisitionTableFrame(studio_);
         advTimingFrame_ = new AdvancedTimingFrame(model_);
-        xyzGridFrame_ = new XYZGridFrame();
+        xyzGridFrame_ = new XYZGridFrame(model_);
         createUserInterface();
         createEventHandlers();
     }
