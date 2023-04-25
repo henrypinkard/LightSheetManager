@@ -37,9 +37,9 @@ public class XYZGridFrame extends JFrame {
     private Spinner spnOverlap_;
     private CheckBox chkClearPositions_;
 
-    private JLabel lblXCount_;
-    private JLabel lblYCount_;
-    private JLabel lblZCount_;
+    private JLabel lblXCountValue_;
+    private JLabel lblYCountValue_;
+    private JLabel lblZCountValue_;
 
     private LightSheetManagerModel model_;
 
@@ -64,6 +64,11 @@ public class XYZGridFrame extends JFrame {
         chkUseY_ = new CheckBox("Grid in Y", false);
         chkUseZ_ = new CheckBox("Grid in Z", false);
 
+        // init all values to zero
+        lblXCountValue_ = new JLabel("0");
+        lblYCountValue_ = new JLabel("0");
+        lblZCountValue_ = new JLabel("0");
+
         Panel.setMigLayoutDefault(
                 "insets 10 10 10 10",
                 "[]15[]",
@@ -80,9 +85,9 @@ public class XYZGridFrame extends JFrame {
         final JLabel lblXDelta = new JLabel("X delta [\u00B5m]:");
         final JLabel lblXCount = new JLabel("Slice count:");
 
-        spnXStart_ = Spinner.createIntegerSpinner(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 100);
-        spnXStop_ = Spinner.createIntegerSpinner(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 100);
-        spnXDelta_ = Spinner.createIntegerSpinner(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 100);
+        spnXStart_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
+        spnXStop_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
+        spnXDelta_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
 
         // Y
         final JLabel lblYStart = new JLabel("Y start [\u00B5m]:");
@@ -90,9 +95,9 @@ public class XYZGridFrame extends JFrame {
         final JLabel lblYDelta = new JLabel("Y delta [\u00B5m]:");
         final JLabel lblYCount = new JLabel("Y count:");
 
-        spnYStart_ = Spinner.createIntegerSpinner(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 100);
-        spnYStop_ = Spinner.createIntegerSpinner(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 100);
-        spnYDelta_ = Spinner.createIntegerSpinner(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 100);
+        spnYStart_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
+        spnYStop_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
+        spnYDelta_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
 
         // Z
         final JLabel lblZStart = new JLabel("Z start [\u00B5m]:");
@@ -100,9 +105,9 @@ public class XYZGridFrame extends JFrame {
         final JLabel lblZDelta = new JLabel("Z delta [\u00B5m]:");
         final JLabel lblZCount = new JLabel("Z count:");
 
-        spnZStart_ = Spinner.createIntegerSpinner(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 100);
-        spnZStop_ = Spinner.createIntegerSpinner(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 100);
-        spnZDelta_ = Spinner.createIntegerSpinner(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 100);
+        spnZStart_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
+        spnZStop_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
+        spnZDelta_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
 
         final Panel settingsPanel = new Panel("Grid Settings");
         final JLabel lblOverlap = new JLabel("Overlap (Y and Z) [%]");
@@ -116,6 +121,7 @@ public class XYZGridFrame extends JFrame {
         xPanel.add(lblXDelta, "");
         xPanel.add(spnXDelta_, "wrap");
         xPanel.add(lblXCount, "");
+        xPanel.add(lblXCountValue_, "");
 
         yPanel.add(lblYStart, "");
         yPanel.add(spnYStart_, "wrap");
@@ -124,6 +130,7 @@ public class XYZGridFrame extends JFrame {
         yPanel.add(lblYDelta, "");
         yPanel.add(spnYDelta_, "wrap");
         yPanel.add(lblYCount, "");
+        yPanel.add(lblYCountValue_, "");
 
         zPanel.add(lblZStart, "");
         zPanel.add(spnZStart_, "wrap");
@@ -132,6 +139,7 @@ public class XYZGridFrame extends JFrame {
         zPanel.add(lblZDelta, "");
         zPanel.add(spnZDelta_, "wrap");
         zPanel.add(lblZCount, "");
+        zPanel.add(lblZCountValue_, "");
 
         settingsPanel.add(lblOverlap, "split 2");
         settingsPanel.add(spnOverlap_, "wrap");
