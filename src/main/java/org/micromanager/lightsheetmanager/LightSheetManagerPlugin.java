@@ -41,7 +41,7 @@ public class LightSheetManagerPlugin implements MenuPlugin, SciJavaPlugin {
         try {
             model_ = new LightSheetManagerModel(studio_);
             final boolean isLoaded = model_.setup();
-            frame_ = new LightSheetManagerFrame(studio_, model_, isLoaded);
+            frame_ = new LightSheetManagerFrame(model_, isLoaded);
             frame_.setVisible(true);
             frame_.toFront();
         } catch (Exception e) {
