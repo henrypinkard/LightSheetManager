@@ -53,7 +53,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
     private DataStorage data_;
 
-    private ExecutorService acquistitonExecutor_ = Executors.newSingleThreadExecutor(
+    private ExecutorService acquisitionExecutor_ = Executors.newSingleThreadExecutor(
             r -> new Thread(r, "Acquisition Thread"));
     private LightSheetManagerModel model_;
     private volatile Acquisition currentAcquisition_ = null;
@@ -87,7 +87,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
     @Override
     public Future requestRun(boolean speedTest) {
         // Run on a new thread, so it doesn't block the EDT
-        Future acqFinished = acquistitonExecutor_.submit(() -> {
+        Future acqFinished = acquisitionExecutor_.submit(() -> {
             if (currentAcquisition_ != null) {
                 studio_.logs().showError("Acquisition is already running.");
                 return;
@@ -457,12 +457,12 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 //            scanner.sa().setAmplitudeX(4.1f);
 //            scanner.sa().setOffsetY(-0.0336f);
         }
-        try {
-            core_.setProperty("Andor sCMOS Camera A", "TriggerMode", "Internal (Recommended for fast acquisitions)");
-            core_.setProperty("Andor sCMOS Camera B", "TriggerMode", "Internal (Recommended for fast acquisitions)"); // External
-        } catch (Exception e1) {
-            e1.printStackTrace();
-        }
+//        try {
+//            core_.setProperty("Andor sCMOS Camera A", "TriggerMode", "Internal (Recommended for fast acquisitions)");
+//            core_.setProperty("Andor sCMOS Camera B", "TriggerMode", "Internal (Recommended for fast acquisitions)");
+//        } catch (Exception e1) {
+//            e1.printStackTrace();
+//        }
         setAcquisitionSettings(asb_.build());
 
         String saveDir = acqSettings_.saveDirectory();
@@ -915,7 +915,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         float delayBeforeScan = globalExposureDelayMax - scanLaserBufferTime   // start scan 0.25ms before camera's global exposure
                 - scanDelayFilter; // start galvo moving early due to card's Bessel filter and delay of TTL signals via PLC
         float delayBeforeLaser = globalExposureDelayMax; // turn on laser as soon as camera's global exposure is reached
-        float delayBeforeCamera = cameraReadoutMax; // camera must readout last frame before triggering again
+        float delayBeforeCamera = cameraReadoutMax; // camera must read out last frame before triggering again
         int scansPerSlice = 1;
 
         float cameraDuration = 0; // set in the switch statement below

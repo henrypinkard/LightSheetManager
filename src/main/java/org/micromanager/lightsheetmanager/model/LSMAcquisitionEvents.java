@@ -153,8 +153,8 @@ public class LSMAcquisitionEvents {
       };
    }
 
-   public static Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack(int startSliceIndex,
-                                                                               int stopSliceIndex) {
+   public static Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack(
+           int startSliceIndex, int stopSliceIndex) {
       return (AcquisitionEvent event) -> new Iterator<AcquisitionEvent>() {
 
          private int zIndex_ = startSliceIndex;
