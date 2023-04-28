@@ -21,30 +21,19 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
       public Builder() {
       }
 
-      private Builder(int numImages,
-                     double stepSize,
-                     AutofocusMode mode,
-                     AutofocusType type,
-                     double r2,
-                     int timePointInterval,
-                     boolean useEveryStagePass,
-                     boolean useBeforeAcquisition,
-                     String channel,
-                     double maxOffset,
-                     boolean autoUpdateOffset,
-                     double autoUpdateMaxOffset) {
-         numImages_ = numImages;
-         stepSize_ = stepSize;
-         mode_ = mode;
-         type_ = type;
-         r2_ = r2;
-         timePointInterval_ = timePointInterval;
-         useEveryStagePass_ = useEveryStagePass;
-         useBeforeAcquisition_ = useBeforeAcquisition;
-         channel_ = channel;
-         maxOffset_ = maxOffset;
-         autoUpdateOffset_ = autoUpdateOffset;
-         autoUpdateMaxOffset_ = autoUpdateMaxOffset;
+      private Builder(DefaultAutofocusSettings autofocusSettings) {
+         numImages_ = autofocusSettings.numImages_;
+         stepSize_ = autofocusSettings.stepSize_;
+         mode_ = autofocusSettings.mode_;
+         type_ = autofocusSettings.type_;
+         r2_ = autofocusSettings.r2_;
+         timePointInterval_ = autofocusSettings.timePointInterval_;
+         useEveryStagePass_ = autofocusSettings.useEveryStagePass_;
+         useBeforeAcquisition_ = autofocusSettings.useBeforeAcquisition_;
+         channel_ = autofocusSettings.channel_;
+         maxOffset_ = autoUpdateMaxOffset_;
+         autoUpdateOffset_ = autofocusSettings.autoUpdateOffset_;
+         autoUpdateMaxOffset_ = autofocusSettings.autoUpdateMaxOffset_;
       }
 
       /**
@@ -171,19 +160,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        */
       @Override
       public AutofocusSettings build() {
-         return new DefaultAutofocusSettings(
-               numImages_,
-               stepSize_,
-               mode_,
-               type_,
-               r2_,
-               timePointInterval_,
-               useEveryStagePass_,
-               useBeforeAcquisition_,
-               channel_,
-               maxOffset_,
-               autoUpdateOffset_,
-               autoUpdateMaxOffset_);
+         return new DefaultAutofocusSettings(this);
       }
    }
 
@@ -201,47 +178,23 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
    private final boolean autoUpdateOffset_;
    private final double autoUpdateMaxOffset_;
 
-
-   private DefaultAutofocusSettings(int numImages,
-                                    double stepSize,
-                                    AutofocusMode mode,
-                                    AutofocusType type,
-                                    double r2,
-                                    int timePointInterval,
-                                    boolean useEveryStagePass,
-                                    boolean useBeforeAcquisition,
-                                    String channel,
-                                    double maxOffset,
-                                    boolean autoUpdateOffset,
-                                    double autoUpdateMaxOffset
-                                    ) {
-      numImages_ = numImages;
-      stepSize_ = stepSize;
-      mode_ = mode;
-      type_ = type;
-      r2_ = r2;
-      timePointInterval_ = timePointInterval;
-      useEveryStagePass_ = useEveryStagePass;
-      useBeforeAcquisition_ = useBeforeAcquisition;
-      channel_ = channel;
-      maxOffset_ = maxOffset;
-      autoUpdateOffset_ = autoUpdateOffset;
-      autoUpdateMaxOffset_ = autoUpdateMaxOffset;
+   private DefaultAutofocusSettings(Builder builder) {
+      numImages_ = builder.numImages_;
+      stepSize_ = builder.stepSize_;
+      mode_ = builder.mode_;
+      type_ = builder.type_;
+      r2_ = builder.r2_;
+      timePointInterval_ = builder.timePointInterval_;
+      useEveryStagePass_ = builder.useEveryStagePass_;
+      useBeforeAcquisition_ = builder.useBeforeAcquisition_;
+      channel_ = builder.channel_;
+      maxOffset_ = builder.maxOffset_;
+      autoUpdateOffset_ = builder.autoUpdateOffset_;
+      autoUpdateMaxOffset_ = builder.autoUpdateMaxOffset_;
    }
 
    public Builder copyBuilder() {
-      return new Builder(numImages_,
-            stepSize_,
-            mode_,
-            type_,
-            r2_,
-            timePointInterval_,
-            useEveryStagePass_,
-            useBeforeAcquisition_,
-            channel_,
-            maxOffset_,
-            autoUpdateOffset_,
-            autoUpdateMaxOffset_);
+      return new Builder(this);
    }
 
    /**

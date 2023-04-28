@@ -15,7 +15,7 @@ public class DefaultSliceSettingsLS implements SliceSettingsLS {
         public Builder() {
         }
 
-        public Builder(DefaultSliceSettingsLS sliceSettings) {
+        private Builder(DefaultSliceSettingsLS sliceSettings) {
             scanResetTime_ = sliceSettings.scanResetTime();
             scanSettleTime_ = sliceSettings.scanSettleTime();
             shutterWidth_ = sliceSettings.shutterWidth();
