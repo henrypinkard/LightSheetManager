@@ -7,7 +7,7 @@ public interface ScanSettings {
 
     interface Builder {
 
-        Builder scanAccelerationFactor(final int factor);
+        Builder scanAccelerationFactor(final double factor);
 
         Builder scanOvershootDistance(final int distance);
 
@@ -31,7 +31,7 @@ public interface ScanSettings {
 
     Builder copyBuilder();
 
-    int scanAccelerationFactor();
+    double scanAccelerationFactor();
 
     int scanOvershootDistance();
 

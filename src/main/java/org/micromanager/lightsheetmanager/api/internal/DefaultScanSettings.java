@@ -6,7 +6,7 @@ public class DefaultScanSettings implements ScanSettings {
 
     public static class Builder implements ScanSettings.Builder {
 
-        private int scanAccelerationFactor_ = 1;
+        private double scanAccelerationFactor_ = 1;
         private int scanOvershootDistance_ = 0;
         private double scanRetraceSpeed_ =  67.0;
         private double scanAngleFirstView_ = 45.0;
@@ -29,7 +29,7 @@ public class DefaultScanSettings implements ScanSettings {
         }
 
         @Override
-        public ScanSettings.Builder scanAccelerationFactor(final int factor) {
+        public ScanSettings.Builder scanAccelerationFactor(final double factor) {
             scanAccelerationFactor_ = factor;
             return this;
         }
@@ -77,7 +77,7 @@ public class DefaultScanSettings implements ScanSettings {
 
     }
 
-    private final int scanAccelerationFactor_;
+    private final double scanAccelerationFactor_;
     private final int scanOvershootDistance_;
     private final double scanRetraceSpeed_;
     private final double scanAngleFirstView_;
@@ -101,7 +101,7 @@ public class DefaultScanSettings implements ScanSettings {
     }
 
     @Override
-    public int scanAccelerationFactor() {
+    public double scanAccelerationFactor() {
         return scanAccelerationFactor_;
     }
 
