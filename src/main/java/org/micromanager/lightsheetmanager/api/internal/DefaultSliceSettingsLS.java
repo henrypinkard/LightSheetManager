@@ -15,17 +15,7 @@ public class DefaultSliceSettingsLS implements SliceSettingsLS {
         public Builder() {
         }
 
-        public Builder(final double scanResetTime,
-                       final double scanSettleTime,
-                       final double shutterWidth,
-                       final double shutterSpeedFactor) {
-            scanResetTime_ = scanResetTime;
-            scanSettleTime_ = scanSettleTime;
-            shutterWidth_ = shutterWidth;
-            shutterSpeedFactor_ = shutterSpeedFactor;
-        }
-
-        public Builder(final DefaultSliceSettingsLS sliceSettings) {
+        public Builder(DefaultSliceSettingsLS sliceSettings) {
             scanResetTime_ = sliceSettings.scanResetTime();
             scanSettleTime_ = sliceSettings.scanSettleTime();
             shutterWidth_ = sliceSettings.shutterWidth();
@@ -74,12 +64,7 @@ public class DefaultSliceSettingsLS implements SliceSettingsLS {
 
         @Override
         public DefaultSliceSettingsLS build() {
-            return new DefaultSliceSettingsLS(
-                    scanResetTime_,
-                    scanSettleTime_,
-                    shutterWidth_,
-                    shutterSpeedFactor_
-            );
+            return new DefaultSliceSettingsLS(this);
         }
     }
 
@@ -88,25 +73,16 @@ public class DefaultSliceSettingsLS implements SliceSettingsLS {
     private final double shutterWidth_;
     private final double shutterSpeedFactor_;
 
-    private DefaultSliceSettingsLS(
-            final double scanResetTime,
-            final double scanSettleTime,
-            final double shutterWidth,
-            final double shutterSpeedFactor) {
-        scanResetTime_ = scanResetTime;
-        scanSettleTime_ = scanSettleTime;
-        shutterWidth_ = shutterWidth;
-        shutterSpeedFactor_ = shutterSpeedFactor;
+    private DefaultSliceSettingsLS(Builder builder) {
+        scanResetTime_ = builder.scanResetTime_;
+        scanSettleTime_ = builder.scanSettleTime_;
+        shutterWidth_ = builder.shutterWidth_;
+        shutterSpeedFactor_ = builder.shutterSpeedFactor_;
     }
 
     @Override
     public DefaultSliceSettingsLS.Builder copyBuilder() {
-        return new Builder(
-                scanResetTime_,
-                scanSettleTime_,
-                shutterWidth_,
-                shutterSpeedFactor_
-        );
+        return new Builder(this);
     }
 
     @Override

@@ -15,6 +15,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
         private DefaultVolumeSettings.Builder vsb_ = new DefaultVolumeSettings.Builder();
         private DefaultSliceSettings.Builder ssb_ = new DefaultSliceSettings.Builder();
         private DefaultSliceSettingsLS.Builder ssbLS_ = new DefaultSliceSettingsLS.Builder();
+        private DefaultScanSettings.Builder scsb_ = new DefaultScanSettings.Builder();
 
         private AcquisitionModes acquisitionMode_ = AcquisitionModes.NONE;
         private MultiChannelModes channelMode_ = MultiChannelModes.NONE;
@@ -45,6 +46,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
             vsb_ = acqSettings.volumeSettings_.copyBuilder();
             ssb_ = acqSettings.sliceSettings_.copyBuilder();
             ssbLS_ = acqSettings.sliceSettingsLS_.copyBuilder();
+            scsb_ = acqSettings.scanSettings_.copyBuilder();
             acquisitionMode_ = acqSettings.acquisitionMode_;
             channelMode_ = acqSettings.channelMode_;
             cameraMode_ = acqSettings.cameraMode_;
@@ -62,49 +64,6 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
             channelGroup_ = acqSettings.channelGroup_;
             channels_ = acqSettings.channels_;
         }
-
-//        private Builder(
-//                final DefaultTimingSettings.Builder tsb,
-//                final DefaultVolumeSettings.Builder vsb,
-//                final DefaultSliceSettings.Builder  ssb,
-//                final DefaultSliceSettingsLS.Builder ssbLS,
-//                final AcquisitionModes acquisitionMode,
-//                final MultiChannelModes channelMode,
-//                final CameraModes cameraMode,
-//                final boolean useChannels,
-//                final boolean useTimePoints,
-//                final boolean useAutofocus,
-//                final boolean useStageScanning,
-//                final boolean useMultiplePositions,
-//                final boolean useHardwareTimePoints,
-//                final boolean useAdvancedTiming,
-//                final int numTimePoints,
-//                final int timePointInterval,
-//                final int postMoveDelayMs,
-//                final int numChannels,
-//                final String channelGroup,
-//                final ChannelSpec[] channels) {
-//            tsb_ = tsb;
-//            vsb_ = vsb;
-//            ssb_ = ssb;
-//            ssbLS_ = ssbLS;
-//            acquisitionMode_ = acquisitionMode;
-//            channelMode_ = channelMode;
-//            cameraMode_ = cameraMode;
-//            useChannels_ = useChannels;
-//            useTimePoints_ = useTimePoints;
-//            useAutofocus_ = useAutofocus;
-//            useStageScanning_ = useStageScanning;
-//            useMultiplePositions_ = useMultiplePositions;
-//            useHardwareTimePoints_ = useHardwareTimePoints;
-//            useAdvancedTiming_ = useAdvancedTiming;
-//            numTimePoints_ = numTimePoints;
-//            timePointInterval_ = timePointInterval;
-//            postMoveDelay_ = postMoveDelayMs;
-//            numChannels_ = numChannels;
-//            channelGroup_ = channelGroup;
-//            channels_ = channels;
-//        }
 
         /**
          * Sets the acquisition mode.
@@ -299,6 +258,10 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
             return ssbLS_;
         }
 
+        public DefaultScanSettings.Builder scanSettingsBuilder() {
+            return scsb_;
+        }
+
         public DefaultTimingSettings.Builder tsb() {
             return tsb_;
         }
@@ -334,41 +297,15 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
             tsb_ = tsb;
         }
 
-        public void volumeSettingsBuilde(DefaultVolumeSettings.Builder vsb) {
+        public void volumeSettingsBuilder(DefaultVolumeSettings.Builder vsb) {
             vsb_ = vsb;
         }
 
-//        /**
-//         * Creates an immutable instance of DefaultAcquisitionSettingsDISPIM
-//         *
-//         * @return Immutable version of DefaultAcquisitionSettingsDISPIM
-//         */
-//        @Override
-//        public DefaultAcquisitionSettingsDISPIM build() {
-//            return new DefaultAcquisitionSettingsDISPIM(
-//                    tsb_.build(),
-//                    vsb_.build(),
-//                    ssb_.build(),
-//                    ssbLS_.build(),
-//                    acquisitionMode_,
-//                    channelMode_,
-//                    cameraMode_,
-//                    useChannels_,
-//                    useTimePoints_,
-//                    useAutofocus_,
-//                    useStageScanning_,
-//                    useMultiplePositions_,
-//                    useHardwareTimePoints_,
-//                    useAdvancedTiming_,
-//                    numTimePoints_,
-//                    timePointInterval_,
-//                    postMoveDelay_,
-//                    numChannels_,
-//                    channelGroup_,
-//                    channels_
-//            );
-//        }
-
+        /**
+         * Creates an immutable instance of DefaultAcquisitionSettingsDISPIM
+         *
+         * @return Immutable version of DefaultAcquisitionSettingsDISPIM
+         */
         @Override
         public DefaultAcquisitionSettingsDISPIM build() {
             return new DefaultAcquisitionSettingsDISPIM(this);
@@ -385,6 +322,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
     private final DefaultVolumeSettings volumeSettings_;
     private final DefaultSliceSettingsLS sliceSettingsLS_;
     private final DefaultSliceSettings sliceSettings_;
+    private final DefaultScanSettings scanSettings_;
 
     private final AcquisitionModes acquisitionMode_;
     private final MultiChannelModes channelMode_;
@@ -412,6 +350,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
         volumeSettings_ = builder.vsb_.build();
         sliceSettings_ = builder.ssb_.build();
         sliceSettingsLS_ = builder.ssbLS_.build();
+        scanSettings_ = builder.scsb_.build();
         acquisitionMode_ = builder.acquisitionMode_;
         channelMode_ = builder.channelMode_;
         cameraMode_ = builder.cameraMode_;

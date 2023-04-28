@@ -7,13 +7,13 @@ public interface ScanSettings {
 
     interface Builder {
 
-        Builder scanAccelerationFactor();
+        Builder scanAccelerationFactor(final int factor);
 
-        Builder scanOvershootDistance();
+        Builder scanOvershootDistance(final int distance);
 
-        Builder scanRetraceSpeed();
+        Builder scanRetraceSpeed(final double speed);
 
-        Builder scanAngleFirstView();
+        Builder scanAngleFirstView(final double angle);
 
         Builder scanReturnToOriginalPosition(final boolean state);
 
@@ -28,6 +28,8 @@ public interface ScanSettings {
          */
         ScanSettings build();
     }
+
+    Builder copyBuilder();
 
     int scanAccelerationFactor();
 
