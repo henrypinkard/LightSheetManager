@@ -22,7 +22,7 @@ public class DataTab extends Panel {
     private TextField txtSaveDirectory_;
     private TextField txtSaveFileName_;
 
-    private CheckBox chkSaveWhileAcquiring_;
+    private CheckBox cbxSaveWhileAcquiring_;
     private Button btnBrowse_;
     private FileSelect fileSelect_;
     private RadioButton radSaveMode_;
@@ -45,8 +45,8 @@ public class DataTab extends Panel {
                 FileSelect.DIRECTORIES_ONLY
         );
 
-        final Panel savePanel = new Panel("Image Save Settings");
-        final Panel datastorePanel = new Panel("Datastore Save Mode");
+        final Panel pnlSave = new Panel("Image Save Settings");
+        final Panel pnlDatastore = new Panel("Datastore Save Mode");
 
         final JLabel lblSaveDirectory = new JLabel("Save Directory:");
         final JLabel lblSaveFileName = new JLabel("Save File Name:");
@@ -66,23 +66,23 @@ public class DataTab extends Panel {
         txtSaveFileName_.setForeground(Color.WHITE);
         txtSaveFileName_.setText(model_.acquisitions().getAcquisitionSettings().saveNamePrefix());
 
-        chkSaveWhileAcquiring_ = new CheckBox("Save images during acquisition",
+        cbxSaveWhileAcquiring_ = new CheckBox("Save images during acquisition",
                 model_.acquisitions().getAcquisitionSettings().isSavingImagesDuringAcquisition());
 
         btnBrowse_ = new Button("Browse...", 80, 20);
 
-        savePanel.add(lblSaveDirectory, "");
-        savePanel.add(txtSaveDirectory_, "");
-        savePanel.add(btnBrowse_, "wrap");
-        savePanel.add(lblSaveFileName, "");
-        savePanel.add(txtSaveFileName_, "wrap");
-        savePanel.add(chkSaveWhileAcquiring_, "span 2, wrap");
+        pnlSave.add(lblSaveDirectory, "");
+        pnlSave.add(txtSaveDirectory_, "");
+        pnlSave.add(btnBrowse_, "wrap");
+        pnlSave.add(lblSaveFileName, "");
+        pnlSave.add(txtSaveFileName_, "wrap");
+        pnlSave.add(cbxSaveWhileAcquiring_, "span 2, wrap");
 
-        datastorePanel.add(radSaveMode_, "");
+        pnlDatastore.add(radSaveMode_, "");
 
         add(lblTitle, "wrap");
-        add(savePanel, "wrap");
-        add(datastorePanel, "growx");
+        add(pnlSave, "wrap");
+        add(pnlDatastore, "growx");
     }
 
     private void createEventHandlers() {
@@ -95,8 +95,8 @@ public class DataTab extends Panel {
             //System.out.println("getSaveDirectory: " + model_.acquisitions().getAcquisitionSettings().getSaveDirectory());
         });
 
-        chkSaveWhileAcquiring_.registerListener(e -> {
-            asb_.saveImagesDuringAcquisition(chkSaveWhileAcquiring_.isSelected());
+        cbxSaveWhileAcquiring_.registerListener(e -> {
+            asb_.saveImagesDuringAcquisition(cbxSaveWhileAcquiring_.isSelected());
             //System.out.println("isSavingWhileAcquiring: " + model_.acquisitions().getAcquisitionSettings().isSavingWhileAcquiring());
         });
 

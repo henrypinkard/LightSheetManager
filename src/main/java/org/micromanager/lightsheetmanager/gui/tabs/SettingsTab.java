@@ -87,14 +87,21 @@ public class SettingsTab extends Panel {
                 .getAcquisitionSettingsBuilder().scanSettingsBuilder();
 
         // Spinners
-        spnScanAcceleration_.registerListener(e -> scsb.scanAccelerationFactor(spnScanAcceleration_.getDouble()));
-        spnScanOvershootDist_.registerListener(e -> scsb.scanOvershootDistance(spnScanOvershootDist_.getInt()));
-        spnScanRetraceSpeed_.registerListener(e -> scsb.scanRetraceSpeed(spnScanRetraceSpeed_.getDouble()));
-        spnScanAngleFirstView_.registerListener(e -> scsb.scanAngleFirstView(spnScanAngleFirstView_.getDouble()));
+        spnScanAcceleration_.registerListener(e ->
+                scsb.scanAccelerationFactor(spnScanAcceleration_.getDouble()));
+        spnScanOvershootDist_.registerListener(e ->
+                scsb.scanOvershootDistance(spnScanOvershootDist_.getInt()));
+        spnScanRetraceSpeed_.registerListener(e ->
+                scsb.scanRetraceSpeed(spnScanRetraceSpeed_.getDouble()));
+        spnScanAngleFirstView_.registerListener(e ->
+                scsb.scanAngleFirstView(spnScanAngleFirstView_.getDouble()));
 
         // CheckBoxes
-        cbxScanFromCurrentPosition_.registerListener(e -> scsb.scanFromCurrentPosition(cbxScanFromCurrentPosition_.isSelected()));
-        cbxScanNegativeDirection_.registerListener(e -> scsb.scanFromNegativeDirection(cbxScanNegativeDirection_.isSelected()));
-        cbxReturnToOriginalPosition_.registerListener(e -> scsb.scanReturnToOriginalPosition(cbxReturnToOriginalPosition_.isSelected()));
+        cbxScanFromCurrentPosition_.registerListener(e ->
+                scsb.scanFromCurrentPosition(cbxScanFromCurrentPosition_.isSelected()));
+        cbxScanNegativeDirection_.registerListener(e ->
+                scsb.scanFromNegativeDirection(cbxScanNegativeDirection_.isSelected()));
+        cbxReturnToOriginalPosition_.registerListener(e ->
+                scsb.scanReturnToOriginalPosition(cbxReturnToOriginalPosition_.isSelected()));
     }
 }

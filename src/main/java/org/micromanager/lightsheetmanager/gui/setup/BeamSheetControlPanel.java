@@ -18,7 +18,7 @@ public class BeamSheetControlPanel extends Panel {
     private JLabel lblSlopeUnits2_;
 
     // second panel
-    private CheckBox chkAutoSheetWidth_;
+    private CheckBox cbxAutoSheetWidth_;
     private TextField txtSheetWidth_;
     private Button btnCenterOffset_;
 
@@ -28,12 +28,12 @@ public class BeamSheetControlPanel extends Panel {
     private Button btnSheetOffsetMinus_;
     private Button btnSheetOffsetPlus_;
 
-    private Slider sldSheetWidth_;
-    private Slider sldSheetOffset_;
+    private Slider sdrSheetWidth_;
+    private Slider sdrSheetOffset_;
 
     // layout panels
-    private Panel firstPanel_;  // virtual slit camera trigger mode active
-    private Panel secondPanel_; // all other camera trigger modes
+    private Panel pblFirst_;  // virtual slit camera trigger mode active
+    private Panel pnlSecond_; // all other camera trigger modes
 
     private boolean isVirtualSlitMode_;
 
@@ -43,8 +43,8 @@ public class BeamSheetControlPanel extends Panel {
     }
 
     private void init() {
-        firstPanel_ = new Panel();
-        secondPanel_ = new Panel();
+        pblFirst_ = new Panel();
+        pnlSecond_ = new Panel();
 
         // first panel for virtual slit mode
         final JLabel lblSlope = new JLabel("Speed / slope:");
@@ -62,7 +62,7 @@ public class BeamSheetControlPanel extends Panel {
         final JLabel lblSheetOffset = new JLabel("Sheet offset:");
         lblSlopeUnits2_ = new JLabel("μ°/px"); // TODO: reuse labels like this?
 
-        chkAutoSheetWidth_ = new CheckBox("Automatic", false);
+        cbxAutoSheetWidth_ = new CheckBox("Automatic", false);
         txtSheetWidth_ = new TextField();
         btnCenterOffset_ = new Button("Center", 100, 26);
 
@@ -74,36 +74,36 @@ public class BeamSheetControlPanel extends Panel {
 
         // TODO: set the ranges of these sliders to the micro-mirror's min and max deflection
         UIManager.put("Slider.focus", UIManager.get("Slider.background")); // remove highlight when clicked
-        sldSheetWidth_ = new Slider(0, 8, 4);
-        sldSheetOffset_ = new Slider(-1, 1, 0);
+        sdrSheetWidth_ = new Slider(0, 8, 4);
+        sdrSheetOffset_ = new Slider(-1, 1, 0);
 
         createEventHandlers();
 
-        firstPanel_.add(lblSlope, "");
-        firstPanel_.add(txtSlope_, "");
-        firstPanel_.add(lblSlopeUnits, "wrap");
-        firstPanel_.add(lblOffset, "");
-        firstPanel_.add(txtOffset_, "");
-        firstPanel_.add(lblOffsetUnits, "");
-        firstPanel_.add(btnPlotProfile_, "gapleft 100");
+        pblFirst_.add(lblSlope, "");
+        pblFirst_.add(txtSlope_, "");
+        pblFirst_.add(lblSlopeUnits, "wrap");
+        pblFirst_.add(lblOffset, "");
+        pblFirst_.add(txtOffset_, "");
+        pblFirst_.add(lblOffsetUnits, "");
+        pblFirst_.add(btnPlotProfile_, "gapleft 100");
 
-        secondPanel_.add(lblSheetWidth, "");
-        secondPanel_.add(chkAutoSheetWidth_, "");
-        secondPanel_.add(txtSheetWidth_, "");
-        secondPanel_.add(lblSlopeUnits2_, "");
-        secondPanel_.add(btnSheetWidthMinus_, "");
-        secondPanel_.add(btnSheetWidthPlus_, "");
-        secondPanel_.add(sldSheetWidth_, "wrap");
-        secondPanel_.add(lblSheetOffset, "span 3");
-        secondPanel_.add(btnCenterOffset_, "");
-        secondPanel_.add(btnSheetOffsetMinus_, "");
-        secondPanel_.add(btnSheetOffsetPlus_, "");
-        secondPanel_.add(sldSheetOffset_, "");
+        pnlSecond_.add(lblSheetWidth, "");
+        pnlSecond_.add(cbxAutoSheetWidth_, "");
+        pnlSecond_.add(txtSheetWidth_, "");
+        pnlSecond_.add(lblSlopeUnits2_, "");
+        pnlSecond_.add(btnSheetWidthMinus_, "");
+        pnlSecond_.add(btnSheetWidthPlus_, "");
+        pnlSecond_.add(sdrSheetWidth_, "wrap");
+        pnlSecond_.add(lblSheetOffset, "span 3");
+        pnlSecond_.add(btnCenterOffset_, "");
+        pnlSecond_.add(btnSheetOffsetMinus_, "");
+        pnlSecond_.add(btnSheetOffsetPlus_, "");
+        pnlSecond_.add(sdrSheetOffset_, "");
 
         // TODO: select panel based on Microscope Geometry
         // first panel => virtual slit mode
         isVirtualSlitMode_ = true;
-        add(firstPanel_, "");
+        add(pblFirst_, "");
     }
 
     private void createEventHandlers() {
@@ -113,9 +113,8 @@ public class BeamSheetControlPanel extends Panel {
         });
 
         // second panel
-        chkAutoSheetWidth_.registerListener(e -> {
-            //final boolean isSelected = chkAutoSheetWidth_.isSelected();
-            setEnabledSheetWidth(chkAutoSheetWidth_.isSelected());
+        cbxAutoSheetWidth_.registerListener(e -> {
+            setEnabledSheetWidth(cbxAutoSheetWidth_.isSelected());
         });
 
         btnCenterOffset_.registerListener(e -> {
@@ -130,14 +129,14 @@ public class BeamSheetControlPanel extends Panel {
      */
     public void swapPanels() {
         if (isVirtualSlitMode_) {
-            remove(firstPanel_);
-            add(secondPanel_);
+            remove(pblFirst_);
+            add(pnlSecond_);
             revalidate();
             repaint();
             isVirtualSlitMode_ = false;
         } else {
-            remove(secondPanel_);
-            add(firstPanel_);
+            remove(pnlSecond_);
+            add(pblFirst_);
             revalidate();
             repaint();
             isVirtualSlitMode_ = true;
@@ -154,7 +153,7 @@ public class BeamSheetControlPanel extends Panel {
         lblSlopeUnits2_.setEnabled(state);
         btnSheetWidthMinus_.setEnabled(!state);
         btnSheetWidthPlus_.setEnabled(!state);
-        sldSheetWidth_.setEnabled(!state);
+        sdrSheetWidth_.setEnabled(!state);
     }
 
 }

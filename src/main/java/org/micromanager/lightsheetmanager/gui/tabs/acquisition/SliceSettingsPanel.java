@@ -16,8 +16,8 @@ import java.util.Objects;
 public class SliceSettingsPanel extends Panel {
 
     // regular panel
-    private CheckBox chkUseAdvancedTiming_;
-    private CheckBox chkMinimizeSlicePeriod_;
+    private CheckBox cbxUseAdvancedTiming_;
+    private CheckBox cbxMinimizeSlicePeriod_;
     private Label lblSlicePeriod_;
     private Label lblSampleExposure_;
     private Spinner spnSlicePeriod_;
@@ -57,7 +57,7 @@ public class SliceSettingsPanel extends Panel {
         // regular panel
         lblSlicePeriod_ = new Label("Slice period [ms]:");
         lblSampleExposure_ = new Label("Sample exposure [ms]:");
-        chkMinimizeSlicePeriod_ = new CheckBox("Minimize slice period", 12, isSlicePeriodMinimized, CheckBox.RIGHT);
+        cbxMinimizeSlicePeriod_ = new CheckBox("Minimize slice period", 12, isSlicePeriodMinimized, CheckBox.RIGHT);
         spnSlicePeriod_ = Spinner.createDoubleSpinner(sliceSettings.slicePeriod(), 0.0, Double.MAX_VALUE, 0.25);
         spnSampleExposure_ = Spinner.createDoubleSpinner(sliceSettings.sampleExposure(), 0.0, Double.MAX_VALUE, 0.25);
 
@@ -78,7 +78,7 @@ public class SliceSettingsPanel extends Panel {
 
         // open the advanced timing frame if using advanced timing settings
         final boolean isUsingAdvancedTiming = model_.acquisitions().getAcquisitionSettings().isUsingAdvancedTiming();
-        chkUseAdvancedTiming_ = new CheckBox("Use advanced timing settings", 12, isUsingAdvancedTiming, CheckBox.RIGHT);
+        cbxUseAdvancedTiming_ = new CheckBox("Use advanced timing settings", 12, isUsingAdvancedTiming, CheckBox.RIGHT);
         if (isUsingAdvancedTiming) {
             advTimingFrame_.setVisible(true);
             advTimingFrame_.toFront();
@@ -99,8 +99,8 @@ public class SliceSettingsPanel extends Panel {
 
 
         // regular panel
-        chkMinimizeSlicePeriod_.registerListener(e -> {
-            final boolean selected = !chkMinimizeSlicePeriod_.isSelected();
+        cbxMinimizeSlicePeriod_.registerListener(e -> {
+            final boolean selected = !cbxMinimizeSlicePeriod_.isSelected();
             lblSlicePeriod_.setEnabled(selected);
             spnSlicePeriod_.setEnabled(selected);
             ssb_.minimizeSlicePeriod(!selected);
@@ -139,10 +139,10 @@ public class SliceSettingsPanel extends Panel {
         });
 
         // disable ui elements
-        chkUseAdvancedTiming_.registerListener(e -> {
+        cbxUseAdvancedTiming_.registerListener(e -> {
             // regular panel
-            final boolean selected = !chkUseAdvancedTiming_.isSelected();
-            chkMinimizeSlicePeriod_.setEnabled(selected);
+            final boolean selected = !cbxUseAdvancedTiming_.isSelected();
+            cbxMinimizeSlicePeriod_.setEnabled(selected);
 
             if (model_.acquisitions().getAcquisitionSettings().sliceSettings().isSlicePeriodMinimized()) {
                 lblSlicePeriod_.setEnabled(false);
@@ -180,12 +180,12 @@ public class SliceSettingsPanel extends Panel {
     public void switchUI(final CameraModes cameraMode) {
         removeAll();
         if (cameraMode != CameraModes.VIRTUAL_SLIT) {
-            add(chkMinimizeSlicePeriod_, "wrap");
+            add(cbxMinimizeSlicePeriod_, "wrap");
             add(lblSlicePeriod_, "");
             add(spnSlicePeriod_, "wrap");
             add(lblSampleExposure_, "");
             add(spnSampleExposure_, "wrap");
-            add(chkUseAdvancedTiming_, "span 2");
+            add(cbxUseAdvancedTiming_, "span 2");
         } else {
             add(lblScanResetTime_, "");
             add(spnScanResetTime_, "wrap");
@@ -195,7 +195,7 @@ public class SliceSettingsPanel extends Panel {
             add(spnShutterWidth_, "wrap");
             add(lblShutterSpeed_, "");
             add(spnShutterSpeed_, "wrap");
-            add(chkUseAdvancedTiming_, "span 2");
+            add(cbxUseAdvancedTiming_, "span 2");
         }
         revalidate();
         repaint();

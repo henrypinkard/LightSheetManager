@@ -18,9 +18,9 @@ public class XYZGridFrame extends JFrame {
     private Button btnEditPositionList_;
     private Button btnComputeGrid_;
 
-    private CheckBox chkUseX_;
-    private CheckBox chkUseY_;
-    private CheckBox chkUseZ_;
+    private CheckBox cbxUseX_;
+    private CheckBox cbxUseY_;
+    private CheckBox cbxUseZ_;
 
     private Spinner spnXStart_;
     private Spinner spnXStop_;
@@ -35,7 +35,7 @@ public class XYZGridFrame extends JFrame {
     private Spinner spnZDelta_;
 
     private Spinner spnOverlap_;
-    private CheckBox chkClearPositions_;
+    private CheckBox cbxClearPositions_;
 
     private JLabel lblXCountValue_;
     private JLabel lblYCountValue_;
@@ -60,9 +60,9 @@ public class XYZGridFrame extends JFrame {
         btnComputeGrid_ = new Button("Compute Grid");
         btnEditPositionList_ = new Button("Edit Position List...");
 
-        chkUseX_ = new CheckBox("Slices from stage coordinates", false);
-        chkUseY_ = new CheckBox("Grid in Y", false);
-        chkUseZ_ = new CheckBox("Grid in Z", false);
+        cbxUseX_ = new CheckBox("Slices from stage coordinates", false);
+        cbxUseY_ = new CheckBox("Grid in Y", false);
+        cbxUseZ_ = new CheckBox("Grid in Z", false);
 
         // init all values to zero
         lblXCountValue_ = new JLabel("0");
@@ -74,9 +74,9 @@ public class XYZGridFrame extends JFrame {
                 "[]15[]",
                 "[]10[]"
         );
-        final Panel xPanel = new Panel(chkUseX_);
-        final Panel yPanel = new Panel(chkUseY_);
-        final Panel zPanel = new Panel(chkUseZ_);
+        final Panel xPanel = new Panel(cbxUseX_);
+        final Panel yPanel = new Panel(cbxUseY_);
+        final Panel zPanel = new Panel(cbxUseZ_);
         final Panel buttonPanel = new Panel();
 
         // X
@@ -112,7 +112,7 @@ public class XYZGridFrame extends JFrame {
         final Panel settingsPanel = new Panel("Grid Settings");
         final JLabel lblOverlap = new JLabel("Overlap (Y and Z) [%]");
         spnOverlap_ = Spinner.createIntegerSpinner(10, 0, 100, 1);
-        chkClearPositions_ = new CheckBox("Clear position list if YZ unused", false);
+        cbxClearPositions_ = new CheckBox("Clear position list if YZ unused", false);
 
         xPanel.add(lblXStart, "");
         xPanel.add(spnXStart_, "wrap");
@@ -143,7 +143,7 @@ public class XYZGridFrame extends JFrame {
 
         settingsPanel.add(lblOverlap, "split 2");
         settingsPanel.add(spnOverlap_, "wrap");
-        settingsPanel.add(chkClearPositions_, "wrap");
+        settingsPanel.add(cbxClearPositions_, "wrap");
 
         buttonPanel.add(btnComputeGrid_, "wrap");
         buttonPanel.add(btnEditPositionList_, "");
