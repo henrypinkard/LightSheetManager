@@ -1,10 +1,14 @@
 package org.micromanager.lightsheetmanager.gui.tabs;
 
+import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
+import org.micromanager.lightsheetmanager.api.internal.DefaultScanSettings;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.components.Spinner;
+import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
 import javax.swing.JLabel;
+import java.util.Objects;
 
 public class SettingsTab extends Panel {
 
@@ -17,12 +21,17 @@ public class SettingsTab extends Panel {
     private CheckBox cbxScanNegativeDirection_;
     private CheckBox cbxReturnToOriginalPosition_;
 
-    public SettingsTab() {
+    private LightSheetManagerModel model_;
+
+    public SettingsTab(final LightSheetManagerModel model) {
+        model_ = Objects.requireNonNull(model);
         createUserInterface();
         createEventHandlers();
     }
 
     private void createUserInterface() {
+        final DefaultAcquisitionSettingsDISPIM acqSettings =
+                model_.acquisitions().getAcquisitionSettings();
 
         final Panel pnlScan = new Panel("Stage Scan Settings");
         pnlScan.setMigLayout("", "[]5[]", "[]5[]");
@@ -58,12 +67,18 @@ public class SettingsTab extends Panel {
     }
 
     private void createEventHandlers() {
-        spnScanAcceleration_.registerListener(e -> {});
-        spnScanOvershootDist_.registerListener(e -> {});
-        spnScanRetraceSpeed_.registerListener(e -> {});
-        spnScanAngleFirstView_.registerListener(e -> {});
-        cbxScanFromCurrentPosition_.registerListener(e -> {});
-        cbxScanNegativeDirection_.registerListener(e -> {});
-        cbxReturnToOriginalPosition_.registerListener(e -> {});
+        final DefaultScanSettings.Builder scsb = model_.acquisitions()
+                .getAcquisitionSettingsBuilder().scanSettingsBuilder();
+
+        // Spinners
+        spnScanAcceleration_.registerListener(e -> scsb.scanAccelerationFactor(spnScanAcceleration_.getDouble()));
+        spnScanOvershootDist_.registerListener(e -> scsb.scanOvershootDistance(spnScanOvershootDist_.getInt()));
+        spnScanRetraceSpeed_.registerListener(e -> scsb.scanRetraceSpeed(spnScanRetraceSpeed_.getDouble()));
+        spnScanAngleFirstView_.registerListener(e -> scsb.scanAngleFirstView(spnScanAngleFirstView_.getDouble()));
+
+        // CheckBoxes
+        cbxScanFromCurrentPosition_.registerListener(e -> scsb.scanFromCurrentPosition(cbxScanFromCurrentPosition_.isSelected()));
+        cbxScanNegativeDirection_.registerListener(e -> scsb.scanFromNegativeDirection(cbxScanNegativeDirection_.isSelected()));
+        cbxReturnToOriginalPosition_.registerListener(e -> scsb.scanReturnToOriginalPosition(cbxReturnToOriginalPosition_.isSelected()));
     }
 }
