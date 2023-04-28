@@ -41,14 +41,30 @@ public class SettingsTab extends Panel {
         final JLabel lblScanRetraceSpeed = new JLabel("Scan retrace speed [% of max]:");
         final JLabel lblScanAngleFirstView = new JLabel("Path A stage/objective angle [\u00B0]:");
 
-        spnScanAcceleration_ = Spinner.createFloatSpinner(1.0f, 0.1f, 1000.0f, 1.0f);
-        spnScanOvershootDist_ = Spinner.createIntegerSpinner(0,0, 1000, 10);
-        spnScanRetraceSpeed_ = Spinner.createFloatSpinner(67.0f,0.01f, 99.0f, 1.0f);
-        spnScanAngleFirstView_ = Spinner.createFloatSpinner(45.0f,1.0f, 89.0f, 1.0f);
+        // Spinners
+        spnScanAcceleration_ = Spinner.createDoubleSpinner(
+                acqSettings.scanSettings().scanAccelerationFactor(),
+                0.1, 1000.0, 1.0);
 
-        cbxScanFromCurrentPosition_ = new CheckBox("Scan from current position instead of center", false);
-        cbxScanNegativeDirection_ = new CheckBox("Scan negative direction", false);
-        cbxReturnToOriginalPosition_ = new CheckBox("Return to original position after scan", false);
+        spnScanOvershootDist_ = Spinner.createIntegerSpinner(
+                acqSettings.scanSettings().scanOvershootDistance(),
+                0, 1000, 10);
+
+        spnScanRetraceSpeed_ = Spinner.createDoubleSpinner(
+                acqSettings.scanSettings().scanRetraceSpeed(),
+                0.01, 99.0, 1.0);
+
+        spnScanAngleFirstView_ = Spinner.createDoubleSpinner(
+                acqSettings.scanSettings().scanAngleFirstView(),
+                1.0, 89.0, 1.0);
+
+        // CheckBoxes
+        cbxScanFromCurrentPosition_ = new CheckBox("Scan from current position instead of center",
+                acqSettings.scanSettings().scanFromCurrentPosition());
+        cbxScanNegativeDirection_ = new CheckBox("Scan negative direction",
+                acqSettings.scanSettings().scanFromNegativeDirection());
+        cbxReturnToOriginalPosition_ = new CheckBox("Return to original position after scan",
+                acqSettings.scanSettings().scanReturnToOriginalPosition());
 
         pnlScan.add(lblScanAcceleration, "");
         pnlScan.add(spnScanAcceleration_, "wrap");

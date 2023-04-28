@@ -435,6 +435,7 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
         return sliceSettings_;
     }
 
+
     /**
      * Returns the immutable DefaultSliceSettingsLS instance.
      *
@@ -443,6 +444,16 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
     @Override
     public DefaultSliceSettingsLS sliceSettingsLS() {
         return sliceSettingsLS_;
+    }
+
+    /**
+     * Returns the immutable DefaultScanSettings instance.
+     *
+     * @return immutable DefaultScanSettings instance.
+     */
+    @Override
+    public DefaultScanSettings scanSettings() {
+        return scanSettings_;
     }
 
     /**

@@ -110,8 +110,6 @@ public class AcquisitionTab extends Panel {
         pnlVolumeSettings_ = new VolumeSettingsPanel(model_);
         pnlSliceSettings_ = new SliceSettingsPanel(model_, advTimingFrame_);
 
-        System.out.println("isUsingTimePoints: " + acqSettings.isUsingTimePoints());
-        System.out.println("isUsingChannels: " + acqSettings.isUsingChannels());
         // check boxes for panels
         cbxUseMultiplePositions_ = new CheckBox("Multiple positions (XY)", acqSettings.isUsingMultiplePositions());
         cbxUseTimePoints_ = new CheckBox("Time Points", acqSettings.isUsingTimePoints());
