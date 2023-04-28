@@ -29,7 +29,7 @@ public class NavigationPanel extends Panel {
 
     private Button btnRefreshNavPanel_;
     private Button btnHaltDevices_;
-    private CheckBox chkPollPositions_;
+    private CheckBox cbxPollPositions_;
 
     private DeviceManager devices_;
 
@@ -59,7 +59,7 @@ public class NavigationPanel extends Panel {
 
         btnHaltDevices_ = new Button("HALT", 120, 30);
         btnRefreshNavPanel_ = new Button("Refresh", 120, 30);
-        chkPollPositions_ = new CheckBox("Poll Positions", true);
+        cbxPollPositions_ = new CheckBox("Poll Positions", true);
 
         final int numImagingPaths = devices_.getDeviceAdapter().getNumImagingPaths();
         final int numIlluminationPaths = devices_.getDeviceAdapter().getNumIlluminationPaths();
@@ -151,7 +151,7 @@ public class NavigationPanel extends Panel {
             add(new JLabel("No devices or device adapter properties are not set."), "wrap");
             add(btnHaltDevices_, "wrap");
             add(btnRefreshNavPanel_, "wrap");
-            add(chkPollPositions_, "");
+            add(cbxPollPositions_, "");
             return;
         }
 
@@ -204,7 +204,7 @@ public class NavigationPanel extends Panel {
         add(miscPanel, "wrap");
         add(btnHaltDevices_, "wrap");
         add(btnRefreshNavPanel_, "wrap");
-        add(chkPollPositions_, "");
+        add(cbxPollPositions_, "");
     }
 
     private void createEventHandlers() {
@@ -215,7 +215,7 @@ public class NavigationPanel extends Panel {
             init();
         });
         btnHaltDevices_.registerListener(e -> haltAllDevices());
-        chkPollPositions_.registerListener(e -> {
+        cbxPollPositions_.registerListener(e -> {
             isPollingPositions = !isPollingPositions;
             System.out.println("isPollingPositions: " + isPollingPositions);
         });

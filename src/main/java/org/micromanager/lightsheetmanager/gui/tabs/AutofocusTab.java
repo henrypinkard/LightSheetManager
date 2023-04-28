@@ -13,7 +13,7 @@ public class AutofocusTab extends Panel {
     private Label lblMaxOffsetSetup;
     private Label lblMaxOffsetSetupUM;
     private Spinner spnMaxOffsetSetup;
-    private CheckBox chkAutoUpdateFocusFound;
+    private CheckBox cbxAutoUpdateFocusFound;
 
     public AutofocusTab() {
         setMigLayout(
@@ -41,11 +41,14 @@ public class AutofocusTab extends Panel {
         final Label lblScoringAlgorithm = new Label("Scoring algorithm:");
         final Label lblFittingFunction = new Label("Fit using:");
         final Label lblMinimumR2 = new Label("<html>Minimum R<sup>2</sup></html>");
-        final CheckBox chkShowImages = new CheckBox("Show Images", 12, true, CheckBox.RIGHT);
-        final CheckBox chkShowPlot = new CheckBox("Show Plot", 12, true, CheckBox.RIGHT);
+
+        final CheckBox cbxShowImages = new CheckBox("Show Images", 12, true, CheckBox.RIGHT);
+        final CheckBox cbxShowPlot = new CheckBox("Show Plot", 12, true, CheckBox.RIGHT);
+
         final Spinner spnNumImages = Spinner.createIntegerSpinner(1, 0, Integer.MAX_VALUE, 1);
         final Spinner spnStepSize = Spinner.createFloatSpinner(0.001f, 0.0f, 100.0f, 1.0f);
         final Spinner spnMinimumR2 = Spinner.createFloatSpinner(0.75f, 0.0f, 1.0f, 0.01f);
+
         final ComboBox cmbMode = new ComboBox(labels, "None");
         final ComboBox cmbScoringAlgorithm = new ComboBox(labels, "None");
         final ComboBox cmbFittingFunction = new ComboBox(labels, "None");
@@ -55,8 +58,10 @@ public class AutofocusTab extends Panel {
         final Label lblMaxOffsetActive = new Label("Max offset change: ");
         final Label lblAutofocusEveryX = new Label("Autofocus every ");
         final Label lblAutofocusChannel = new Label("Autofocus channel:");
-        final CheckBox chkAutofocusEveryPass = new CheckBox("Autofocus every stage pass", 12, false, CheckBox.RIGHT);
-        final CheckBox chkAutofocusBeforeAcq = new CheckBox("Autofocus before starting acquisition", 12, false, CheckBox.RIGHT);
+
+        final CheckBox cbxAutofocusEveryPass = new CheckBox("Autofocus every stage pass", 12, false, CheckBox.RIGHT);
+        final CheckBox cbxAutofocusBeforeAcq = new CheckBox("Autofocus before starting acquisition", 12, false, CheckBox.RIGHT);
+
         final ComboBox cmbAutofocusChannel = new ComboBox(labels, "None", 60, 20);
         final Spinner spnAutofocusEveryX = Spinner.createIntegerSpinner(10, 0, 1000, 1);
         final Spinner spnMaxOffset = Spinner.createIntegerSpinner(3, 0, 10, 1);
@@ -64,7 +69,7 @@ public class AutofocusTab extends Panel {
         // setup options
         lblMaxOffsetSetup = new Label("Max offset change: ");
         lblMaxOffsetSetupUM = new Label("\u00B5m (\u00B1)");
-        chkAutoUpdateFocusFound = new CheckBox("Automatically update offset if focus found", 12, false, CheckBox.RIGHT);
+        cbxAutoUpdateFocusFound = new CheckBox("Automatically update offset if focus found", 12, false, CheckBox.RIGHT);
         spnMaxOffsetSetup = Spinner.createIntegerSpinner(3, 0, 10, 1);
         setSetupOptionsState(false);
 
@@ -85,8 +90,8 @@ public class AutofocusTab extends Panel {
         add(lblTitle, "span 2, wrap");
 
         // general options
-        panelGeneralOptions.add(chkShowImages, "");
-        panelGeneralOptions.add(chkShowPlot, "wrap");
+        panelGeneralOptions.add(cbxShowImages, "");
+        panelGeneralOptions.add(cbxShowPlot, "wrap");
         panelGeneralOptions.add(lblNumImages, "");
         panelGeneralOptions.add(spnNumImages, "wrap");
         panelGeneralOptions.add(lblStepSize, "");
@@ -101,8 +106,8 @@ public class AutofocusTab extends Panel {
         panelGeneralOptions.add(cmbFittingFunction, "");
 
         // active options
-        panelAcqActiveOptions.add(chkAutofocusEveryPass, "span 3, wrap");
-        panelAcqActiveOptions.add(chkAutofocusBeforeAcq, "span 3, wrap");
+        panelAcqActiveOptions.add(cbxAutofocusEveryPass, "span 3, wrap");
+        panelAcqActiveOptions.add(cbxAutofocusBeforeAcq, "span 3, wrap");
         panelAcqActiveOptions.add(lblAutofocusEveryX, "");
         panelAcqActiveOptions.add(spnAutofocusEveryX, "");
         panelAcqActiveOptions.add(lblTimePoints, "wrap");
@@ -113,7 +118,7 @@ public class AutofocusTab extends Panel {
         panelAcqActiveOptions.add(new Label("\u00B5m (\u00B1)"), "");
 
         // setup options
-        panelAcqSetupOptions.add(chkAutoUpdateFocusFound, "span 3, wrap");
+        panelAcqSetupOptions.add(cbxAutoUpdateFocusFound, "span 3, wrap");
         panelAcqSetupOptions.add(lblMaxOffsetSetup, "");
         panelAcqSetupOptions.add(spnMaxOffsetSetup, "");
         panelAcqSetupOptions.add(lblMaxOffsetSetupUM, "");
@@ -145,8 +150,8 @@ public class AutofocusTab extends Panel {
 
     }
     private void createEventHandlers() {
-        chkAutoUpdateFocusFound.registerListener(event -> {
-            setSetupOptionsState(chkAutoUpdateFocusFound.isSelected());
+        cbxAutoUpdateFocusFound.registerListener(event -> {
+            setSetupOptionsState(cbxAutoUpdateFocusFound.isSelected());
         });
     }
 

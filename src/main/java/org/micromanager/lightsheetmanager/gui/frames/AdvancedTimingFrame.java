@@ -33,7 +33,7 @@ public class AdvancedTimingFrame extends JFrame {
     private Spinner spnScansPerSlice_;
     private Spinner spnCameraExposure_;
 
-    private CheckBox chkAlternateScanDirection_;
+    private CheckBox cbxAlternateScanDirection_;
 
     private LightSheetManagerModel model_;
 
@@ -74,7 +74,7 @@ public class AdvancedTimingFrame extends JFrame {
         spnScansPerSlice_ = Spinner.createIntegerSpinner(timingSettings.scansPerSlice(), 1, 1000, 1);
         spnCameraExposure_ = Spinner.createDoubleSpinner(timingSettings.cameraExposure(), 0.0, 1000.0, 0.25);
 
-        chkAlternateScanDirection_ = new CheckBox(
+        cbxAlternateScanDirection_ = new CheckBox(
                 "Alternate Scan Direction", false, CheckBox.LEFT);
 
         add(lblDelayBeforeScan_, "");
@@ -93,7 +93,7 @@ public class AdvancedTimingFrame extends JFrame {
         add(spnCameraTriggerDuration_, "wrap");
         add(lblCameraExposure_, "");
         add(spnCameraExposure_, "wrap");
-        add(chkAlternateScanDirection_, "");
+        add(cbxAlternateScanDirection_, "");
 
         pack();
     }
@@ -149,8 +149,8 @@ public class AdvancedTimingFrame extends JFrame {
             //System.out.println("cameraExposure: " + acqSettings.getTimingSettings().cameraExposure());
         });
 
-        chkAlternateScanDirection_.registerListener(e -> {
-            tsb_.useAlternateScanDirection(chkAlternateScanDirection_.isSelected());
+        cbxAlternateScanDirection_.registerListener(e -> {
+            tsb_.useAlternateScanDirection(cbxAlternateScanDirection_.isSelected());
             //acqSettings.setTimingSettings(tsb_.build());
             //System.out.println("useAlternateScanDirection: " + acqSettings.getTimingSettings().useAlternateScanDirection());
         });
