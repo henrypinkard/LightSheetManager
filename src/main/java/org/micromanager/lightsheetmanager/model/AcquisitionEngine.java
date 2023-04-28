@@ -852,7 +852,6 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         // TODO: update gui (but not in the model)
     }
 
-    // TODO: only using acqSettings for cameraExposure which maybe should not exist?
     public DefaultTimingSettings.Builder getTimingFromPeriodAndLightExposure(DefaultAcquisitionSettingsDISPIM.Builder asb) {
         // uses algorithm Jon worked out in Octave code; each slice period goes like this:
         // 1. camera readout time (none if in overlap mode, 0.25ms in pseudo-overlap)

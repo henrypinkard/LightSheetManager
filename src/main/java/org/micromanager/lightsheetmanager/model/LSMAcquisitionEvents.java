@@ -132,77 +132,71 @@ public class LSMAcquisitionEvents {
 
 
    public static Function<AcquisitionEvent, Iterator<AcquisitionEvent>> cameras(String[] cameraDeviceNames) {
-      return (AcquisitionEvent event) -> {
-         return new Iterator<AcquisitionEvent>() {
+      return (AcquisitionEvent event) -> new Iterator<AcquisitionEvent>() {
 
-            private int cameraIndex_ = 0;
-            private String[] cameraDeviceNames_ = cameraDeviceNames;
+         private int cameraIndex_ = 0;
+         private String[] cameraDeviceNames_ = cameraDeviceNames;
 
-            @Override
-            public boolean hasNext() {
-               return cameraIndex_ < cameraDeviceNames_.length;
-            }
+         @Override
+         public boolean hasNext() {
+            return cameraIndex_ < cameraDeviceNames_.length;
+         }
 
-            @Override
-            public AcquisitionEvent next() {
-               AcquisitionEvent cameraEvent = event.copy();
-               cameraEvent.setCameraDeviceName(cameraDeviceNames_[cameraIndex_]);
-               cameraEvent.setAxisPosition(CAMERA_AXIS, cameraIndex_);
-               cameraIndex_++;
-               return cameraEvent;
-            }
-         };
+         @Override
+         public AcquisitionEvent next() {
+            AcquisitionEvent cameraEvent = event.copy();
+            cameraEvent.setCameraDeviceName(cameraDeviceNames_[cameraIndex_]);
+            cameraEvent.setAxisPosition(CAMERA_AXIS, cameraIndex_);
+            cameraIndex_++;
+            return cameraEvent;
+         }
       };
    }
 
    public static Function<AcquisitionEvent, Iterator<AcquisitionEvent>> zStack(int startSliceIndex,
                                                                                int stopSliceIndex) {
-      return (AcquisitionEvent event) -> {
-         return new Iterator<AcquisitionEvent>() {
+      return (AcquisitionEvent event) -> new Iterator<AcquisitionEvent>() {
 
-            private int zIndex_ = startSliceIndex;
+         private int zIndex_ = startSliceIndex;
 
-            @Override
-            public boolean hasNext() {
-               return zIndex_ < stopSliceIndex;
-            }
+         @Override
+         public boolean hasNext() {
+            return zIndex_ < stopSliceIndex;
+         }
 
-            @Override
-            public AcquisitionEvent next() {
-               AcquisitionEvent sliceEvent = event.copy();
-               sliceEvent.setAxisPosition(AcqEngMetadata.Z_AXIS, zIndex_);
-               // The tiger controller handles Z axis, so no need to add the actual Z position
-               zIndex_++;
-               return sliceEvent;
-            }
-         };
+         @Override
+         public AcquisitionEvent next() {
+            AcquisitionEvent sliceEvent = event.copy();
+            sliceEvent.setAxisPosition(AcqEngMetadata.Z_AXIS, zIndex_);
+            // The tiger controller handles Z axis, so no need to add the actual Z position
+            zIndex_++;
+            return sliceEvent;
+         }
       };
    }
 
    public static Function<AcquisitionEvent, Iterator<AcquisitionEvent>> timelapse(
          int numTimePoints, Double intervalMs) {
-      return (AcquisitionEvent event) -> {
-         return new Iterator<AcquisitionEvent>() {
+      return (AcquisitionEvent event) -> new Iterator<AcquisitionEvent>() {
 
-            int frameIndex_ = 0;
+         int frameIndex_ = 0;
 
-            @Override
-            public boolean hasNext() {
-               return frameIndex_ == 0 || frameIndex_ < numTimePoints;
+         @Override
+         public boolean hasNext() {
+            return frameIndex_ == 0 || frameIndex_ < numTimePoints;
+         }
+
+         @Override
+         public AcquisitionEvent next() {
+            AcquisitionEvent timePointEvent = event.copy();
+            if (intervalMs != null) {
+               timePointEvent.setMinimumStartTime((long) (intervalMs * frameIndex_));
             }
+            timePointEvent.setTimeIndex(frameIndex_);
+            frameIndex_++;
 
-            @Override
-            public AcquisitionEvent next() {
-               AcquisitionEvent timePointEvent = event.copy();
-               if (intervalMs != null) {
-                  timePointEvent.setMinimumStartTime((long) (intervalMs * frameIndex_));
-               }
-               timePointEvent.setTimeIndex(frameIndex_);
-               frameIndex_++;
-
-               return timePointEvent;
-            }
-         };
+            return timePointEvent;
+         }
       };
    }
 
@@ -214,40 +208,38 @@ public class LSMAcquisitionEvents {
     */
    public static Function<AcquisitionEvent, Iterator<AcquisitionEvent>> channels(
          ChannelSpec[] channelList) {
-      return (AcquisitionEvent event) -> {
-         return new Iterator<AcquisitionEvent>() {
-            int index = 0;
+      return (AcquisitionEvent event) -> new Iterator<AcquisitionEvent>() {
+         int index = 0;
 
-            @Override
-            public boolean hasNext() {
-               return index < channelList.length;
-            }
+         @Override
+         public boolean hasNext() {
+            return index < channelList.length;
+         }
 
-            @Override
-            public AcquisitionEvent next() {
-               AcquisitionEvent channelEvent = event.copy();
-               channelEvent.setConfigGroup(channelList[index].getGroup());
-               channelEvent.setConfigPreset(channelList[index].getName());
-               channelEvent.setChannelName(channelList[index].getName());
+         @Override
+         public AcquisitionEvent next() {
+            AcquisitionEvent channelEvent = event.copy();
+            channelEvent.setConfigGroup(channelList[index].getGroup());
+            channelEvent.setConfigPreset(channelList[index].getName());
+            channelEvent.setChannelName(channelList[index].getName());
 
-               double zPos;
-               if (channelEvent.getZPosition() == null) {
-                  try {
-                     zPos = Engine.getCore().getPosition() + channelList[index].getOffset();
-                  } catch (Exception e) {
-                     throw new RuntimeException(e);
-                  }
-               } else {
-                  zPos = channelEvent.getZPosition() + channelList[index].getOffset();
+            double zPos;
+            if (channelEvent.getZPosition() == null) {
+               try {
+                  zPos = Engine.getCore().getPosition() + channelList[index].getOffset();
+               } catch (Exception e) {
+                  throw new RuntimeException(e);
                }
-               channelEvent.setZ(channelEvent.getZIndex(), zPos);
-
-               // TODO: do channels have different exposures?
-//               channelEvent.setExposure(channelList.get(index).exposure());
-               index++;
-               return channelEvent;
+            } else {
+               zPos = channelEvent.getZPosition() + channelList[index].getOffset();
             }
-         };
+            channelEvent.setZ(channelEvent.getZIndex(), zPos);
+
+            // TODO: do channels have different exposures?
+//               channelEvent.setExposure(channelList.get(index).exposure());
+            index++;
+            return channelEvent;
+         }
       };
    }
 
