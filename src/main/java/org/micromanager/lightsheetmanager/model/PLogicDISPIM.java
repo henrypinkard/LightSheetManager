@@ -225,7 +225,7 @@ public class PLogicDISPIM {
 
             // set the acceleration to a reasonable value for the (usually very slow) scan speed
             xyStage_.setAccelerationX((float)computeScanAcceleration(actualMotorSpeed,
-                    xyStage_.getMaxSpeedX(), 1.0f)); // TODO: get scan settings //settings.scanSettings().getAccelFactor()));
+                    xyStage_.getMaxSpeedX(), settings.scanSettings().scanAccelerationFactor()));
 
             int numLines = settings.volumeSettings().numViews();
             if (isInterleaved) {
@@ -291,10 +291,8 @@ public class PLogicDISPIM {
      * @param motorSpeed
      * @return
      */
-    public double computeScanAcceleration(final double motorSpeed) {
-        final double accelFactor = 1.0; // TODO: get from acqSettings
-        //final double accelFactor = props_.getPropValueFloat(Devices.Keys.PLUGIN, Properties.Keys.PLUGIN_STAGESCAN_ACCEL_FACTOR);
-        return (10 + 100 * (motorSpeed / xyStage_.getMaxSpeedX()) ) * accelFactor;
+    public double computeScanAcceleration(final double motorSpeed, DefaultAcquisitionSettingsDISPIM settings) {
+        return (10 + 100 * (motorSpeed / xyStage_.getMaxSpeedX())) * settings.scanSettings().scanAccelerationFactor();
     }
 
     // TODO: scanNum was part of SliceSettings (now TimingSettings)
@@ -327,11 +325,11 @@ public class PLogicDISPIM {
     }
 
     public boolean prepareStageScanForAcquisition(final double x, final double y, DefaultAcquisitionSettingsDISPIM settings) {
-        final boolean scanFromStart = true;//settings.scanSettings().scanFromStartPosition();
-        final boolean scanNegative = false; //settings.scanSettings().scanNegativeDirection();
+        final boolean scanFromCurrent = settings.scanSettings().scanFromCurrentPosition();
+        final boolean scanNegative = settings.scanSettings().scanFromNegativeDirection();
         double xStartUm;
         double xStopUm;
-        if (scanFromStart) {
+        if (scanFromCurrent) {
             if (scanNegative) {
                 xStartUm = x;
                 xStopUm = x - scanDistance_;
@@ -403,7 +401,6 @@ public class PLogicDISPIM {
         return true;
     }
 
-    // TODO: side => view
     public boolean prepareControllerForAcquisitionSide(
             final AcquisitionSettingsDISPIM settings,
             final int view,

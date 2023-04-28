@@ -38,7 +38,8 @@ public class DataTab extends Panel {
     private void createUserInterface() {
         final JLabel lblTitle = new JLabel("Data");
 
-        final DefaultAcquisitionSettingsDISPIM acqSettings = model_.acquisitions().getAcquisitionSettings();
+        final DefaultAcquisitionSettingsDISPIM acqSettings =
+                model_.acquisitions().getAcquisitionSettings();
 
         fileSelect_ = new FileSelect(
                 "Please select a directory to save image data...",
@@ -58,16 +59,16 @@ public class DataTab extends Panel {
         txtSaveDirectory_.setEditable(false);
         txtSaveDirectory_.setColumns(24);
         txtSaveDirectory_.setForeground(Color.BLACK);
-        txtSaveDirectory_.setText(model_.acquisitions().getAcquisitionSettings().saveDirectory());
+        txtSaveDirectory_.setText(acqSettings.saveDirectory());
 
         txtSaveFileName_ = new TextField();
         //txtSaveFileName_.setEditable(false);
         txtSaveFileName_.setColumns(24);
         txtSaveFileName_.setForeground(Color.WHITE);
-        txtSaveFileName_.setText(model_.acquisitions().getAcquisitionSettings().saveNamePrefix());
+        txtSaveFileName_.setText(acqSettings.saveNamePrefix());
 
         cbxSaveWhileAcquiring_ = new CheckBox("Save images during acquisition",
-                model_.acquisitions().getAcquisitionSettings().isSavingImagesDuringAcquisition());
+                acqSettings.isSavingImagesDuringAcquisition());
 
         btnBrowse_ = new Button("Browse...", 80, 20);
 
@@ -86,7 +87,8 @@ public class DataTab extends Panel {
     }
 
     private void createEventHandlers() {
-        final DefaultAcquisitionSettingsDISPIM.Builder asb_ = model_.acquisitions().getAcquisitionSettingsBuilder();
+        final DefaultAcquisitionSettingsDISPIM.Builder asb_ =
+                model_.acquisitions().getAcquisitionSettingsBuilder();
 
         btnBrowse_.registerListener((EventObject e) -> {
             final String path = fileSelect_.openDialogBox(this, new File(""));
