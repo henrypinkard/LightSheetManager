@@ -1,6 +1,7 @@
 package org.micromanager.lightsheetmanager.gui;
 
 import org.micromanager.Studio;
+import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 import org.micromanager.lightsheetmanager.model.DeviceManager;
 import org.micromanager.lightsheetmanager.gui.tabs.AcquisitionTab;
@@ -61,16 +62,19 @@ public class TabPanel extends Panel {
     }
 
     /**
-     * Create the panel.
+     * Create the ui.
      */
     private void createUserInterface() {
+        final DefaultAcquisitionSettingsDISPIM acqSettings =
+                model_.acquisitions().getAcquisitionSettings();
+
         // create panels
         acquisitionTab_ = new AcquisitionTab(model_);
         autofocusTab_ = new AutofocusTab();
         cameraTab_ = new CameraTab(model_, acquisitionTab_.getSliceSettingsPanel());
         dataTab_ = new DataTab(model_);
         deviceTab_ = new DeviceTab(model_, devices_);
-        settingsTab_ = new SettingsTab();
+        settingsTab_ = new SettingsTab(model_);
         helpTab_ = new HelpTab();
 
         // add tabs to the pane
