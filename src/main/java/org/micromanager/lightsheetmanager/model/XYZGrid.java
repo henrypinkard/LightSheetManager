@@ -161,4 +161,107 @@ public class XYZGrid {
         model_.studio().positions().setPositionList(positionList);
     }
 
+    public boolean getUseX() {
+        return useX_;
+    }
+
+    public void setUseX(final boolean state) {
+        useX_ = state;
+    }
+
+    public boolean getUseY() {
+        return useX_;
+    }
+
+    public void setUseY(final boolean state) {
+        useY_ = state;
+    }
+
+    public boolean getUseZ() {
+        return useX_;
+    }
+
+    public void setUseZ(final boolean state) {
+        useZ_ = state;
+    }
+
+    public boolean getClearYZ() {
+        return clearYZ_;
+    }
+
+    public void setClearYZ(final boolean state) {
+        clearYZ_ = state;
+    }
+
+    public double getStartX() {
+        return startX_;
+    }
+
+    public void setStartX(final double value) {
+        startX_ = value;
+    }
+
+    public double getStopX() {
+        return stopX_;
+    }
+
+    public void setStopX(final double value) {
+        stopX_ = value;
+    }
+
+    public double getDeltaX() {
+        return deltaX_;
+    }
+
+    public void setDeltaX(final double value) {
+        deltaX_ = value;
+    }
+
+    public double getStartY() {
+        return startY_;
+    }
+
+    public void setStartY(final double value) {
+        startY_ = value;
+    }
+
+    public double getStopY() {
+        return stopY_;
+    }
+
+    public void setStopY(final double value) {
+        stopY_ = value;
+    }
+
+    public double getDeltaY() {
+        return deltaY_;
+    }
+
+    public void setDeltaY(final double value) {
+        deltaY_ = value;
+    }
+
+    public double getStartZ() {
+        return startZ_;
+    }
+
+    public void setStartZ(final double value) {
+        startZ_ = value;
+    }
+
+    public double getStopZ() {
+        return stopZ_;
+    }
+
+    public void setStopZ(final double value) {
+        stopZ_ = value;
+    }
+
+    public double getDeltaZ() {
+        return deltaZ_;
+    }
+
+    public void setDeltaZ(final double value) {
+        deltaZ_ = value;
+    }
 }

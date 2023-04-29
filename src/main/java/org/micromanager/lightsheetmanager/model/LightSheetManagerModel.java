@@ -26,6 +26,8 @@ public class LightSheetManagerModel implements LightSheetManager {
 
     private DeviceManager deviceManager_;
 
+    private XYZGrid xyzGrid_;
+
     private AcquisitionEngine acqEngine_;
     private AcquisitionTableData acqTableData_;
 
@@ -40,6 +42,7 @@ public class LightSheetManagerModel implements LightSheetManager {
 
         settings_ = new UserSettings(studio_, this);
         acqEngine_ = new AcquisitionEngine(studio_, this);
+        xyzGrid_ = new XYZGrid(this);
     }
 
     /**
@@ -115,6 +118,10 @@ public class LightSheetManagerModel implements LightSheetManager {
         return studio_;
     }
 
+    public XYZGrid getXYZGrid() {
+        return xyzGrid_;
+    }
+    
     @Override
     public AutofocusSettings.Builder autofocusSettingsBuilder() {
         return null;

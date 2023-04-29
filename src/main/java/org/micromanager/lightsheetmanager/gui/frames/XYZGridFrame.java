@@ -8,6 +8,7 @@ import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.components.Spinner;
 import org.micromanager.internal.utils.WindowPositioning;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
+import org.micromanager.lightsheetmanager.model.XYZGrid;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -17,6 +18,7 @@ public class XYZGridFrame extends JFrame {
 
     private Button btnEditPositionList_;
     private Button btnComputeGrid_;
+    private Button btnRunOverviewAcq_;
 
     private CheckBox cbxUseX_;
     private CheckBox cbxUseY_;
@@ -53,12 +55,18 @@ public class XYZGridFrame extends JFrame {
     private void createUserInterface() {
         setTitle("XYZ Grid");
         setIconImage(Icons.MICROSCOPE.getImage());
-        setLayout(new MigLayout("insets 10 10 10 10", "[]10[]", "[]10[]"));
         setResizable(false);
 
-        Button.setDefaultSize(140, 26);
+        setLayout(new MigLayout(
+                "insets 10 10 10 10",
+                "[]10[]",
+                "[]10[]"
+        ));
+
+        Button.setDefaultSize(160, 26);
         btnComputeGrid_ = new Button("Compute Grid");
         btnEditPositionList_ = new Button("Edit Position List...");
+        btnRunOverviewAcq_ = new Button("Run Overview Acquisition");
 
         cbxUseX_ = new CheckBox("Slices from stage coordinates", false);
         cbxUseY_ = new CheckBox("Grid in Y", false);
@@ -146,7 +154,8 @@ public class XYZGridFrame extends JFrame {
         settingsPanel.add(cbxClearPositions_, "wrap");
 
         buttonPanel.add(btnComputeGrid_, "wrap");
-        buttonPanel.add(btnEditPositionList_, "");
+        buttonPanel.add(btnEditPositionList_, "wrap");
+        buttonPanel.add(btnRunOverviewAcq_, "");
 
         add(yPanel, "growx");
         add(zPanel, "wrap");
@@ -158,7 +167,37 @@ public class XYZGridFrame extends JFrame {
     }
 
     private void createEventHandlers() {
-        btnComputeGrid_.registerListener(e -> System.out.println("compute grid pressed"));
-        btnEditPositionList_.registerListener(e -> model_.studio().app().showPositionList());
+        final XYZGrid xyzGrid = model_.getXYZGrid();
+
+        // Spinners X
+        spnXStart_.registerListener(e ->
+                xyzGrid.setStartX(spnXStart_.getDouble()));
+        spnXStop_.registerListener(e ->
+                xyzGrid.setStopX(spnXStop_.getDouble()));
+        spnXDelta_.registerListener(e ->
+                xyzGrid.setDeltaX(spnXDelta_.getDouble()));
+
+        // Spinners Y
+        spnYStart_.registerListener(e ->
+                xyzGrid.setStartY(spnYStart_.getDouble()));
+        spnYStop_.registerListener(e ->
+                xyzGrid.setStopY(spnYStop_.getDouble()));
+        spnYDelta_.registerListener(e ->
+                xyzGrid.setDeltaY(spnYDelta_.getDouble()));
+
+        // Spinners Z
+        spnZStart_.registerListener(e -> xyzGrid.setStartZ(spnZStart_.getDouble()));
+        spnZStop_.registerListener(e -> xyzGrid.setStopZ(spnZStop_.getDouble()));
+        spnZDelta_.registerListener(e -> {});
+
+        spnOverlap_.registerListener(e -> {});
+
+        // Buttons
+        btnComputeGrid_.registerListener(
+                e -> System.out.println("compute grid pressed"));
+        btnEditPositionList_.registerListener(
+                e -> model_.studio().app().showPositionList());
+        btnRunOverviewAcq_.registerListener(
+                e -> System.out.println("run overview acq pressed"));
     }
 }
