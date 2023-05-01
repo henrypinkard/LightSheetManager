@@ -36,7 +36,7 @@ public class XYZGridFrame extends JFrame {
     private Spinner spnZStop_;
     private Spinner spnZDelta_;
 
-    private Spinner spnOverlap_;
+    private Spinner spnOverlapYZ_;
     private CheckBox cbxClearPositions_;
 
     private JLabel lblXCountValue_;
@@ -82,10 +82,10 @@ public class XYZGridFrame extends JFrame {
                 "[]15[]",
                 "[]10[]"
         );
-        final Panel xPanel = new Panel(cbxUseX_);
-        final Panel yPanel = new Panel(cbxUseY_);
-        final Panel zPanel = new Panel(cbxUseZ_);
-        final Panel buttonPanel = new Panel();
+        final Panel pnlX = new Panel(cbxUseX_);
+        final Panel pnlY = new Panel(cbxUseY_);
+        final Panel pnlZ = new Panel(cbxUseZ_);
+        final Panel pnlButtons = new Panel();
 
         // X
         final JLabel lblXStart = new JLabel("X start [\u00B5m]:");
@@ -93,9 +93,9 @@ public class XYZGridFrame extends JFrame {
         final JLabel lblXDelta = new JLabel("X delta [\u00B5m]:");
         final JLabel lblXCount = new JLabel("Slice count:");
 
-        spnXStart_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
-        spnXStop_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
-        spnXDelta_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
+        spnXStart_ = Spinner.createDoubleSpinner(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 100.0);
+        spnXStop_ = Spinner.createDoubleSpinner(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 100.0);
+        spnXDelta_ = Spinner.createDoubleSpinner(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 100.0);
 
         // Y
         final JLabel lblYStart = new JLabel("Y start [\u00B5m]:");
@@ -103,9 +103,9 @@ public class XYZGridFrame extends JFrame {
         final JLabel lblYDelta = new JLabel("Y delta [\u00B5m]:");
         final JLabel lblYCount = new JLabel("Y count:");
 
-        spnYStart_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
-        spnYStop_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
-        spnYDelta_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
+        spnYStart_ = Spinner.createDoubleSpinner(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 100.0);
+        spnYStop_ = Spinner.createDoubleSpinner(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 100.0);
+        spnYDelta_ = Spinner.createDoubleSpinner(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 100.0);
 
         // Z
         final JLabel lblZStart = new JLabel("Z start [\u00B5m]:");
@@ -113,61 +113,69 @@ public class XYZGridFrame extends JFrame {
         final JLabel lblZDelta = new JLabel("Z delta [\u00B5m]:");
         final JLabel lblZCount = new JLabel("Z count:");
 
-        spnZStart_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
-        spnZStop_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
-        spnZDelta_ = Spinner.createDoubleSpinner(0.0, Double.MIN_VALUE, Double.MAX_VALUE, 100.0);
+        spnZStart_ = Spinner.createDoubleSpinner(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 100.0);
+        spnZStop_ = Spinner.createDoubleSpinner(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 100.0);
+        spnZDelta_ = Spinner.createDoubleSpinner(0.0,-Double.MAX_VALUE, Double.MAX_VALUE, 100.0);
 
-        final Panel settingsPanel = new Panel("Grid Settings");
+        final Panel pnlSettings = new Panel("Grid Settings");
         final JLabel lblOverlap = new JLabel("Overlap (Y and Z) [%]");
-        spnOverlap_ = Spinner.createIntegerSpinner(10, 0, 100, 1);
+        spnOverlapYZ_ = Spinner.createIntegerSpinner(10, 0, 100, 1);
         cbxClearPositions_ = new CheckBox("Clear position list if YZ unused", false);
 
-        xPanel.add(lblXStart, "");
-        xPanel.add(spnXStart_, "wrap");
-        xPanel.add(lblXStop, "");
-        xPanel.add(spnXStop_, "wrap");
-        xPanel.add(lblXDelta, "");
-        xPanel.add(spnXDelta_, "wrap");
-        xPanel.add(lblXCount, "");
-        xPanel.add(lblXCountValue_, "");
+        pnlX.add(lblXStart, "");
+        pnlX.add(spnXStart_, "wrap");
+        pnlX.add(lblXStop, "");
+        pnlX.add(spnXStop_, "wrap");
+        pnlX.add(lblXDelta, "");
+        pnlX.add(spnXDelta_, "wrap");
+        pnlX.add(lblXCount, "");
+        pnlX.add(lblXCountValue_, "");
 
-        yPanel.add(lblYStart, "");
-        yPanel.add(spnYStart_, "wrap");
-        yPanel.add(lblYStop, "");
-        yPanel.add(spnYStop_, "wrap");
-        yPanel.add(lblYDelta, "");
-        yPanel.add(spnYDelta_, "wrap");
-        yPanel.add(lblYCount, "");
-        yPanel.add(lblYCountValue_, "");
+        pnlY.add(lblYStart, "");
+        pnlY.add(spnYStart_, "wrap");
+        pnlY.add(lblYStop, "");
+        pnlY.add(spnYStop_, "wrap");
+        pnlY.add(lblYDelta, "");
+        pnlY.add(spnYDelta_, "wrap");
+        pnlY.add(lblYCount, "");
+        pnlY.add(lblYCountValue_, "");
 
-        zPanel.add(lblZStart, "");
-        zPanel.add(spnZStart_, "wrap");
-        zPanel.add(lblZStop, "");
-        zPanel.add(spnZStop_, "wrap");
-        zPanel.add(lblZDelta, "");
-        zPanel.add(spnZDelta_, "wrap");
-        zPanel.add(lblZCount, "");
-        zPanel.add(lblZCountValue_, "");
+        pnlZ.add(lblZStart, "");
+        pnlZ.add(spnZStart_, "wrap");
+        pnlZ.add(lblZStop, "");
+        pnlZ.add(spnZStop_, "wrap");
+        pnlZ.add(lblZDelta, "");
+        pnlZ.add(spnZDelta_, "wrap");
+        pnlZ.add(lblZCount, "");
+        pnlZ.add(lblZCountValue_, "");
 
-        settingsPanel.add(lblOverlap, "split 2");
-        settingsPanel.add(spnOverlap_, "wrap");
-        settingsPanel.add(cbxClearPositions_, "wrap");
+        pnlSettings.add(lblOverlap, "split 2");
+        pnlSettings.add(spnOverlapYZ_, "wrap");
+        pnlSettings.add(cbxClearPositions_, "wrap");
 
-        buttonPanel.add(btnComputeGrid_, "wrap");
-        buttonPanel.add(btnEditPositionList_, "wrap");
-        buttonPanel.add(btnRunOverviewAcq_, "");
+        pnlButtons.add(btnComputeGrid_, "wrap");
+        pnlButtons.add(btnEditPositionList_, "wrap");
+        pnlButtons.add(btnRunOverviewAcq_, "");
 
-        add(yPanel, "growx");
-        add(zPanel, "wrap");
-        add(xPanel, "growx");
-        add(settingsPanel, "wrap");
-        add(buttonPanel, "");
+        add(pnlY, "growx");
+        add(pnlZ, "wrap");
+        add(pnlX, "growx");
+        add(pnlSettings, "wrap");
+        add(pnlButtons, "");
 
         pack();
     }
 
     private void createEventHandlers() {
         final XYZGrid xyzGrid = model_.getXYZGrid();
+
+        // Check Boxes
+        cbxUseX_.registerListener(e ->
+                xyzGrid.setUseX(cbxUseX_.isSelected()));
+        cbxUseY_.registerListener(e ->
+                xyzGrid.setUseY(cbxUseY_.isSelected()));
+        cbxUseZ_.registerListener(e ->
+                xyzGrid.setUseZ(cbxUseZ_.isSelected()));
 
         // Spinners X
         spnXStart_.registerListener(e ->
@@ -186,18 +194,23 @@ public class XYZGridFrame extends JFrame {
                 xyzGrid.setDeltaY(spnYDelta_.getDouble()));
 
         // Spinners Z
-        spnZStart_.registerListener(e -> xyzGrid.setStartZ(spnZStart_.getDouble()));
-        spnZStop_.registerListener(e -> xyzGrid.setStopZ(spnZStop_.getDouble()));
-        spnZDelta_.registerListener(e -> {});
+        spnZStart_.registerListener(e ->
+                xyzGrid.setStartZ(spnZStart_.getDouble()));
+        spnZStop_.registerListener(e ->
+                xyzGrid.setStopZ(spnZStop_.getDouble()));
+        spnZDelta_.registerListener(e ->
+                xyzGrid.setDeltaZ(spnZDelta_.getDouble()));
 
-        spnOverlap_.registerListener(e -> {});
+        // Overlap
+        spnOverlapYZ_.registerListener(e ->
+                xyzGrid.setOverlapYZ(spnOverlapYZ_.getInt()));
 
         // Buttons
-        btnComputeGrid_.registerListener(
-                e -> System.out.println("compute grid pressed"));
-        btnEditPositionList_.registerListener(
-                e -> model_.studio().app().showPositionList());
-        btnRunOverviewAcq_.registerListener(
-                e -> System.out.println("run overview acq pressed"));
+        btnComputeGrid_.registerListener(e ->
+                xyzGrid.computeGrid());
+        btnEditPositionList_.registerListener(e ->
+                model_.studio().app().showPositionList());
+        btnRunOverviewAcq_.registerListener(e ->
+                model_.studio().logs().showError("Not implemented yet!"));
     }
 }

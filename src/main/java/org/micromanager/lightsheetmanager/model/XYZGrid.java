@@ -34,6 +34,7 @@ public class XYZGrid {
     private double deltaY_;
     private double deltaZ_;
 
+    private int overlapYZ_;
     private boolean clearYZ_;
 
     private LightSheetManagerModel model_;
@@ -193,6 +194,14 @@ public class XYZGrid {
         clearYZ_ = state;
     }
 
+    public void setOverlapYZ(final int value) {
+        overlapYZ_ = value;
+    }
+
+    public int getOverlapYZ() {
+        return overlapYZ_;
+    }
+
     public double getStartX() {
         return startX_;
     }
@@ -264,4 +273,5 @@ public class XYZGrid {
     public void setDeltaZ(final double value) {
         deltaZ_ = value;
     }
+
 }
