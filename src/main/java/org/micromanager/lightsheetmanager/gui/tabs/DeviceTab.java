@@ -1,12 +1,11 @@
 package org.micromanager.lightsheetmanager.gui.tabs;
 
 import org.micromanager.lightsheetmanager.api.data.GeometryType;
-import org.micromanager.lightsheetmanager.gui.frames.NavigationFrame;
-import org.micromanager.lightsheetmanager.model.DeviceManager;
-
-import org.micromanager.lightsheetmanager.gui.frames.SetupPathFrame;
 import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
+import org.micromanager.lightsheetmanager.gui.frames.NavigationFrame;
+import org.micromanager.lightsheetmanager.gui.frames.SetupPathFrame;
+import org.micromanager.lightsheetmanager.model.DeviceManager;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
 import javax.swing.JLabel;
@@ -34,18 +33,20 @@ public class DeviceTab extends Panel {
         model_ = Objects.requireNonNull(model);
         setupPanelButtons_ = new ArrayList<>();
         setupPathFrames_ = new ArrayList<>();
+        createUserInterface();
+        createEventHandlers();
+    }
+
+    private void createUserInterface() {
+
+        navFrame_ = new NavigationFrame(model_.getStudio(), model_);
+        navFrame_.init();
+
         setMigLayout(
             "",
             "[]0[]",
             "[]0[]"
         );
-        init();
-    }
-
-    private void init() {
-
-        navFrame_ = new NavigationFrame(model_.getStudio(), model_);
-        navFrame_.init();
 
         btnCreateConfigGroup_ = new Button("Create System Configuration Group", 220, 30);
 
@@ -73,8 +74,6 @@ public class DeviceTab extends Panel {
                 setupPathFrames_.add(frame);
             }
         }
-
-        createEventHandlers();
 
         add(lblGeometryType, "wrap");
         add(lblLightSheetType, "wrap");

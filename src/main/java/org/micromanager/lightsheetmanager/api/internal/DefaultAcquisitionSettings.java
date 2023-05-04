@@ -77,10 +77,20 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
             return self();
         }
 
+        /**
+         * Sets the data saving mode.
+         *
+         * @param saveMode the save mode
+         */
         @Override
         public T saveMode(final DataStorage.SaveMode saveMode) {
             saveMode_ = saveMode;
             return self();
+        }
+
+        @Override
+        public DefaultAutofocusSettings.Builder autofocusSettingsBuilder() {
+            return afsb_;
         }
 
         /**
