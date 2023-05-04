@@ -1,23 +1,15 @@
 package org.micromanager.lightsheetmanager.api;
 
 
+import org.micromanager.lightsheetmanager.api.data.AutofocusFit;
+import org.micromanager.lightsheetmanager.api.data.AutofocusModes;
+import org.micromanager.lightsheetmanager.api.data.AutofocusType;
+
 /**
  * Autofocus settings.
  *
  */
 public interface AutofocusSettings {
-
-   // TODO: meaningful modes
-    enum AutofocusMode {
-        TYPE1,
-        TYPE2
-    }
-
-   // TODO: meaningful types
-    enum AutofocusType {
-        TYPE1,
-        TYPE2
-    }
 
     interface Builder {
 
@@ -47,21 +39,26 @@ public interface AutofocusSettings {
          *
          * @param mode the autofocus mode
          */
-        Builder mode(final AutofocusMode mode);
+        Builder mode(final AutofocusModes mode);
 
         /**
          * Sets the type of scoring algorithm to use when running autofocus.
          *
          * @param type the scoring algorithm
          */
-        Builder type(final AutofocusType type); // TODO: rename to scoringAlgorithm
+        Builder scoringAlgorithm(final AutofocusType type);
 
+        /**
+         * Sets the type of curve fitting algorithm to use with autofocus..
+         *
+         * @param type the curve fitting algorithm
+         */
+        Builder fit(final AutofocusFit type);
 
         // TODO: maybe denote that these are related to acquisitions
 
         /**
-         * Sets the number of images to capture before running an autofocus routine during an acquisition.
-         * TODO: what does this measure?
+         * Sets the amount of time to delay between acquiring time points.
          */
         Builder timePointInterval(final int timePointInterval);
 
@@ -86,7 +83,7 @@ public interface AutofocusSettings {
          *
          * @param value the coefficient of determination
          */
-        Builder r2(final double value); // TODO: add threshold to the name? does this belong here or not?
+        Builder r2(final double value);
 
         Builder maxOffset(final double maxOffset); // +/- um
 
@@ -128,14 +125,16 @@ public interface AutofocusSettings {
      *
      * @return the autofocus mode
      */
-    AutofocusMode mode();
+    AutofocusModes mode();
 
     /**
      * Returns the type of scoring algorithm used for autofocus.
      *
      * @return the type of scoring algorithm
      */
-    AutofocusType type();
+    AutofocusType scoringAlgorithm();
+
+    AutofocusFit fit();
 
     /**
      * Returns the coefficient of determination used in the autofocus routine.
@@ -145,9 +144,9 @@ public interface AutofocusSettings {
     double r2();
 
     /**
-     * Returns the number of images between autofocus routines.
+     * Returns the amount of time to delay between acquiring time points.
      *
-     * @return the number of images between autofocus routines
+     * @return the amount of time to delay between acquiring time points
      */
     int timePointInterval();
 
@@ -182,14 +181,5 @@ public interface AutofocusSettings {
     boolean autoUpdateOffset();
 
     double autoUpdateMaxOffset();
-
-    // TODO: do we need these methods for viewing images/plots?
-    // NS: these should not be part of the AutofocusSettings, but rather be parameters
-    // to the entity using the AutofocusSettings to autofocus.
-    // void showImages(final boolean state);
-    // boolean getShowImages();
-
-    // void showPlot(final boolean state);
-    // boolean getShowPlot();
 
 }
