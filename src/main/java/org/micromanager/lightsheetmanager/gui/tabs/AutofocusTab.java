@@ -1,5 +1,9 @@
 package org.micromanager.lightsheetmanager.gui.tabs;
 
+import org.micromanager.lightsheetmanager.api.data.AutofocusFit;
+import org.micromanager.lightsheetmanager.api.data.AutofocusModes;
+import org.micromanager.lightsheetmanager.api.data.AutofocusType;
+import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.api.internal.DefaultAutofocusSettings;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;
 import org.micromanager.lightsheetmanager.gui.components.ComboBox;
@@ -48,6 +52,9 @@ public class AutofocusTab extends Panel {
     }
 
     public void createUserInterface() {
+        final DefaultAcquisitionSettingsDISPIM acqSettings =
+                model_.acquisitions().getAcquisitionSettings();
+
         final Label lblTitle = new Label("Autofocus Settings", Font.BOLD, 18);
 
         setMigLayout(
@@ -78,9 +85,13 @@ public class AutofocusTab extends Panel {
         spnStepSize_ = Spinner.createFloatSpinner(0.001f, 0.0f, 100.0f, 1.0f);
         spnMinimumR2_ = Spinner.createFloatSpinner(0.75f, 0.0f, 1.0f, 0.01f);
 
-        cmbAutofocusMode_ = new ComboBox(labels, "None");
-        cmbScoringAlgorithm_ = new ComboBox(labels, "None");
-        cmbFittingFunction_ = new ComboBox(labels, "None");
+        cmbScoringAlgorithm_ = new ComboBox(AutofocusType.toArray(),
+                acqSettings.autofocusSettings().scoringAlgorithm().toString());
+        cmbFittingFunction_ = new ComboBox(AutofocusFit.toArray(),
+                acqSettings.autofocusSettings().fit().toString());
+        ComboBox.setDefaultSize(140, 20);
+        cmbAutofocusMode_ = new ComboBox(AutofocusModes.toArray(),
+                acqSettings.autofocusSettings().mode().toString());
 
         // autofocus options during acquisition
         final Label lblTimePoints = new Label("time points");
@@ -116,7 +127,7 @@ public class AutofocusTab extends Panel {
         // add ui elements to the panel
         add(lblTitle, "span 2, wrap");
 
-        // general options
+        // general autofocus options
         pnlGeneralOptions.add(cbxShowImages_, "");
         pnlGeneralOptions.add(cbxShowPlot_, "wrap");
         pnlGeneralOptions.add(lblNumImages, "");
@@ -125,14 +136,14 @@ public class AutofocusTab extends Panel {
         pnlGeneralOptions.add(spnStepSize_, "wrap");
         pnlGeneralOptions.add(lblMinimumR2, "");
         pnlGeneralOptions.add(spnMinimumR2_, "wrap");
-        pnlGeneralOptions.add(lblMode, "");
-        pnlGeneralOptions.add(cmbAutofocusMode_, "wrap");
         pnlGeneralOptions.add(lblScoringAlgorithm, "");
         pnlGeneralOptions.add(cmbScoringAlgorithm_, "wrap");
         pnlGeneralOptions.add(lblFittingFunction, "");
-        pnlGeneralOptions.add(cmbFittingFunction_, "");
+        pnlGeneralOptions.add(cmbFittingFunction_, "wrap");
+        pnlGeneralOptions.add(lblMode, "");
+        pnlGeneralOptions.add(cmbAutofocusMode_, "");
 
-        // active options
+        // autofocus options during acquisition
         pnlAcqActiveOptions.add(cbxAutofocusEveryPass_, "span 3, wrap");
         pnlAcqActiveOptions.add(cbxAutofocusBeforeAcq_, "span 3, wrap");
         pnlAcqActiveOptions.add(lblAutofocusEveryX, "");
@@ -144,7 +155,7 @@ public class AutofocusTab extends Panel {
         pnlAcqActiveOptions.add(spnMaxOffset_, "");
         pnlAcqActiveOptions.add(new Label("\u00B5m (\u00B1)"), "");
 
-        // setup options
+        // autofocus options during setup
         pnlAcqSetupOptions.add(cbxAutoUpdateFocusFound_, "span 3, wrap");
         pnlAcqSetupOptions.add(lblMaxOffsetSetup_, "");
         pnlAcqSetupOptions.add(spnMaxOffsetSetup_, "");

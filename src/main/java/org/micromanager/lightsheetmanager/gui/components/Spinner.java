@@ -56,7 +56,7 @@ public class Spinner extends JSpinner {
         textField.setColumns(width);
     }
 
-    public void setDefaultSize(final int width) {
+    public static void setDefaultSize(final int width) {
         defaultSize = width;
     }
 
