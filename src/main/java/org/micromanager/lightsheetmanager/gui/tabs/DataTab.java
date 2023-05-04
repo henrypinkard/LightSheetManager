@@ -1,20 +1,19 @@
 package org.micromanager.lightsheetmanager.gui.tabs;
 
+import java.awt.*;
 import java.io.File;
 import java.util.EventObject;
 
 import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
-import org.micromanager.lightsheetmanager.model.DataStorage;
+import org.micromanager.lightsheetmanager.gui.components.*;
 import org.micromanager.lightsheetmanager.gui.components.Button;
-import org.micromanager.lightsheetmanager.gui.components.CheckBox;
-import org.micromanager.lightsheetmanager.gui.components.FileSelect;
+import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
-import org.micromanager.lightsheetmanager.gui.components.RadioButton;
 import org.micromanager.lightsheetmanager.gui.components.TextField;
+import org.micromanager.lightsheetmanager.model.DataStorage;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
 import javax.swing.JLabel;
-import java.awt.Color;
 import java.util.Objects;
 
 public class DataTab extends Panel {
@@ -36,7 +35,7 @@ public class DataTab extends Panel {
     }
 
     private void createUserInterface() {
-        final JLabel lblTitle = new JLabel("Data");
+        final Label lblTitle = new Label("Data Settings", Font.BOLD, 18);
 
         final DefaultAcquisitionSettingsDISPIM acqSettings =
                 model_.acquisitions().getAcquisitionSettings();

@@ -1,8 +1,11 @@
 package org.micromanager.lightsheetmanager.gui.setup;
 
 import org.micromanager.lightsheetmanager.gui.components.Button;
+import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.data.Icons;
+
+import java.awt.Font;
 
 /**
  * Select which camera is being used.
@@ -17,10 +20,12 @@ public class CameraPanel extends Panel {
 
     public CameraPanel() {
         super("Cameras");
-        init();
+        createUserInterface();
+        createEventHandlers();
     }
 
-    private void init() {
+    private void createUserInterface() {
+
         Button.setDefaultSize(80, 26);
         btnImagingPath_ = new Button("Imaging");
         btnMultiPath_ = new Button("Multi");
@@ -29,8 +34,6 @@ public class CameraPanel extends Panel {
 
         Button.setDefaultSize(165, 26);
         btnLiveMode_ = new Button("Live", Icons.CAMERA);
-
-        createEventHandlers();
 
         add(btnImagingPath_, "");
         add(btnMultiPath_, "wrap");
@@ -41,6 +44,22 @@ public class CameraPanel extends Panel {
 
     private void createEventHandlers() {
         btnImagingPath_.registerListener(e -> {
+
+        });
+
+        btnMultiPath_.registerListener(e -> {
+
+        });
+
+        btnEpiPath_.registerListener(e -> {
+
+        });
+
+        btnInvertedPath_.registerListener(e -> {
+
+        });
+
+        btnLiveMode_.registerListener(e -> {
 
         });
     }

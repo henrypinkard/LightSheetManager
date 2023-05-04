@@ -70,7 +70,7 @@ public class TabPanel extends Panel {
 
         // create panels
         acquisitionTab_ = new AcquisitionTab(model_);
-        autofocusTab_ = new AutofocusTab();
+        autofocusTab_ = new AutofocusTab(model_);
         cameraTab_ = new CameraTab(model_, acquisitionTab_.getSliceSettingsPanel());
         dataTab_ = new DataTab(model_);
         deviceTab_ = new DeviceTab(model_, devices_);

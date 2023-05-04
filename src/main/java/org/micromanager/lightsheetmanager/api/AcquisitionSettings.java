@@ -45,6 +45,13 @@ public interface AcquisitionSettings {
          */
         T saveMode(final DataStorage.SaveMode saveMode);
 
+        /**
+         * Returns the autofocus settings builder.
+         *
+         * @return the autofocus settings builder
+         */
+        DefaultAutofocusSettings.Builder autofocusSettingsBuilder();
+
         // TODO: document this
         /**
          *

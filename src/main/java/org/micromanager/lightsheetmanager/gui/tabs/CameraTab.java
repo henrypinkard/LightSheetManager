@@ -8,7 +8,7 @@ import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.tabs.acquisition.SliceSettingsPanel;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
-import javax.swing.JLabel;
+import java.awt.Font;
 import java.util.Objects;
 
 public class CameraTab extends Panel {
@@ -34,10 +34,10 @@ public class CameraTab extends Panel {
     }
 
     private void createUserInterface() {
-        JLabel lblTitle = new JLabel("Cameras");
+        final Label lblTitle = new Label("Camera Settings", Font.BOLD, 18);
 
-        final Panel panelROI = new Panel("Imaging ROI");
-        final Panel panelCameraTrigger = new Panel("Camera Trigger Mode");
+        final Panel pnlROI = new Panel("Imaging ROI");
+        final Panel pnlCameraTrigger = new Panel("Camera Trigger Mode");
 
         final Label lblXOffset = new Label("X Offset:");
         final Label lblYOffset = new Label("Y Offset:");
@@ -56,32 +56,35 @@ public class CameraTab extends Panel {
               model_.acquisitions().getAcquisitionSettings().cameraMode() != null ?
                 model_.acquisitions().getAcquisitionSettings().cameraMode().toString() : null);
 
-        panelROI.add(btnUnchangedROI_, "span 2, wrap");
-        panelROI.add(btnFullROI_, "");
-        panelROI.add(btnHalfROI_, "wrap");
-        panelROI.add(btnQuarterROI_, "");
-        panelROI.add(btnEigthROI_, "wrap");
-        panelROI.add(btnCustomROI_, "span 2, wrap");
-        panelROI.add(lblXOffset, "wrap");
-        panelROI.add(lblYOffset, "wrap");
-        panelROI.add(lblWidth, "wrap");
-        panelROI.add(lblHeight, "wrap");
-        panelROI.add(btnGetCurrentROI_, "span 2");
+        pnlROI.add(btnUnchangedROI_, "span 2, wrap");
+        pnlROI.add(btnFullROI_, "");
+        pnlROI.add(btnHalfROI_, "wrap");
+        pnlROI.add(btnQuarterROI_, "");
+        pnlROI.add(btnEigthROI_, "wrap");
+        pnlROI.add(btnCustomROI_, "span 2, wrap");
+        pnlROI.add(lblXOffset, "wrap");
+        pnlROI.add(lblYOffset, "wrap");
+        pnlROI.add(lblWidth, "wrap");
+        pnlROI.add(lblHeight, "wrap");
+        pnlROI.add(btnGetCurrentROI_, "span 2");
 
-        panelCameraTrigger.add(cmbCameraTriggerMode_, "");
+        pnlCameraTrigger.add(cmbCameraTriggerMode_, "");
 
         add(lblTitle, "wrap");
-        add(panelROI, "wrap");
-        add(panelCameraTrigger, "growx");
+        add(pnlROI, "wrap");
+        add(pnlCameraTrigger, "growx");
     }
 
     private void createEventHandlers() {
+
+        // camera trigger mode
         cmbCameraTriggerMode_.registerListener(e -> {
             final CameraModes cameraMode = CameraModes.fromString(cmbCameraTriggerMode_.getSelected());
             model_.acquisitions().getAcquisitionSettingsBuilder().cameraMode(cameraMode);
             sliceSettingsPanel_.switchUI(cameraMode);
             //System.out.println("getCameraMode: " + model_.acquisitions().getAcquisitionSettings().getCameraMode());
         });
+
     }
 
 }
