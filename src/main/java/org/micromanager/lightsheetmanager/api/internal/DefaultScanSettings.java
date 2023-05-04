@@ -15,7 +15,6 @@ public class DefaultScanSettings implements ScanSettings {
         private boolean scanFromNegativeDirection_ = false;
 
         public Builder() {
-            // use default settings
         }
 
         private Builder(DefaultScanSettings scanSettings) {

@@ -20,6 +20,8 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
         private boolean demoMode_ = false;
         private DataStorage.SaveMode saveMode_ = DataStorage.SaveMode.NDTIFF;
 
+        private DefaultAutofocusSettings.Builder afsb_ = new DefaultAutofocusSettings.Builder();
+
         public Builder() {
         }
 
@@ -110,6 +112,8 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
     private final boolean demoMode_;
     private final DataStorage.SaveMode saveMode_;
 
+    private final DefaultAutofocusSettings autofocusSettings_;
+
 //    public DefaultAcquisitionSettings() {
 //        saveNamePrefix_ = "";
 //        saveDirectory_ = "";
@@ -122,6 +126,7 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
         saveDuringAcq_ = builder.saveDuringAcq_;
         demoMode_ = builder.demoMode_;
         saveMode_ = builder.saveMode_;
+        autofocusSettings_ = builder.afsb_.build();
     }
 
     /**
@@ -172,6 +177,16 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
     @Override
     public DataStorage.SaveMode saveMode() {
         return saveMode_;
+    }
+
+    /**
+     * Returns the autofocus settings.
+     *
+     * @return the autofocus settings
+     */
+    @Override
+    public DefaultAutofocusSettings autofocusSettings() {
+        return autofocusSettings_;
     }
 
     @Override

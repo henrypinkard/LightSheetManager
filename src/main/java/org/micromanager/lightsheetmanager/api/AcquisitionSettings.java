@@ -1,5 +1,6 @@
 package org.micromanager.lightsheetmanager.api;
 
+import org.micromanager.lightsheetmanager.api.internal.DefaultAutofocusSettings;
 import org.micromanager.lightsheetmanager.model.DataStorage;
 
 /**
@@ -44,6 +45,11 @@ public interface AcquisitionSettings {
          */
         T saveMode(final DataStorage.SaveMode saveMode);
 
+        // TODO: document this
+        /**
+         *
+         * @return
+         */
         T self();
 
         /**
@@ -96,4 +102,11 @@ public interface AcquisitionSettings {
      * @return the save mode of the acquisition.
      */
     DataStorage.SaveMode saveMode();
+
+    /**
+     * Returns the autofocus settings.
+     *
+     * @return the autofocus settings
+     */
+    DefaultAutofocusSettings autofocusSettings();
 }

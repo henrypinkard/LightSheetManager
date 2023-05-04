@@ -159,7 +159,7 @@ public class DefaultAutofocusSettings implements AutofocusSettings {
        * @return Immutable version of AutofocusSettings
        */
       @Override
-      public AutofocusSettings build() {
+      public DefaultAutofocusSettings build() {
          return new DefaultAutofocusSettings(this);
       }
    }
