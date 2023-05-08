@@ -207,9 +207,9 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
         );
     }
 
-    public String toJson() {
-        return new Gson().toJson(this);
-    }
+//    public String toJson() {
+//        return new Gson().toJson(this);
+//    }
 //
 //    public String toPrettyJson() {
 //        Gson gson = new GsonBuilder().setPrettyPrinting().create();
