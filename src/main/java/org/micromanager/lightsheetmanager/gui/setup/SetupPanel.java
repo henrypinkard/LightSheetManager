@@ -21,7 +21,10 @@ public class SetupPanel extends Panel {
     private Panel leftPanel_;
     private Panel rightPanel_;
 
-    public SetupPanel() {
+    private int pathNum_;
+
+    public SetupPanel(final int pathNum) {
+        pathNum_ = pathNum;
         leftPanel_ = new Panel();
         rightPanel_ = new Panel();
 
@@ -43,5 +46,9 @@ public class SetupPanel extends Panel {
 
         add(leftPanel_, "");
         add(rightPanel_, "aligny top");
+    }
+
+    public int getPathNum() {
+        return pathNum_;
     }
 }

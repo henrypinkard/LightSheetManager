@@ -26,6 +26,12 @@ public class CameraPanel extends Panel {
 
     private void createUserInterface() {
 
+        setMigLayout(
+                "",
+                "[]5[]",
+                "[]5[]"
+        );
+
         Button.setDefaultSize(80, 26);
         btnImagingPath_ = new Button("Imaging");
         btnMultiPath_ = new Button("Multi");

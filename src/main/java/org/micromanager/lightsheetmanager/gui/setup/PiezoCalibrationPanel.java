@@ -24,16 +24,23 @@ public class PiezoCalibrationPanel extends Panel {
 
     public PiezoCalibrationPanel() {
         super("Piezo/Slice Calibration");
-        init();
+        createUserInterface();
+        createEventHandlers();
     }
 
-    private void init() {
+    private void createUserInterface() {
 
         final JLabel lblSlope = new JLabel("Slope:");
         final JLabel lblOffset = new JLabel("Offset:");
         final JLabel lblStepSize = new JLabel("Step Size:");
         //final JLabel lblMicrons = new JLabel("μm");
         final JLabel lblMicronsPerDeg = new JLabel("μm/°");
+
+        setMigLayout(
+                "",
+                "[]5[]",
+                "[]5[]"
+        );
 
         Button.setDefaultSize(80, 26);
         btnTwoPoint_ = new Button("2-point");
@@ -47,8 +54,6 @@ public class PiezoCalibrationPanel extends Panel {
         Button.setDefaultSize(26, 26);
         btnStepUp_ = new Button(Icons.ARROW_UP);
         btnStepDown_ = new Button(Icons.ARROW_DOWN);
-
-        createEventHandlers();
 
         add(lblSlope, "");
         add(txtSlope_, "");

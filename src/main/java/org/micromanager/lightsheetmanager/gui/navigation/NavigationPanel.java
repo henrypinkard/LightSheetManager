@@ -7,6 +7,7 @@ import org.micromanager.lightsheetmanager.gui.components.Panel;
 import mmcorej.CMMCore;
 import mmcorej.DeviceType;
 import org.micromanager.Studio;
+import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
 import javax.swing.JLabel;
 import javax.swing.SwingWorker;
@@ -35,10 +36,14 @@ public class NavigationPanel extends Panel {
 
     private PositionUpdater positionUpdater_;
     private ArrayList<ControlPanel> controlPanels_;
-    public NavigationPanel(final Studio studio, final DeviceManager devices) {
-        studio_ = Objects.requireNonNull(studio);
-        devices_ = Objects.requireNonNull(devices);
-        core_ = studio.core();
+
+    private LightSheetManagerModel model_;
+
+    public NavigationPanel(final LightSheetManagerModel model) {
+        model_ = Objects.requireNonNull(model);
+        studio_ = model_.getStudio();
+        devices_ = model_.devices();
+        core_ = studio_.core();
 
         controlPanels_ = new ArrayList<>();
         isPollingPositions = true; // starts in polling mode
@@ -202,8 +207,8 @@ public class NavigationPanel extends Panel {
 //        infoPanel.add(new JLabel("Relative Move"), "");
 //        infoPanel.add(new JLabel("Absolute Move"), "");
         add(miscPanel, "wrap");
-        add(btnHaltDevices_, "wrap");
-        add(btnRefreshNavPanel_, "wrap");
+        add(btnHaltDevices_, "split 3");
+        add(btnRefreshNavPanel_, "");
         add(cbxPollPositions_, "");
     }
 

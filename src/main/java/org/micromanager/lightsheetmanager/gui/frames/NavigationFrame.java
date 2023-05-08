@@ -1,7 +1,6 @@
 package org.micromanager.lightsheetmanager.gui.frames;
 
 import net.miginfocom.swing.MigLayout;
-import org.micromanager.Studio;
 import org.micromanager.lightsheetmanager.gui.navigation.NavigationPanel;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 import org.micromanager.internal.utils.WindowPositioning;
@@ -12,10 +11,10 @@ public class NavigationFrame extends JFrame {
 
     private NavigationPanel navigationPanel_;
 
-    public NavigationFrame(final Studio studio, final LightSheetManagerModel model) {
-        setLayout(new MigLayout("", "", ""));
+    public NavigationFrame(final LightSheetManagerModel model) {
         WindowPositioning.setUpBoundsMemory(this, this.getClass(), this.getClass().getSimpleName());
-        navigationPanel_ = new NavigationPanel(studio, model.getDeviceManager());
+        setLayout(new MigLayout("", "", ""));
+        navigationPanel_ = new NavigationPanel(model);
         add(navigationPanel_, "");
     }
 

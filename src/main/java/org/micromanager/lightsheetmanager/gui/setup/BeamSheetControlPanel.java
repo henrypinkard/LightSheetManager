@@ -39,10 +39,11 @@ public class BeamSheetControlPanel extends Panel {
 
     public BeamSheetControlPanel() {
         super("Light Sheet Synchronization");
-        init();
+        createUserInterface();
+        createEventHandlers();
     }
 
-    private void init() {
+    private void createUserInterface() {
         pblFirst_ = new Panel();
         pnlSecond_ = new Panel();
 
@@ -76,8 +77,6 @@ public class BeamSheetControlPanel extends Panel {
         UIManager.put("Slider.focus", UIManager.get("Slider.background")); // remove highlight when clicked
         sdrSheetWidth_ = new Slider(0, 8, 4);
         sdrSheetOffset_ = new Slider(-1, 1, 0);
-
-        createEventHandlers();
 
         pblFirst_.add(lblSlope, "");
         pblFirst_.add(txtSlope_, "");
