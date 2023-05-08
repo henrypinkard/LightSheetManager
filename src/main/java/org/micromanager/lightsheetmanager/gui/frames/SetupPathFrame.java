@@ -30,7 +30,7 @@ public class SetupPathFrame extends JFrame {
 
         final Label lblTitle = new Label(title, Font.BOLD, 16);
 
-        setupPanel_ = new SetupPanel();
+        setupPanel_ = new SetupPanel(pathNum_);
 
         setIconImage(Icons.MICROSCOPE.getImage());
 

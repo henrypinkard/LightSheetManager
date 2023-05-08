@@ -14,21 +14,28 @@ public class JoystickPanel extends Panel {
 
     public JoystickPanel() {
         super("Joystick");
-        init();
+        createUserInterface();
+        createEventHandlers();
     }
 
-    private void init() {
+    private void createUserInterface() {
         final JLabel lblJoystick = new JLabel("JoysticK:");
         final JLabel lblLeftWheel = new JLabel("Left Wheel:");
         final JLabel lblRightWheel = new JLabel("Right Wheel:");
 
+        setMigLayout(
+                "",
+                "[]5[]",
+                "[]5[]"
+        );
+
         // TODO: enum for combo values
         String[] labels = {"Imaging Piezo", "XYStage", "Imaging Slice"};
+
+        ComboBox.setDefaultSize(100, 20);
         cmbJoystick_ = new ComboBox(labels, "XYStage");
         cmbLeftWheel_ = new ComboBox(labels, "Imaging Piezo");
         cmbRightWheel_ = new ComboBox(labels, "Imaging Slice");
-
-        createEventHandlers();
 
         add(lblJoystick, "");
         add(cmbJoystick_, "wrap");

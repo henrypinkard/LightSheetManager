@@ -15,10 +15,11 @@ public class ExcitationPanel extends Panel {
 
     public ExcitationPanel() {
         super("Scanner");
-        init();
+        createUserInterface();
+        createEventHandlers();
     }
 
-    private void init() {
+    private void createUserInterface() {
         final JLabel lblExcitation = new JLabel("Excitation:");
 
         cbxBeam_ = new CheckBox("Beam", false);

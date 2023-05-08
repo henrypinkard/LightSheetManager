@@ -67,6 +67,7 @@ public class XYZGridFrame extends JFrame {
         btnComputeGrid_ = new Button("Compute Grid");
         btnEditPositionList_ = new Button("Edit Position List...");
         btnRunOverviewAcq_ = new Button("Run Overview Acquisition");
+        btnRunOverviewAcq_.setEnabled(false);
 
         cbxUseX_ = new CheckBox("Slices from stage coordinates", false);
         cbxUseY_ = new CheckBox("Grid in Y", false);
@@ -121,6 +122,7 @@ public class XYZGridFrame extends JFrame {
         final JLabel lblOverlap = new JLabel("Overlap (Y and Z) [%]");
         spnOverlapYZ_ = Spinner.createIntegerSpinner(10, 0, 100, 1);
         cbxClearPositions_ = new CheckBox("Clear position list if YZ unused", false);
+
 
         pnlX.add(lblXStart, "");
         pnlX.add(spnXStart_, "wrap");

@@ -124,7 +124,7 @@ public class LightSheetManagerFrame extends JFrame {
         studio_.events().registerForEvents(this);
 
         WindowUtils.registerWindowClosingEvent(this, event -> {
-            tabPanel_.getDeviceTab().getNavigationFrame().stopTimer();
+            tabPanel_.getNavigationTab().stopTimer();
             model_.getUserSettings().save();
             System.out.println("main window closed!");
         });
