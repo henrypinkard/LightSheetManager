@@ -141,10 +141,11 @@ public class AcquisitionTab extends Panel {
         setTimePointSpinnersEnabled(acqSettings.isUsingTimePoints());
 
         // multiple positions
+        Spinner.setDefaultSize(7);
         lblPostMoveDelay_ = new Label("Post-move delay [ms]:");
         spnPostMoveDelay_ = Spinner.createIntegerSpinner(acqSettings.postMoveDelay(), 0, Integer.MAX_VALUE, 100);
-        btnEditPositionList_ = new Button("Edit Position List", 120, 20);
-        btnOpenXYZGrid_ = new Button("XYZ Grid", 80, 20);
+        btnEditPositionList_ = new Button("Edit Position List", 120, 24);
+        btnOpenXYZGrid_ = new Button("XYZ Grid", 80, 24);
 
         // disable elements based on acqSettings
         setMultiPositionsEnabled(acqSettings.isUsingMultiplePositions());
@@ -177,7 +178,8 @@ public class AcquisitionTab extends Panel {
         }
 
         cmbAcquisitionModes_ = new ComboBox(AcquisitionModes.toArray(),
-                model_.acquisitions().getAcquisitionSettings().acquisitionMode().toString());
+                acqSettings.acquisitionMode().toString(),
+                180, 24);
 
         // durations
         pnlDurations_.add(lblSliceTime_, "");
@@ -213,7 +215,7 @@ public class AcquisitionTab extends Panel {
         pnlLeft.add(pnlMultiplePositions_, "growx, span 2");
 
         pnlCenter.add(pnlChannelTable_, "wrap");
-        pnlCenter.add(new JLabel("Acquisition modes:"), "split 2");
+        pnlCenter.add(new JLabel("Acquisition mode:"), "split 2");
         pnlCenter.add(cmbAcquisitionModes_, "");
 
         pnlRight.add(pnlVolumeSettings_, "growx, wrap");

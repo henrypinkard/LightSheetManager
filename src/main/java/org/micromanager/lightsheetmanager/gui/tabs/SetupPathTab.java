@@ -1,5 +1,6 @@
 package org.micromanager.lightsheetmanager.gui.tabs;
 
+import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.setup.SetupPanel;
@@ -25,10 +26,14 @@ public class SetupPathTab extends Panel {
         final String title = "Setup Path " + pathNum_;
         final Label lblTitle = new Label(title, Font.BOLD, 16);
 
-        setupPanel_ = new SetupPanel(pathNum_);
+        setupPanel_ = new SetupPanel(model_, pathNum_);
 
         add(lblTitle, "wrap");
         add(setupPanel_, "wrap");
+    }
+
+    public void swapPanels(final CameraModes cameraMode) {
+        setupPanel_.getBeamSheetPanel().swapPanels(cameraMode);
     }
 
     public int getPathNum() {

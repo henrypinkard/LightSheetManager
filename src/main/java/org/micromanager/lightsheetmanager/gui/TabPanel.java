@@ -1,6 +1,7 @@
 package org.micromanager.lightsheetmanager.gui;
 
 import org.micromanager.Studio;
+import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.gui.tabs.NavigationTab;
 import org.micromanager.lightsheetmanager.gui.tabs.SetupPathTab;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
@@ -60,7 +61,7 @@ public class TabPanel extends Panel {
         navigationTab_ = new NavigationTab(model_);
         acquisitionTab_ = new AcquisitionTab(model_);
         autofocusTab_ = new AutofocusTab(model_);
-        cameraTab_ = new CameraTab(model_, acquisitionTab_.getSliceSettingsPanel());
+        cameraTab_ = new CameraTab(model_,this);
         dataTab_ = new DataTab(model_);
         deviceTab_ = new DeviceTab(model_);
         settingsTab_ = new SettingsTab(model_);
@@ -95,6 +96,17 @@ public class TabPanel extends Panel {
     // use HTML to make the tab labels look nice
     private String createTabTitle(final String title) {
         return "<html><body leftmargin=10 topmargin=8 marginwidth=10 marginheight=5><b><font size=4>" + title + "</font></b></body></html>";
+    }
+
+    /**
+     * Swaps the control panel on the setup tabs based on the camera trigger mode.
+     *
+     * @param cameraMode the selected camera trigger mode
+     */
+    public void swapSetupPathPanels(final CameraModes cameraMode) {
+        for (SetupPathTab setupPathTab : setupPathTabs_) {
+            setupPathTab.swapPanels(cameraMode);
+        }
     }
 
     public NavigationTab getNavigationTab() {
