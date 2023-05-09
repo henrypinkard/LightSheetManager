@@ -1,6 +1,7 @@
 package org.micromanager.lightsheetmanager.gui.tabs;
 
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
+import org.micromanager.lightsheetmanager.gui.TabPanel;
 import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.ComboBox;
 import org.micromanager.lightsheetmanager.gui.components.Label;
@@ -20,14 +21,13 @@ public class CameraTab extends Panel {
     private Button btnEigthROI_;
     private Button btnCustomROI_;
     private Button btnGetCurrentROI_;
-
     private ComboBox cmbCameraTriggerMode_;
 
-    private SliceSettingsPanel sliceSettingsPanel_;
+    private TabPanel tabPanel_;
     private LightSheetManagerModel model_;
 
-    public CameraTab(final LightSheetManagerModel model, final SliceSettingsPanel sliceSettingsPanel) {
-        sliceSettingsPanel_ = Objects.requireNonNull(sliceSettingsPanel);
+    public CameraTab(final LightSheetManagerModel model, final TabPanel tabPanel) {
+        tabPanel_ = Objects.requireNonNull(tabPanel);
         model_ = Objects.requireNonNull(model);
         createUserInterface();
         createEventHandlers();
@@ -53,8 +53,7 @@ public class CameraTab extends Panel {
         btnGetCurrentROI_ = new Button("Get Current ROI", 120, 30);
 
         cmbCameraTriggerMode_ = new ComboBox(CameraModes.toArray(),
-              model_.acquisitions().getAcquisitionSettings().cameraMode() != null ?
-                model_.acquisitions().getAcquisitionSettings().cameraMode().toString() : null);
+              model_.acquisitions().getAcquisitionSettings().cameraMode().toString());
 
         pnlROI.add(btnUnchangedROI_, "span 2, wrap");
         pnlROI.add(btnFullROI_, "");
@@ -81,7 +80,8 @@ public class CameraTab extends Panel {
         cmbCameraTriggerMode_.registerListener(e -> {
             final CameraModes cameraMode = CameraModes.fromString(cmbCameraTriggerMode_.getSelected());
             model_.acquisitions().getAcquisitionSettingsBuilder().cameraMode(cameraMode);
-            sliceSettingsPanel_.switchUI(cameraMode);
+            tabPanel_.getAcquisitionTab().getSliceSettingsPanel().switchUI(cameraMode);
+            tabPanel_.swapSetupPathPanels(cameraMode);
             //System.out.println("getCameraMode: " + model_.acquisitions().getAcquisitionSettings().getCameraMode());
         });
 

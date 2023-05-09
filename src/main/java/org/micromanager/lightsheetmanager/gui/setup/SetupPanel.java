@@ -1,6 +1,9 @@
 package org.micromanager.lightsheetmanager.gui.setup;
 
 import org.micromanager.lightsheetmanager.gui.components.Panel;
+import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
+
+import java.util.Objects;
 
 // Note: changes based on camera trigger mode
 
@@ -23,13 +26,16 @@ public class SetupPanel extends Panel {
 
     private int pathNum_;
 
-    public SetupPanel(final int pathNum) {
+    private LightSheetManagerModel model_;
+
+    public SetupPanel(final LightSheetManagerModel model, final int pathNum) {
+        model_ = Objects.requireNonNull(model);
         pathNum_ = pathNum;
+
         leftPanel_ = new Panel();
         rightPanel_ = new Panel();
-
         piezoPanel_ = new PiezoCalibrationPanel();
-        beamSheetPanel_ = new BeamSheetControlPanel();
+        beamSheetPanel_ = new BeamSheetControlPanel(model_);
         positionPanel_ = new PositionPanel();
 
         joystickPanel_ = new JoystickPanel();
@@ -46,6 +52,10 @@ public class SetupPanel extends Panel {
 
         add(leftPanel_, "");
         add(rightPanel_, "aligny top");
+    }
+
+    public BeamSheetControlPanel getBeamSheetPanel() {
+        return beamSheetPanel_;
     }
 
     public int getPathNum() {
