@@ -12,14 +12,22 @@ import java.util.Objects;
 
 public class SettingsTab extends Panel {
 
+    // scan settings
+
     private Spinner spnScanAcceleration_;
-    private Spinner  spnScanOvershootDist_;
+    private Spinner spnScanOvershootDist_;
     private Spinner spnScanRetraceSpeed_;
     private Spinner spnScanAngleFirstView_;
 
     private CheckBox cbxScanFromCurrentPosition_;
     private CheckBox cbxScanNegativeDirection_;
     private CheckBox cbxReturnToOriginalPosition_;
+
+    // light sheet scanner settings
+
+    private Spinner spnSheetAxisFilterFreq_;
+    private Spinner spnSliceAxisFilterFreq_;
+    private Spinner spnLiveScanPeriod_;
 
     private LightSheetManagerModel model_;
 
@@ -34,7 +42,10 @@ public class SettingsTab extends Panel {
                 model_.acquisitions().getAcquisitionSettings();
 
         final Panel pnlScan = new Panel("Stage Scan Settings");
-        pnlScan.setMigLayout("", "[]5[]", "[]5[]");
+        pnlScan.setMigLayout(
+                "",
+                "[]5[]",
+                "[]5[]");
 
         final JLabel lblScanAcceleration = new JLabel("Relative acceleration time:");
         final JLabel lblScanOvershootDist = new JLabel("Scan overshoot distance [" + "\u00B5"+ "m]:");
@@ -66,6 +77,23 @@ public class SettingsTab extends Panel {
         cbxReturnToOriginalPosition_ = new CheckBox("Return to original position after scan",
                 acqSettings.scanSettings().scanReturnToOriginalPosition());
 
+        final Panel pnlLightSheet = new Panel("Light Sheet Scanner");
+        pnlLightSheet.setMigLayout(
+                "",
+                "[right]16[center]",
+                "[]4[]"
+        );
+
+        final JLabel lblSheetAxisFilterFreq = new JLabel("Filter freq, sheet axis [kHz]:");
+        final JLabel lblSliceAxisFilterFreq = new JLabel("Filter freq, slice axis [kHz]:");
+        final JLabel lblLiveScanPeriod = new JLabel("Live scan period [ms]:");
+
+        // TODO: increase max filter freq based on build (to 10.0)
+        spnSheetAxisFilterFreq_ = Spinner.createDoubleSpinner(0.4, 0.1, 1.0, 0.1);
+        spnSliceAxisFilterFreq_ = Spinner.createDoubleSpinner(0.4, 0.1, 1.0, 0.1);
+        spnLiveScanPeriod_ = Spinner.createIntegerSpinner(20, 2, 10000, 100);
+
+        // scan settings panel
         pnlScan.add(lblScanAcceleration, "");
         pnlScan.add(spnScanAcceleration_, "wrap");
         pnlScan.add(lblScanOvershootDist, "");
@@ -74,19 +102,27 @@ public class SettingsTab extends Panel {
         pnlScan.add(spnScanRetraceSpeed_, "wrap");
         pnlScan.add(lblScanAngleFirstView, "");
         pnlScan.add(spnScanAngleFirstView_, "wrap");
-
         pnlScan.add(cbxScanFromCurrentPosition_, "wrap");
         pnlScan.add(cbxScanNegativeDirection_, "wrap");
         pnlScan.add(cbxReturnToOriginalPosition_, "wrap");
 
-        add(pnlScan, "wrap");
+        // light sheet scanner settings panel
+        pnlLightSheet.add(lblSheetAxisFilterFreq, "");
+        pnlLightSheet.add(spnSheetAxisFilterFreq_, "wrap");
+        pnlLightSheet.add(lblSliceAxisFilterFreq, "");
+        pnlLightSheet.add(spnSliceAxisFilterFreq_, "wrap");
+        pnlLightSheet.add(lblLiveScanPeriod, "");
+        pnlLightSheet.add(spnLiveScanPeriod_, "");
+
+        add(pnlLightSheet, "growx, wrap");
+        add(pnlScan, "");
     }
 
     private void createEventHandlers() {
         final DefaultScanSettings.Builder scsb = model_.acquisitions()
                 .getAcquisitionSettingsBuilder().scanSettingsBuilder();
 
-        // Spinners
+        // Scan Settings
         spnScanAcceleration_.registerListener(e ->
                 scsb.scanAccelerationFactor(spnScanAcceleration_.getDouble()));
         spnScanOvershootDist_.registerListener(e ->
@@ -96,12 +132,26 @@ public class SettingsTab extends Panel {
         spnScanAngleFirstView_.registerListener(e ->
                 scsb.scanAngleFirstView(spnScanAngleFirstView_.getDouble()));
 
-        // CheckBoxes
         cbxScanFromCurrentPosition_.registerListener(e ->
                 scsb.scanFromCurrentPosition(cbxScanFromCurrentPosition_.isSelected()));
         cbxScanNegativeDirection_.registerListener(e ->
                 scsb.scanFromNegativeDirection(cbxScanNegativeDirection_.isSelected()));
         cbxReturnToOriginalPosition_.registerListener(e ->
                 scsb.scanReturnToOriginalPosition(cbxReturnToOriginalPosition_.isSelected()));
+
+        // TODO: set these settings
+        // Light Sheet Scanner
+        spnSheetAxisFilterFreq_.registerListener(e -> {
+
+        });
+
+        spnSliceAxisFilterFreq_.registerListener(e -> {
+
+        });
+
+        spnLiveScanPeriod_.registerListener(e -> {
+
+        });
+
     }
 }
