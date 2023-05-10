@@ -1,7 +1,5 @@
 package org.micromanager.lightsheetmanager.api;
 
-// FIXME: maybe wrap this into timing settings ???
-
 public interface SliceSettings {
 
     interface Builder {
