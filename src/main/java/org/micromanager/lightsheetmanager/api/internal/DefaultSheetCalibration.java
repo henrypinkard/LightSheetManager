@@ -1,7 +1,6 @@
 package org.micromanager.lightsheetmanager.api.internal;
 
 import org.micromanager.lightsheetmanager.api.SheetCalibration;
-import org.micromanager.lightsheetmanager.api.SliceCalibration;
 
 public class DefaultSheetCalibration implements SheetCalibration {
 
@@ -77,7 +76,7 @@ public class DefaultSheetCalibration implements SheetCalibration {
         }
 
         @Override
-        public SheetCalibration build() {
+        public DefaultSheetCalibration build() {
             return new DefaultSheetCalibration(this);
         }
     }
