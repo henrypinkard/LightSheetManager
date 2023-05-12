@@ -16,6 +16,8 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
         private DefaultSliceSettings.Builder ssb_ = new DefaultSliceSettings.Builder();
         private DefaultSliceSettingsLS.Builder ssbLS_ = new DefaultSliceSettingsLS.Builder();
         private DefaultScanSettings.Builder scsb_ = new DefaultScanSettings.Builder();
+        private DefaultSheetCalibration.Builder shcb_ = new DefaultSheetCalibration.Builder();
+        private DefaultSliceCalibration.Builder slcb_ = new DefaultSliceCalibration.Builder();
 
         private AcquisitionModes acquisitionMode_ = AcquisitionModes.NONE;
         private MultiChannelModes channelMode_ = MultiChannelModes.NONE;
@@ -262,6 +264,14 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
             return scsb_;
         }
 
+        public DefaultSheetCalibration.Builder sheetCalibrationBuilder() {
+            return shcb_;
+        }
+
+        public DefaultSliceCalibration.Builder sliceCalibrationBuilder() {
+            return slcb_;
+        }
+
         public DefaultTimingSettings.Builder tsb() {
             return tsb_;
         }
@@ -323,7 +333,8 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
     private final DefaultSliceSettingsLS sliceSettingsLS_;
     private final DefaultSliceSettings sliceSettings_;
     private final DefaultScanSettings scanSettings_;
-
+    private final DefaultSheetCalibration sheetCalibration_;
+    private final DefaultSliceCalibration sliceCalibration_;
     private final AcquisitionModes acquisitionMode_;
     private final MultiChannelModes channelMode_;
     private final CameraModes cameraMode_;
@@ -351,6 +362,8 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
         sliceSettings_ = builder.ssb_.build();
         sliceSettingsLS_ = builder.ssbLS_.build();
         scanSettings_ = builder.scsb_.build();
+        sheetCalibration_ = builder.shcb_.build();
+        sliceCalibration_ = builder.slcb_.build();
         acquisitionMode_ = builder.acquisitionMode_;
         channelMode_ = builder.channelMode_;
         cameraMode_ = builder.cameraMode_;
@@ -454,6 +467,26 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
     @Override
     public DefaultScanSettings scanSettings() {
         return scanSettings_;
+    }
+
+    /**
+     * Returns the immutable DefaultSheetCalibration instance.
+     *
+     * @return immutable DefaultSheetCalibration instance.
+     */
+    @Override
+    public DefaultSheetCalibration sheetCalibration() {
+        return sheetCalibration_;
+    }
+
+    /**
+     * Returns the immutable DefaultSliceCalibration instance.
+     *
+     * @return immutable DefaultSliceCalibration instance.
+     */
+    @Override
+    public DefaultSliceCalibration sliceCalibration() {
+        return sliceCalibration_;
     }
 
     /**

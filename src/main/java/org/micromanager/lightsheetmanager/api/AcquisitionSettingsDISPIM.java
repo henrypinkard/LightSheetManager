@@ -2,6 +2,8 @@ package org.micromanager.lightsheetmanager.api;
 
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.api.internal.DefaultScanSettings;
+import org.micromanager.lightsheetmanager.api.internal.DefaultSheetCalibration;
+import org.micromanager.lightsheetmanager.api.internal.DefaultSliceCalibration;
 import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettings;
 import org.micromanager.lightsheetmanager.api.internal.DefaultSliceSettingsLS;
 import org.micromanager.lightsheetmanager.api.internal.DefaultTimingSettings;
@@ -178,6 +180,20 @@ public interface AcquisitionSettingsDISPIM extends AcquisitionSettings {
      * @return immutable DefaultScanSettings instance.
      */
     DefaultScanSettings scanSettings();
+
+    /**
+     * Returns the immutable DefaultSheetCalibration instance.
+     *
+     * @return immutable DefaultSheetCalibration instance.
+     */
+    DefaultSheetCalibration sheetCalibration();
+
+    /**
+     * Returns the immutable DefaultSliceCalibration instance.
+     *
+     * @return immutable DefaultSliceCalibration instance.
+     */
+    DefaultSliceCalibration sliceCalibration();
 
     /**
      * Returns the acquisition mode.
