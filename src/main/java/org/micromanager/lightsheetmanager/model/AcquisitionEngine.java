@@ -31,7 +31,7 @@ import org.micromanager.lightsheetmanager.api.internal.DefaultTimingSettings;
 import org.micromanager.lightsheetmanager.model.channels.ChannelSpec;
 import org.micromanager.lightsheetmanager.model.data.AcquisitionModes;
 import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
-import org.micromanager.lightsheetmanager.model.devices.cameras.AndorCamera;
+import org.micromanager.lightsheetmanager.model.devices.cameras.CameraBase;
 import org.micromanager.lightsheetmanager.model.devices.vendor.ASIScanner;
 import org.micromanager.lightsheetmanager.model.utils.NumberUtils;
 
@@ -225,7 +225,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         }
         // TODO: code that doubles nrSlicesSoftware if (twoSided && acqBothCameras) missing
 
-        AndorCamera camera = model_.devices().getDevice("Imaging1Camera");
+        CameraBase camera = model_.devices().getDevice("Imaging1Camera");
         CameraModes camMode = camera.getTriggerMode();
         final float cameraReadoutTime = camera.getReadoutTime(camMode);
         //final double exposureTime = acqSettings_.timingSettings().cameraExposure();
@@ -863,7 +863,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         ASIScanner scanner1 = model_.devices().getDevice("Illum1Beam");
         ASIScanner scanner2 = model_.devices().getDevice("Illum2Beam");
 
-        AndorCamera camera = model_.devices().getDevice("Imaging1Camera"); //.getImagingCamera(0);
+        CameraBase camera = model_.devices().getDevice("Imaging1Camera"); //.getImagingCamera(0);
         if (camera == null) {
             // just a dummy to test demo mode
             return new DefaultTimingSettings.Builder();

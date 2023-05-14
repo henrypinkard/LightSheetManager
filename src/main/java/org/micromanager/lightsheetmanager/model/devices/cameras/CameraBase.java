@@ -1,13 +1,13 @@
 package org.micromanager.lightsheetmanager.model.devices.cameras;
 
-import mmcorej.CMMCore;
 import org.micromanager.Studio;
+import org.micromanager.lightsheetmanager.api.LightSheetCamera;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.model.devices.DeviceBase;
 
 import java.awt.Rectangle;
 
-public class CameraBase extends DeviceBase  {
+public class CameraBase extends DeviceBase implements LightSheetCamera {
 
     protected CameraModes mode_;
 
@@ -58,5 +58,47 @@ public class CameraBase extends DeviceBase  {
         return Math.min(
                 Math.abs(roiVerticalOffset(roi, sensor)) + roi.height / 2,  // if ROI overlaps sensor mid-line
                 roi.height);                                                // if ROI does not overlap mid-line
+    }
+
+    // needed for subclasses
+
+    @Override
+    public void setTriggerMode(CameraModes cameraMode) {
+        mode_ = cameraMode;
+    }
+
+    @Override
+    public CameraModes getTriggerMode() {
+        return mode_;
+    }
+
+    @Override
+    public void setBinning() {
+
+    }
+
+    @Override
+    public int getBinning() {
+        return 0;
+    }
+
+    @Override
+    public Rectangle getResolution() {
+        return new Rectangle();
+    }
+
+    @Override
+    public double getRowReadoutTime() {
+        return 0;
+    }
+
+    @Override
+    public float getReadoutTime(CameraModes cameraMode) {
+        return 0;
+    }
+
+    @Override
+    public float getResetTime(CameraModes cameraMode) {
+        return 0;
     }
 }
