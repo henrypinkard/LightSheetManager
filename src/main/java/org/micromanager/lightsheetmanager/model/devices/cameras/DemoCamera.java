@@ -13,16 +13,6 @@ public class DemoCamera extends CameraBase implements LightSheetCamera {
     }
 
     @Override
-    public void setTriggerMode(CameraModes cameraMode) {
-
-    }
-
-    @Override
-    public CameraModes getTriggerMode() {
-        return null;
-    }
-
-    @Override
     public void setBinning() {
 
     }
