@@ -44,7 +44,7 @@ public class DefaultSliceCalibration implements SliceCalibration {
     }
 
     @Override
-    public SliceCalibration.Builder copyBuilder() {
+    public DefaultSliceCalibration.Builder copyBuilder() {
         return new Builder(this);
     }
 
