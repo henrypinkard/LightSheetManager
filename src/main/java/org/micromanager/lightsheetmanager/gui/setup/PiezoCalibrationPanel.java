@@ -24,11 +24,14 @@ public class PiezoCalibrationPanel extends Panel {
     private Button btnStepDown_;
     private TextField txtStepSize_;
 
+    private final int pathNum_;
+
     private LightSheetManagerModel model_;
 
-    public PiezoCalibrationPanel(final LightSheetManagerModel model) {
+    public PiezoCalibrationPanel(final LightSheetManagerModel model, final int pathNum) {
         super("Piezo/Slice Calibration");
         model_ = Objects.requireNonNull(model);
+        pathNum_ = pathNum;
         createUserInterface();
         createEventHandlers();
     }
@@ -59,9 +62,13 @@ public class PiezoCalibrationPanel extends Panel {
         txtOffset_ = new TextField();
         txtStepSize_ = new TextField();
 
-        txtSlope_.setText(String.valueOf(acqSettings.sliceCalibration().sliceSlope()));
-        txtOffset_.setText(String.valueOf(acqSettings.sliceCalibration().sliceOffset()));
-
+        if (pathNum_ == 1) {
+            txtSlope_.setText(String.valueOf(acqSettings.sliceCalibration().sliceSlope()));
+            txtOffset_.setText(String.valueOf(acqSettings.sliceCalibration().sliceOffset()));
+        } else {
+            txtSlope_.setText(String.valueOf(acqSettings.sliceCalibration2().sliceSlope()));
+            txtOffset_.setText(String.valueOf(acqSettings.sliceCalibration2().sliceOffset()));
+        }
         Button.setDefaultSize(26, 26);
         btnStepUp_ = new Button(Icons.ARROW_UP);
         btnStepDown_ = new Button(Icons.ARROW_DOWN);
@@ -103,11 +110,19 @@ public class PiezoCalibrationPanel extends Panel {
         });
 
         txtSlope_.registerListener(e -> {
-            asb.sliceCalibrationBuilder().sliceSlope(Double.parseDouble(txtSlope_.getText()));
+            if (pathNum_ == 1) {
+                asb.sliceCalibrationBuilder().sliceSlope(Double.parseDouble(txtSlope_.getText()));
+            } else {
+                asb.sliceCalibrationBuilder2().sliceSlope(Double.parseDouble(txtSlope_.getText()));
+            }
         });
 
         txtOffset_.registerListener(e -> {
-            asb.sliceCalibrationBuilder().sliceOffset(Double.parseDouble(txtSlope_.getText()));
+            if (pathNum_ == 1) {
+                asb.sliceCalibrationBuilder().sliceOffset(Double.parseDouble(txtSlope_.getText()));
+            } else {
+                asb.sliceCalibrationBuilder2().sliceSlope(Double.parseDouble(txtSlope_.getText()));
+            }
         });
 
         txtStepSize_.registerListener(e -> {
