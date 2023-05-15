@@ -49,6 +49,8 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
             ssb_ = acqSettings.sliceSettings_.copyBuilder();
             ssbLS_ = acqSettings.sliceSettingsLS_.copyBuilder();
             scsb_ = acqSettings.scanSettings_.copyBuilder();
+            slcb_ = acqSettings.sliceCalibration_.copyBuilder();
+            shcb_ = acqSettings.sheetCalibration_.copyBuilder();
             acquisitionMode_ = acqSettings.acquisitionMode_;
             channelMode_ = acqSettings.channelMode_;
             cameraMode_ = acqSettings.cameraMode_;
