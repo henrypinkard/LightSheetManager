@@ -42,7 +42,7 @@ public class AcquisitionTab extends Panel {
     private Button btnSpeedTest_;
     private Button btnRunOverviewAcq_;
 
-    private CheckBox chkUseChannels_;
+    private CheckBox cbxUseChannels_;
 
     // durations
     private Label lblSliceTime_;
@@ -58,24 +58,24 @@ public class AcquisitionTab extends Panel {
     private Label lblTimePointInterval_;
     private Spinner spnNumTimePoints_;
     private Spinner spnTimePointInterval_;
-    private CheckBox chkUseTimePoints_;
+    private CheckBox cbxUseTimePoints_;
 
     // multiple positions
     private Label lblPostMoveDelay_;
     private Spinner spnPostMoveDelay_;
-    private CheckBox chkUseMultiplePositions_;
+    private CheckBox cbxUseMultiplePositions_;
     private Button btnOpenXYZGrid_;
     private Button btnEditPositionList_;
 
-    private Panel panelButtons_;
-    private Panel panelDurations_;
-    private Panel panelTimePoints_;
-    private Panel panelMultiplePositions_;
+    private Panel pnlButtons_;
+    private Panel pnlDurations_;
+    private Panel pnlTimePoints_;
+    private Panel pnlMultiplePositions_;
 
-    private ChannelTablePanel channelTablePanel_;
+    private ChannelTablePanel pnlChannelTable_;
 
-    private VolumeSettingsPanel volumeSettingsPanel_;
-    private SliceSettingsPanel sliceSettingsPanel_;
+    private VolumeSettingsPanel pnlVolumeSettings_;
+    private SliceSettingsPanel pnlSliceSettings_;
 
     private XYZGridFrame xyzGridFrame_;
     private AdvancedTimingFrame advTimingFrame_;
@@ -89,39 +89,37 @@ public class AcquisitionTab extends Panel {
         studio_ = model_.getStudio();
         acqTableFrame_ = new AcquisitionTableFrame(studio_);
         advTimingFrame_ = new AdvancedTimingFrame(model_);
-        xyzGridFrame_ = new XYZGridFrame();
+        xyzGridFrame_ = new XYZGridFrame(model_);
         createUserInterface();
         createEventHandlers();
     }
 
     private void createUserInterface() {
-        //JLabel lblTitle = new JLabel("Acquisitions");
-        final DefaultAcquisitionSettingsDISPIM acqSettings = model_.acquisitions().getAcquisitionSettings();
+        final DefaultAcquisitionSettingsDISPIM acqSettings =
+                model_.acquisitions().getAcquisitionSettings();
 
         Panel.setMigLayoutDefault(
                 "",
                 "[]5[]",
                 "[]5[]"
         );
-        Panel panelLeft = new Panel();
-        Panel panelCenter = new Panel();
-        Panel panelRight = new Panel();
+        Panel pnlLeft = new Panel();
+        Panel pnlCenter = new Panel();
+        Panel pnlRight = new Panel();
 
-        volumeSettingsPanel_ = new VolumeSettingsPanel(model_);
-        sliceSettingsPanel_ = new SliceSettingsPanel(model_, advTimingFrame_);
+        pnlVolumeSettings_ = new VolumeSettingsPanel(model_);
+        pnlSliceSettings_ = new SliceSettingsPanel(model_, advTimingFrame_);
 
-        System.out.println("isUsingTimePoints: " + acqSettings.isUsingTimePoints());
-        System.out.println("isUsingChannels: " + acqSettings.isUsingChannels());
         // check boxes for panels
-        chkUseMultiplePositions_ = new CheckBox("Multiple positions (XY)", acqSettings.isUsingMultiplePositions());
-        chkUseTimePoints_ = new CheckBox("Time Points", acqSettings.isUsingTimePoints());
-        chkUseChannels_ = new CheckBox("Channels", acqSettings.isUsingChannels());
+        cbxUseMultiplePositions_ = new CheckBox("Multiple positions (XY)", acqSettings.isUsingMultiplePositions());
+        cbxUseTimePoints_ = new CheckBox("Time Points", acqSettings.isUsingTimePoints());
+        cbxUseChannels_ = new CheckBox("Channels", acqSettings.isUsingChannels());
 
         // panels
-        panelButtons_ = new Panel();
-        panelDurations_ = new Panel("Durations");
-        panelTimePoints_ = new Panel(chkUseTimePoints_);
-        panelMultiplePositions_ = new Panel(chkUseMultiplePositions_);
+        pnlButtons_ = new Panel();
+        pnlDurations_ = new Panel("Durations");
+        pnlTimePoints_ = new Panel(cbxUseTimePoints_);
+        pnlMultiplePositions_ = new Panel(cbxUseMultiplePositions_);
 
         // durations
         lblSliceTime_ = new Label("Slice");
@@ -143,10 +141,11 @@ public class AcquisitionTab extends Panel {
         setTimePointSpinnersEnabled(acqSettings.isUsingTimePoints());
 
         // multiple positions
+        Spinner.setDefaultSize(7);
         lblPostMoveDelay_ = new Label("Post-move delay [ms]:");
         spnPostMoveDelay_ = Spinner.createIntegerSpinner(acqSettings.postMoveDelay(), 0, Integer.MAX_VALUE, 100);
-        btnEditPositionList_ = new Button("Edit Position List", 120, 20);
-        btnOpenXYZGrid_ = new Button("XYZ Grid", 80, 20);
+        btnEditPositionList_ = new Button("Edit Position List", 120, 24);
+        btnOpenXYZGrid_ = new Button("XYZ Grid", 80, 24);
 
         // disable elements based on acqSettings
         setMultiPositionsEnabled(acqSettings.isUsingMultiplePositions());
@@ -172,63 +171,64 @@ public class AcquisitionTab extends Panel {
         Button.setDefaultSize(140, 30);
         btnRunOverviewAcq_ = new Button("Overview Acquisition");
 
-        channelTablePanel_ = new ChannelTablePanel(model_, chkUseChannels_);
+        pnlChannelTable_ = new ChannelTablePanel(model_, cbxUseChannels_);
         // disable elements based on acqSettings
         if (!acqSettings.isUsingChannels()) {
-            channelTablePanel_.setItemsEnabled(false);
+            pnlChannelTable_.setItemsEnabled(false);
         }
 
         cmbAcquisitionModes_ = new ComboBox(AcquisitionModes.toArray(),
-                model_.acquisitions().getAcquisitionSettings().acquisitionMode().toString());
+                acqSettings.acquisitionMode().toString(),
+                180, 24);
 
         // durations
-        panelDurations_.add(lblSliceTime_, "");
-        panelDurations_.add(lblSliceTimeValue_, "wrap");
-        panelDurations_.add(lblVolumeTime_, "");
-        panelDurations_.add(lblVolumeTimeValue_, "wrap");
-        panelDurations_.add(lblTotalTime_, "");
-        panelDurations_.add(lblTotalTimeValue_, "");
+        pnlDurations_.add(lblSliceTime_, "");
+        pnlDurations_.add(lblSliceTimeValue_, "wrap");
+        pnlDurations_.add(lblVolumeTime_, "");
+        pnlDurations_.add(lblVolumeTimeValue_, "wrap");
+        pnlDurations_.add(lblTotalTime_, "");
+        pnlDurations_.add(lblTotalTimeValue_, "");
 
         // time points
-        panelTimePoints_.add(lblNumTimePoints_, "");
-        panelTimePoints_.add(spnNumTimePoints_, "wrap");
-        panelTimePoints_.add(lblTimePointInterval_, "");
-        panelTimePoints_.add(spnTimePointInterval_, "");
+        pnlTimePoints_.add(lblNumTimePoints_, "");
+        pnlTimePoints_.add(spnNumTimePoints_, "wrap");
+        pnlTimePoints_.add(lblTimePointInterval_, "");
+        pnlTimePoints_.add(spnTimePointInterval_, "");
 
         // multiple positions
-        panelMultiplePositions_.add(btnEditPositionList_, "");
-        panelMultiplePositions_.add(btnOpenXYZGrid_, "wrap");
-        panelMultiplePositions_.add(lblPostMoveDelay_, "");
-        panelMultiplePositions_.add(spnPostMoveDelay_, "");
+        pnlMultiplePositions_.add(btnEditPositionList_, "");
+        pnlMultiplePositions_.add(btnOpenXYZGrid_, "wrap");
+        pnlMultiplePositions_.add(lblPostMoveDelay_, "");
+        pnlMultiplePositions_.add(spnPostMoveDelay_, "");
 
         // acquisition buttons
-        panelButtons_.add(btnRunAcquisition_, "");
-        panelButtons_.add(btnPauseAcquisition_, "");
-        panelButtons_.add(btnTestAcquisition_, "");
-        panelButtons_.add(btnOpenPlaylist_, "");
-        panelButtons_.add(btnSpeedTest_, "");
-        panelButtons_.add(btnRunOverviewAcq_, "");
+        pnlButtons_.add(btnRunAcquisition_, "");
+        pnlButtons_.add(btnPauseAcquisition_, "");
+        pnlButtons_.add(btnTestAcquisition_, "");
+        pnlButtons_.add(btnOpenPlaylist_, "");
+        pnlButtons_.add(btnSpeedTest_, "");
+        pnlButtons_.add(btnRunOverviewAcq_, "");
 
         // 3 panel layout
-        panelLeft.add(panelDurations_, "growx, growy");
-        panelLeft.add(panelTimePoints_, "growx, growy, wrap");
-        panelLeft.add(panelMultiplePositions_, "growx, span 2");
+        pnlLeft.add(pnlDurations_, "growx, growy");
+        pnlLeft.add(pnlTimePoints_, "growx, growy, wrap");
+        pnlLeft.add(pnlMultiplePositions_, "growx, span 2");
 
-        panelCenter.add(channelTablePanel_, "wrap");
-        panelCenter.add(new JLabel("Acquisition modes:"), "split 2");
-        panelCenter.add(cmbAcquisitionModes_, "");
+        pnlCenter.add(pnlChannelTable_, "wrap");
+        pnlCenter.add(new JLabel("Acquisition mode:"), "split 2");
+        pnlCenter.add(cmbAcquisitionModes_, "");
 
-        panelRight.add(volumeSettingsPanel_, "growx, wrap");
-        panelRight.add(sliceSettingsPanel_, "growx, wrap");
+        pnlRight.add(pnlVolumeSettings_, "growx, wrap");
+        pnlRight.add(pnlSliceSettings_, "growx, wrap");
 
         // TODO: consider putting durations into the model, since recalculating the slice timing shouldn't necessarily happen here
         // includes calculating the slice timing
         updateDurationLabels();
 
-        add(panelLeft, "");
-        add(panelCenter, "");
-        add(panelRight, "wrap");
-        add(panelButtons_, "span 3");
+        add(pnlLeft, "");
+        add(pnlCenter, "");
+        add(pnlRight, "wrap");
+        add(pnlButtons_, "span 3");
     }
 
     private void acqFinishedCallback() {
@@ -302,8 +302,8 @@ public class AcquisitionTab extends Panel {
         btnOpenXYZGrid_.registerListener(e -> xyzGridFrame_.setVisible(true));
         btnEditPositionList_.registerListener(e -> studio_.app().showPositionList());
 
-        chkUseMultiplePositions_.registerListener(e -> {
-            final boolean isSelected = chkUseMultiplePositions_.isSelected();
+        cbxUseMultiplePositions_.registerListener(e -> {
+            final boolean isSelected = cbxUseMultiplePositions_.isSelected();
             asb_.useMultiplePositions(isSelected);
             setMultiPositionsEnabled(isSelected);
         });
@@ -315,8 +315,8 @@ public class AcquisitionTab extends Panel {
 
         // time points
 
-        chkUseTimePoints_.registerListener(e -> {
-            final boolean selected = chkUseTimePoints_.isSelected();
+        cbxUseTimePoints_.registerListener(e -> {
+            final boolean selected = cbxUseTimePoints_.isSelected();
             asb_.useTimePoints(selected);
             setTimePointSpinnersEnabled(selected);
             updateDurationLabels();
@@ -335,10 +335,10 @@ public class AcquisitionTab extends Panel {
         });
 
         // use channels
-        chkUseChannels_.registerListener(e -> {
-            final boolean state = chkUseChannels_.isSelected();
+        cbxUseChannels_.registerListener(e -> {
+            final boolean state = cbxUseChannels_.isSelected();
             asb_.useChannels(state);
-            channelTablePanel_.setItemsEnabled(state);
+            pnlChannelTable_.setItemsEnabled(state);
         });
 
         cmbAcquisitionModes_.registerListener(e -> {
@@ -349,7 +349,7 @@ public class AcquisitionTab extends Panel {
     }
 
     public SliceSettingsPanel getSliceSettingsPanel() {
-        return sliceSettingsPanel_;
+        return pnlSliceSettings_;
     }
 
     private void setTimePointSpinnersEnabled(final boolean state) {

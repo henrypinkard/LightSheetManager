@@ -13,7 +13,7 @@ public class ASIXYStage extends ASITigerBase {
         super(studio, deviceName);
     }
 
-    public void setRelativeXYPosition(final int x, final int y) {
+    public void setRelativeXYPosition(final double x, final double y) {
         try {
             core_.setRelativeXYPosition(deviceName_, x, y);
         } catch (Exception e) {
@@ -21,7 +21,7 @@ public class ASIXYStage extends ASITigerBase {
         }
     }
 
-    public void setXYPosition(final int x, final int y) {
+    public void setXYPosition(final double x, final double y) {
         try {
             core_.setXYPosition(deviceName_, x, y);
         } catch (Exception e) {

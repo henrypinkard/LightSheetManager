@@ -225,7 +225,7 @@ public class PLogicDISPIM {
 
             // set the acceleration to a reasonable value for the (usually very slow) scan speed
             xyStage_.setAccelerationX((float)computeScanAcceleration(actualMotorSpeed,
-                    xyStage_.getMaxSpeedX(), 1.0f)); // TODO: get scan settings //settings.scanSettings().getAccelFactor()));
+                    xyStage_.getMaxSpeedX(), settings.scanSettings().scanAccelerationFactor()));
 
             int numLines = settings.volumeSettings().numViews();
             if (isInterleaved) {
@@ -238,7 +238,8 @@ public class PLogicDISPIM {
             xyStage_.setScanPattern(isStageScan2Sided ? ASIXYStage.ScanPattern.SERPENTINE : ASIXYStage.ScanPattern.RASTER);
 
             if (xyStage_.getAxisPolarityX() != ASIXYStage.AxisPolarity.NORMAL) {
-                studio_.logs().showError("Stage scanning requires X axis polarity set to normal");
+                studio_.logs().showError(
+                        "Stage scanning requires X axis polarity set to " + ASIXYStage.AxisPolarity.NORMAL);
                 return false;
             }
 
@@ -290,10 +291,8 @@ public class PLogicDISPIM {
      * @param motorSpeed
      * @return
      */
-    public double computeScanAcceleration(final double motorSpeed) {
-        final double accelFactor = 1.0; // TODO: get from acqSettings
-        //final double accelFactor = props_.getPropValueFloat(Devices.Keys.PLUGIN, Properties.Keys.PLUGIN_STAGESCAN_ACCEL_FACTOR);
-        return (10 + 100 * (motorSpeed / xyStage_.getMaxSpeedX()) ) * accelFactor;
+    public double computeScanAcceleration(final double motorSpeed, DefaultAcquisitionSettingsDISPIM settings) {
+        return (10 + 100 * (motorSpeed / xyStage_.getMaxSpeedX())) * settings.scanSettings().scanAccelerationFactor();
     }
 
     // TODO: scanNum was part of SliceSettings (now TimingSettings)
@@ -326,11 +325,11 @@ public class PLogicDISPIM {
     }
 
     public boolean prepareStageScanForAcquisition(final double x, final double y, DefaultAcquisitionSettingsDISPIM settings) {
-        final boolean scanFromStart = true;//settings.scanSettings().scanFromStartPosition();
-        final boolean scanNegative = false; //settings.scanSettings().scanNegativeDirection();
+        final boolean scanFromCurrent = settings.scanSettings().scanFromCurrentPosition();
+        final boolean scanNegative = settings.scanSettings().scanFromNegativeDirection();
         double xStartUm;
         double xStopUm;
-        if (scanFromStart) {
+        if (scanFromCurrent) {
             if (scanNegative) {
                 xStartUm = x;
                 xStopUm = x - scanDistance_;
@@ -402,7 +401,6 @@ public class PLogicDISPIM {
         return true;
     }
 
-    // TODO: side => view
     public boolean prepareControllerForAcquisitionSide(
             final AcquisitionSettingsDISPIM settings,
             final int view,
@@ -505,12 +503,16 @@ public class PLogicDISPIM {
             }
 
             // FIXME: more light sheet setup
-            float sliceRate = (view == 1) ? 109.081f : 105.883f;//(float)channelOffset; // FIXME: get value
+            final float slope1 = (float)settings.sliceCalibration().sliceSlope();
+            final float slope2 = (float)settings.sliceCalibration().sliceSlope();
+            float sliceRate = (view == 1) ? slope1 : slope2;
             if (NumberUtils.floatsEqual(sliceRate, 0.0f)) {
                 studio_.logs().showError("Calibration slope for view " + view + " cannot be zero. Re-do calibration on Setup tab.");
                 return false;
             }
-            float sliceOffset = (view == 1) ? 3.667f : 1.008f; //1.0f; // FIXME: get value
+            final float offset1 = (float)(settings.sliceCalibration().sliceOffset() + channelOffset);
+            final float offset2 = (float)(settings.sliceCalibration().sliceOffset() + channelOffset);
+            float sliceOffset = (view == 1) ? offset1 : offset2;
             float sliceAmplitude = piezoAmplitude / sliceRate;
             float sliceCenter = (piezoCenter - sliceOffset) / sliceRate;
 
@@ -756,7 +758,6 @@ public class PLogicDISPIM {
 
         } else {
             // original 4-channel mode
-
             // initialize cells 13-16 which control BNCs 5-8
             for (int cellNum = 13; cellNum <= 16; cellNum++) {
                 plcLaser_.setPointerPosition(cellNum);
@@ -886,7 +887,7 @@ public class PLogicDISPIM {
         }
     }
 
-    // TODO: need sheet width settings in AcquiositionSettings
+    // TODO: need sheet width settings in AcquisitionSettings
     /**
      * gets the sheet width for the specified settings in units of degrees
      * @param cameraMode
@@ -905,7 +906,7 @@ public class PLogicDISPIM {
 //        sheetWidth = props_.getPropValueFloat(Devices.Keys.PLUGIN, widthProp);
         sheetWidth = 1; // TODO: get from properties
 
-        if (cameraName == null || cameraName == "") {
+        if (cameraName == null || cameraName.equals("")) {
             studio_.logs().logDebugMessage("Could get sheet width for invalid device " + cameraName);
             return sheetWidth;
         }

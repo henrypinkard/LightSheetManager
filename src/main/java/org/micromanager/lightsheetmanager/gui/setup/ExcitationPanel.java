@@ -10,25 +10,26 @@ import javax.swing.JLabel;
  */
 public class ExcitationPanel extends Panel {
 
-    private CheckBox chkBeam_;
-    private CheckBox chkSheet_;
+    private CheckBox cbxBeam_;
+    private CheckBox cbxSheet_;
 
     public ExcitationPanel() {
         super("Scanner");
-        init();
+        createUserInterface();
+        createEventHandlers();
     }
 
-    private void init() {
+    private void createUserInterface() {
         final JLabel lblExcitation = new JLabel("Excitation:");
 
-        chkBeam_ = new CheckBox("Beam", false);
-        chkSheet_ = new CheckBox("Sheet", false);
+        cbxBeam_ = new CheckBox("Beam", false);
+        cbxSheet_ = new CheckBox("Sheet", false);
 
         createEventHandlers();
 
         add(lblExcitation, "");
-        add(chkBeam_, "");
-        add(chkSheet_, "");
+        add(cbxBeam_, "");
+        add(cbxSheet_, "");
     }
 
     private void createEventHandlers() {

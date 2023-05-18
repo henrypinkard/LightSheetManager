@@ -1,14 +1,5 @@
 package org.micromanager.lightsheetmanager.model;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.function.Function;
-
 import mmcorej.CMMCore;
 import mmcorej.StrVector;
 import mmcorej.org.json.JSONArray;
@@ -20,8 +11,6 @@ import org.micromanager.acqj.api.AcquisitionHook;
 import org.micromanager.acqj.main.Acquisition;
 import org.micromanager.acqj.main.AcquisitionEvent;
 import org.micromanager.acquisition.internal.MMAcquisition;
-//import org.micromanager.acquisition.internal.MMAcquistionControlCallbacks;
-//import org.micromanager.acquisition.internal.acqengjcompat.AcqEngJMDADataSink;
 import org.micromanager.acquisition.internal.MMAcquistionControlCallbacks;
 import org.micromanager.acquisition.internal.acqengjcompat.AcqEngJMDADataSink;
 import org.micromanager.acquisition.internal.acqengjcompat.speedtest.SpeedTest;
@@ -36,18 +25,23 @@ import org.micromanager.data.internal.ndtiff.NDTiffAdapter;
 import org.micromanager.internal.MMStudio;
 import org.micromanager.lightsheetmanager.api.AcquisitionManager;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
-import org.micromanager.lightsheetmanager.api.data.DISPIMDevice;
+import org.micromanager.lightsheetmanager.api.data.GeometryType;
 import org.micromanager.lightsheetmanager.api.internal.DefaultAcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.api.internal.DefaultTimingSettings;
-import org.micromanager.lightsheetmanager.api.data.GeometryType;
 import org.micromanager.lightsheetmanager.model.channels.ChannelSpec;
 import org.micromanager.lightsheetmanager.model.data.AcquisitionModes;
 import org.micromanager.lightsheetmanager.model.data.MultiChannelModes;
-import org.micromanager.lightsheetmanager.model.devices.cameras.AndorCamera;
+import org.micromanager.lightsheetmanager.model.devices.cameras.CameraBase;
 import org.micromanager.lightsheetmanager.model.devices.vendor.ASIScanner;
 import org.micromanager.lightsheetmanager.model.utils.NumberUtils;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class AcquisitionEngine implements AcquisitionManager, MMAcquistionControlCallbacks {
 
@@ -59,7 +53,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
     private DataStorage data_;
 
-    private ExecutorService acquistitonExecutor_ = Executors.newSingleThreadExecutor(
+    private ExecutorService acquisitionExecutor_ = Executors.newSingleThreadExecutor(
             r -> new Thread(r, "Acquisition Thread"));
     private LightSheetManagerModel model_;
     private volatile Acquisition currentAcquisition_ = null;
@@ -93,7 +87,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
     @Override
     public Future requestRun(boolean speedTest) {
         // Run on a new thread, so it doesn't block the EDT
-        Future acqFinished = acquistitonExecutor_.submit(() -> {
+        Future acqFinished = acquisitionExecutor_.submit(() -> {
             if (currentAcquisition_ != null) {
                 studio_.logs().showError("Acquisition is already running.");
                 return;
@@ -176,7 +170,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
      * This is a bunch of logic copied from the diSPIM plugin
      * @return
      */
-    private PLogicDISPIM doHardwareCalculations() {
+    private boolean doHardwareCalculations(PLogicDISPIM plc) {
 
         // make sure slice timings are up-to-date
 
@@ -193,11 +187,45 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         int nrChannelsSoftware = asb_.numChannels();  // how many times we trigger the controller per stack
         int nrSlicesSoftware = asb_.volumeSettingsBuilder().slicesPerVolume();
                 //acqSettings_.volumeSettings().slicesPerView();
-        // TODO: channels
+        // TODO: channels need to modify panels and need extraChannelOffset_
+        boolean changeChannelPerVolumeSoftware = false;
+        boolean changeChannelPerVolumeDoneFirst = false;
+        if (acqSettings_.isUsingChannels()) {
+            if (asb_.numChannels() > 1) {
+                studio_.logs().showError("\"Channels\" is checked, but no channels are selected");
+                return false; // early exit
+            }
+            switch (acqSettings_.channelMode()) {
+                case VOLUME:
+                    changeChannelPerVolumeSoftware = true;
+                    changeChannelPerVolumeDoneFirst = true;
+                    break;
+                case VOLUME_HW:
+                case SLICE_HW:
+                    if (acqSettings_.numChannels() == 1) {
+                        // only 1 channel selected so don't have to really use hardware switching
+                    } else {
+                        // we have at least 2 channels
+                        // intentionally leave extraChannelOffset_ untouched so that it can be specified by user by choosing a preset
+                        //   for the channel in the main Micro-Manager window
+                    }
+                    final boolean success = plc.setupHardwareChannelSwitching(acqSettings_);
+                    if (!success) {
+                        studio_.logs().showError("Couldn't set up slice hardware channel switching.");
+                        return false; // early exit
+                    }
+                    nrChannelsSoftware = 1;
+                    nrSlicesSoftware = asb_.volumeSettingsBuilder().slicesPerVolume() * asb_.numChannels();
+                    break;
+                default:
+                    studio_.logs().showError(
+                            "Unsupported multichannel mode \"" + acqSettings_.channelMode().toString() + "\"");
+                    return false; // early exit
+            }
+        }
+        // TODO: code that doubles nrSlicesSoftware if (twoSided && acqBothCameras) missing
 
-
-
-        AndorCamera camera = model_.devices().getDevice("Imaging1Camera");
+        CameraBase camera = model_.devices().getDevice("Imaging1Camera");
         CameraModes camMode = camera.getTriggerMode();
         final float cameraReadoutTime = camera.getReadoutTime(camMode);
         //final double exposureTime = acqSettings_.timingSettings().cameraExposure();
@@ -207,7 +235,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
         double volumeDuration = computeActualVolumeDuration(acqSettings_);
         double timepointDuration = computeTimePointDuration();
-        long timepointIntervalMs = Math.round(acqSettings_.timePointInterval()*1000);
+        long timepointIntervalMs = Math.round(acqSettings_.timePointInterval()*1000.0f);
 
         // use hardware timing if < 1 second between time points
         // experimentally need ~0.5 sec to set up acquisition, this gives a bit of cushion
@@ -244,7 +272,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
                   " readout time of " + cameraReadoutTime + "\n" +
                   "This will result in dropped frames. " +
                   "Please change input");
-            return null;
+            return false; // early exit
         }
 
 
@@ -267,13 +295,9 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 //            }
 //        }
 
-
-        // TODO: make static?
-        PLogicDISPIM controller = new PLogicDISPIM(studio_, model_.devices(), asb_);
-
         double extraChannelOffset = 0.0;
-        controller.prepareControllerForAquisition(acqSettings_, extraChannelOffset);
-        return controller;
+        plc.prepareControllerForAquisition(acqSettings_, extraChannelOffset);
+        return true;
     }
 
     /**
@@ -281,7 +305,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
      * ways on summary metadata generated by the acquisition engine.
      * This function adds in its fields in order to achieve compatibility.
      */
-    // TODO remove doPRojections when it clear where it should come from in settings
+    // TODO remove doProjections when it clear where it should come from in settings
     private void addMMSummaryMetadata(JSONObject summaryMetadata, boolean doProjections) {
         try {
             // These are the ones from the clojure engine that may yet need to be translated
@@ -366,15 +390,20 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 //        boolean demoMode = acqSettings_.demoMode();
 
         if (!demoMode) {
-            controller = doHardwareCalculations();
+            controller = new PLogicDISPIM(studio_, model_.devices(), asb_);
 
-            String plcName = "PLogic:E:36";
-            try {
-                core_.setProperty(plcName, "EnableAdvancedProperties", "Yes");
-            } catch (Exception e1) {
-                System.out.println("failed to enable adv props");
+            final boolean success = doHardwareCalculations(controller);
+            if (!success) {
+                return; // early exit => could not set up hardware
             }
+//            String plcName = "PLogic:E:36";
+//            try {
+//                core_.setProperty(plcName, "EnableAdvancedProperties", "Yes");
+//            } catch (Exception e1) {
+//                System.out.println("failed to enable adv props");
+//            }
 //        StrVector propertyNames;
+//        try {
 //            propertyNames = core_.getDevicePropertyNames(plcName);
 //        } catch (Exception e) {
 //            propertyNames = null;
@@ -394,42 +423,46 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 //        }
 //        String jsonStr = gsonObj.toJson(deviceProps);
 //        System.out.println(jsonStr);
-            String jsonStr = "{\"PCell_03_CellType\":\"0 - constant\",\"PCell_09_CellType\":\"0 - constant\",\"BackplaneOutputState\":\"130\",\"IOFrontpanel_7_SourceAddress\":\"0\",\"PCell_12_CellType\":\"3 - 3-input LUT\",\"IOBackplane_2_SourceAddress\":\"0\",\"IOFrontpanel_2_SourceAddress\":\"43\",\"PCell_14_Input2\":\"0\",\"PCell_14_Input1\":\"0\",\"PCell_09_Config\":\"0\",\"PCell_16_Config\":\"0\",\"PCell_10_Input1\":\"42\",\"PCell_10_Input2\":\"8\",\"PointerPosition\":\"48\",\"PCell_05_Config\":\"0\",\"PCell_07_Config\":\"0\",\"PCell_12_Input2\":\"10\",\"PCell_16_Input2\":\"0\",\"PCell_12_Input1\":\"44\",\"PCell_16_Input1\":\"0\",\"PCell_10_Input3\":\"0\",\"PCell_12_Input4\":\"0\",\"PCell_14_Input4\":\"0\",\"PCell_16_Input4\":\"0\",\"PCell_10_Input4\":\"0\",\"PCell_12_Input3\":\"1\",\"PCell_14_Input3\":\"0\",\"PCell_16_Input3\":\"0\",\"PCell_03_Config\":\"0\",\"IOFrontpanel_5_SourceAddress\":\"0\",\"PCell_12_Config\":\"168\",\"PCell_14_Config\":\"0\",\"PCell_10_Config\":\"0\",\"PCell_04_CellType\":\"0 - constant\",\"Description\":\"ASI Programmable Logic HexAddr\u003d36\",\"RefreshPropertyValues\":\"No\",\"EditCellUpdateAutomatically\":\"Yes\",\"IOBackplane_6_SourceAddress\":\"0\",\"IOBackplane_0_SourceAddress\":\"0\",\"NumLogicCells\":\"16\",\"OutputChannel\":\"none of outputs 5-8\",\"PCell_14_CellType\":\"0 - constant\",\"PCell_08_CellType\":\"0 - constant\",\"PCell_06_Input3\":\"0\",\"PCell_06_Input2\":\"0\",\"PCell_13_Input1\":\"0\",\"IOFrontpanel_8_SourceAddress\":\"0\",\"PCell_06_Input4\":\"0\",\"PCell_06_Input1\":\"0\",\"PCell_02_Input1\":\"0\",\"PCell_02_Input2\":\"0\",\"PCell_02_Input3\":\"0\",\"PCell_02_Input4\":\"0\",\"PCell_08_Config\":\"0\",\"PCell_13_Input4\":\"0\",\"PCell_13_Input2\":\"0\",\"IOBackplane_7_SourceAddress\":\"0\",\"PCell_13_Input3\":\"0\",\"FirmwareDate\":\"Oct 05 2020:06:42:01\",\"PCell_04_Config\":\"0\",\"SetCardPreset\":\"14 - diSPIM TTL\",\"PCell_11_Config\":\"0\",\"PCell_15_Config\":\"0\",\"PCell_01_CellType\":\"0 - constant\",\"EditCellConfig\":\"0\",\"PCell_15_CellType\":\"0 - constant\",\"IOBackplane_2_IOType\":\"0 - input\",\"PCell_06_CellType\":\"0 - constant\",\"PLogicOutputState\":\"1\",\"IOBackplane_1_IOType\":\"0 - input\",\"IOBackplane_3_IOType\":\"0 - input\",\"IOBackplane_4_IOType\":\"0 - input\",\"IOBackplane_5_IOType\":\"0 - input\",\"IOBackplane_6_IOType\":\"0 - input\",\"IOBackplane_7_IOType\":\"0 - input\",\"Name\":\"PLogic:E:36\",\"IOBackplane_0_IOType\":\"0 - input\",\"IOFrontpanel_3_IOType\":\"2 - output (push-pull)\",\"EditCellCellType\":\"0 - input\",\"IOFrontpanel_2_IOType\":\"2 - output (push-pull)\",\"IOFrontpanel_4_IOType\":\"2 - output (push-pull)\",\"IOFrontpanel_6_SourceAddress\":\"0\",\"IOFrontpanel_1_IOType\":\"2 - output (push-pull)\",\"IOFrontpanel_5_IOType\":\"2 - output (push-pull)\",\"FrontpanelOutputState\":\"0\",\"IOFrontpanel_7_IOType\":\"2 - output (push-pull)\",\"IOFrontpanel_6_IOType\":\"2 - output (push-pull)\",\"TriggerSource\":\"1 - Micro-mirror card\",\"PCell_05_Input1\":\"0\",\"PCell_05_Input2\":\"0\",\"PCell_05_Input3\":\"0\",\"PCell_07_Input3\":\"0\",\"PCell_05_Input4\":\"0\",\"PCell_07_Input4\":\"0\",\"PCell_16_CellType\":\"0 - constant\",\"PCell_07_Input1\":\"0\",\"PCell_07_Input2\":\"0\",\"PCell_03_Input2\":\"0\",\"PCell_03_Input1\":\"0\",\"PCell_03_Input4\":\"0\",\"PCell_09_Input2\":\"0\",\"PCell_03_Input3\":\"0\",\"PCell_09_Input1\":\"0\",\"PCell_09_Input4\":\"0\",\"PCell_09_Input3\":\"0\",\"AxisLetter\":\"E\",\"IOBackplane_1_SourceAddress\":\"0\",\"PCell_01_Input4\":\"0\",\"PCell_01_Input3\":\"0\",\"PCell_01_Input2\":\"0\",\"PCell_01_Input1\":\"0\",\"IOFrontpanel_1_SourceAddress\":\"41\",\"PCell_10_CellType\":\"5 - 2-input AND\",\"EnableAdvancedProperties\":\"Yes\",\"IOBackplane_5_SourceAddress\":\"0\",\"PCell_01_Config\":\"1\",\"ClearAllCellStates\":\"Not done\",\"EditCellInput1\":\"0\",\"PCell_02_CellType\":\"0 - constant\",\"EditCellInput2\":\"0\",\"EditCellInput3\":\"0\",\"PCell_05_CellType\":\"0 - constant\",\"PCell_11_CellType\":\"0 - constant\",\"EditCellInput4\":\"0\",\"IOFrontpanel_4_SourceAddress\":\"12\",\"SaveCardSettings\":\"no action\",\"PCell_15_Input4\":\"0\",\"IOFrontpanel_3_SourceAddress\":\"0\",\"PCell_13_CellType\":\"0 - constant\",\"PCell_08_Input4\":\"0\",\"PCell_04_Input3\":\"0\",\"PCell_08_Input3\":\"0\",\"IOBackplane_4_SourceAddress\":\"0\",\"IOFrontpanel_8_IOType\":\"2 - output (push-pull)\",\"PCell_04_Input2\":\"0\",\"PCell_08_Input2\":\"0\",\"PCell_04_Input1\":\"0\",\"PCell_08_Input1\":\"0\",\"PCell_11_Input4\":\"0\",\"PCell_07_CellType\":\"0 - constant\",\"PCell_04_Input4\":\"0\",\"PCell_06_Config\":\"0\",\"PCell_11_Input1\":\"0\",\"PCell_15_Input1\":\"0\",\"FirmwareVersion\":\"3.3300\",\"PCell_11_Input2\":\"0\",\"PCell_15_Input2\":\"0\",\"PCell_11_Input3\":\"0\",\"PCell_15_Input3\":\"0\",\"PCell_02_Config\":\"0\",\"FirmwareBuild\":\"PLOGIC_16\",\"PCell_13_Config\":\"0\",\"TigerHexAddress\":\"36\",\"PLogicMode\":\"diSPIM Shutter\",\"IOBackplane_3_SourceAddress\":\"0\"}";
+            //String jsonStr = "{\"PCell_03_CellType\":\"0 - constant\",\"PCell_09_CellType\":\"0 - constant\",\"BackplaneOutputState\":\"130\",\"IOFrontpanel_7_SourceAddress\":\"0\",\"PCell_12_CellType\":\"3 - 3-input LUT\",\"IOBackplane_2_SourceAddress\":\"0\",\"IOFrontpanel_2_SourceAddress\":\"43\",\"PCell_14_Input2\":\"0\",\"PCell_14_Input1\":\"0\",\"PCell_09_Config\":\"0\",\"PCell_16_Config\":\"0\",\"PCell_10_Input1\":\"42\",\"PCell_10_Input2\":\"8\",\"PointerPosition\":\"48\",\"PCell_05_Config\":\"0\",\"PCell_07_Config\":\"0\",\"PCell_12_Input2\":\"10\",\"PCell_16_Input2\":\"0\",\"PCell_12_Input1\":\"44\",\"PCell_16_Input1\":\"0\",\"PCell_10_Input3\":\"0\",\"PCell_12_Input4\":\"0\",\"PCell_14_Input4\":\"0\",\"PCell_16_Input4\":\"0\",\"PCell_10_Input4\":\"0\",\"PCell_12_Input3\":\"1\",\"PCell_14_Input3\":\"0\",\"PCell_16_Input3\":\"0\",\"PCell_03_Config\":\"0\",\"IOFrontpanel_5_SourceAddress\":\"0\",\"PCell_12_Config\":\"168\",\"PCell_14_Config\":\"0\",\"PCell_10_Config\":\"0\",\"PCell_04_CellType\":\"0 - constant\",\"Description\":\"ASI Programmable Logic HexAddr\u003d36\",\"RefreshPropertyValues\":\"No\",\"EditCellUpdateAutomatically\":\"Yes\",\"IOBackplane_6_SourceAddress\":\"0\",\"IOBackplane_0_SourceAddress\":\"0\",\"NumLogicCells\":\"16\",\"OutputChannel\":\"none of outputs 5-8\",\"PCell_14_CellType\":\"0 - constant\",\"PCell_08_CellType\":\"0 - constant\",\"PCell_06_Input3\":\"0\",\"PCell_06_Input2\":\"0\",\"PCell_13_Input1\":\"0\",\"IOFrontpanel_8_SourceAddress\":\"0\",\"PCell_06_Input4\":\"0\",\"PCell_06_Input1\":\"0\",\"PCell_02_Input1\":\"0\",\"PCell_02_Input2\":\"0\",\"PCell_02_Input3\":\"0\",\"PCell_02_Input4\":\"0\",\"PCell_08_Config\":\"0\",\"PCell_13_Input4\":\"0\",\"PCell_13_Input2\":\"0\",\"IOBackplane_7_SourceAddress\":\"0\",\"PCell_13_Input3\":\"0\",\"FirmwareDate\":\"Oct 05 2020:06:42:01\",\"PCell_04_Config\":\"0\",\"SetCardPreset\":\"14 - diSPIM TTL\",\"PCell_11_Config\":\"0\",\"PCell_15_Config\":\"0\",\"PCell_01_CellType\":\"0 - constant\",\"EditCellConfig\":\"0\",\"PCell_15_CellType\":\"0 - constant\",\"IOBackplane_2_IOType\":\"0 - input\",\"PCell_06_CellType\":\"0 - constant\",\"PLogicOutputState\":\"1\",\"IOBackplane_1_IOType\":\"0 - input\",\"IOBackplane_3_IOType\":\"0 - input\",\"IOBackplane_4_IOType\":\"0 - input\",\"IOBackplane_5_IOType\":\"0 - input\",\"IOBackplane_6_IOType\":\"0 - input\",\"IOBackplane_7_IOType\":\"0 - input\",\"Name\":\"PLogic:E:36\",\"IOBackplane_0_IOType\":\"0 - input\",\"IOFrontpanel_3_IOType\":\"2 - output (push-pull)\",\"EditCellCellType\":\"0 - input\",\"IOFrontpanel_2_IOType\":\"2 - output (push-pull)\",\"IOFrontpanel_4_IOType\":\"2 - output (push-pull)\",\"IOFrontpanel_6_SourceAddress\":\"0\",\"IOFrontpanel_1_IOType\":\"2 - output (push-pull)\",\"IOFrontpanel_5_IOType\":\"2 - output (push-pull)\",\"FrontpanelOutputState\":\"0\",\"IOFrontpanel_7_IOType\":\"2 - output (push-pull)\",\"IOFrontpanel_6_IOType\":\"2 - output (push-pull)\",\"TriggerSource\":\"1 - Micro-mirror card\",\"PCell_05_Input1\":\"0\",\"PCell_05_Input2\":\"0\",\"PCell_05_Input3\":\"0\",\"PCell_07_Input3\":\"0\",\"PCell_05_Input4\":\"0\",\"PCell_07_Input4\":\"0\",\"PCell_16_CellType\":\"0 - constant\",\"PCell_07_Input1\":\"0\",\"PCell_07_Input2\":\"0\",\"PCell_03_Input2\":\"0\",\"PCell_03_Input1\":\"0\",\"PCell_03_Input4\":\"0\",\"PCell_09_Input2\":\"0\",\"PCell_03_Input3\":\"0\",\"PCell_09_Input1\":\"0\",\"PCell_09_Input4\":\"0\",\"PCell_09_Input3\":\"0\",\"AxisLetter\":\"E\",\"IOBackplane_1_SourceAddress\":\"0\",\"PCell_01_Input4\":\"0\",\"PCell_01_Input3\":\"0\",\"PCell_01_Input2\":\"0\",\"PCell_01_Input1\":\"0\",\"IOFrontpanel_1_SourceAddress\":\"41\",\"PCell_10_CellType\":\"5 - 2-input AND\",\"EnableAdvancedProperties\":\"Yes\",\"IOBackplane_5_SourceAddress\":\"0\",\"PCell_01_Config\":\"1\",\"ClearAllCellStates\":\"Not done\",\"EditCellInput1\":\"0\",\"PCell_02_CellType\":\"0 - constant\",\"EditCellInput2\":\"0\",\"EditCellInput3\":\"0\",\"PCell_05_CellType\":\"0 - constant\",\"PCell_11_CellType\":\"0 - constant\",\"EditCellInput4\":\"0\",\"IOFrontpanel_4_SourceAddress\":\"12\",\"SaveCardSettings\":\"no action\",\"PCell_15_Input4\":\"0\",\"IOFrontpanel_3_SourceAddress\":\"0\",\"PCell_13_CellType\":\"0 - constant\",\"PCell_08_Input4\":\"0\",\"PCell_04_Input3\":\"0\",\"PCell_08_Input3\":\"0\",\"IOBackplane_4_SourceAddress\":\"0\",\"IOFrontpanel_8_IOType\":\"2 - output (push-pull)\",\"PCell_04_Input2\":\"0\",\"PCell_08_Input2\":\"0\",\"PCell_04_Input1\":\"0\",\"PCell_08_Input1\":\"0\",\"PCell_11_Input4\":\"0\",\"PCell_07_CellType\":\"0 - constant\",\"PCell_04_Input4\":\"0\",\"PCell_06_Config\":\"0\",\"PCell_11_Input1\":\"0\",\"PCell_15_Input1\":\"0\",\"FirmwareVersion\":\"3.3300\",\"PCell_11_Input2\":\"0\",\"PCell_15_Input2\":\"0\",\"PCell_11_Input3\":\"0\",\"PCell_15_Input3\":\"0\",\"PCell_02_Config\":\"0\",\"FirmwareBuild\":\"PLOGIC_16\",\"PCell_13_Config\":\"0\",\"TigerHexAddress\":\"36\",\"PLogicMode\":\"diSPIM Shutter\",\"IOBackplane_3_SourceAddress\":\"0\"}";
 
-            System.out.println("create JSON...");
-            JSONObject jsonObj = null;
-            try {
-                jsonObj = new JSONObject(jsonStr);
-            } catch (JSONException e) {
-                System.out.println("failed to create json object!");
-            }
-//            jsonObj.keys().forEachRemaining(key -> {
+//            System.out.println("create JSON...");
+//            JSONObject jsonObj = null;
+//            try {
+//                jsonObj = new JSONObject(jsonStr);
+//            } catch (JSONException e) {
+//                System.out.println("failed to create json object!");
+//            }
+////            jsonObj.keys().forEachRemaining(key -> {
+////
+////            });
 //
-//            });
+//            for (Iterator<String> it = jsonObj.keys(); it.hasNext(); ) {
+//                String s = it.next();
+//                String value;
+//                try {
+//                    value = jsonObj.getString(s);
+//                } catch (JSONException e) {
+//                    throw new RuntimeException(e);
+//                }
+//                try {
+//                    core_.setProperty(plcName, s, value);
+//                } catch (Exception e) {
+//                    System.out.println("failed to set property " + s + " " + value);
+//                }
+//                System.out.println(s + " " + value);
+//            }
 
-            for (Iterator<String> it = jsonObj.keys(); it.hasNext(); ) {
-                String s = it.next();
-                String value;
-                try {
-                    value = jsonObj.getString(s);
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
-                try {
-                    core_.setProperty(plcName, s, value);
-                } catch (Exception e) {
-                    System.out.println("failed to set property " + s + " " + value);
-                }
-                System.out.println(s + " " + value);
-            }
-
-            System.out.println("isUsingHardwareTimePoints: " + acqSettings_.isUsingHardwareTimePoints());
-
-            ASIScanner scanner = model_.devices().getDevice(DISPIMDevice.getIllumBeam(1));
-            scanner.sa().setAmplitudeX(4.1f);
-            scanner.sa().setOffsetY(-0.0336f);
+//            // TODO: match settings from 1.4 plugin (delete later)
+//            ASIScanner scanner = model_.devices().getDevice(DISPIMDevice.getIllumBeam(1));
+//            scanner.sa().setAmplitudeX(4.1f);
+//            scanner.sa().setOffsetY(-0.0336f);
         }
-
+//        try {
+//            core_.setProperty("Andor sCMOS Camera A", "TriggerMode", "Internal (Recommended for fast acquisitions)");
+//            core_.setProperty("Andor sCMOS Camera B", "TriggerMode", "Internal (Recommended for fast acquisitions)");
+//        } catch (Exception e1) {
+//            e1.printStackTrace();
+//        }
         setAcquisitionSettings(asb_.build());
 
         String saveDir = acqSettings_.saveDirectory();
@@ -454,7 +487,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
 
 
         // Projection mode
-        //TODO:where should this coe from in settings?
+        //TODO: where should this come from in settings?
         boolean projectionMode = false;
 
         //////////////////////////////////////
@@ -490,7 +523,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         //  timelapse hook copied from org.micromanager.acquisition.internal.acqengjcompat.AcqEngJAdapter
 //        if (sequenceSettings_.acqOrderMode() == AcqOrderMode.POS_TIME_CHANNEL_SLICE
 //              || sequenceSettings_.acqOrderMode() == AcqOrderMode.POS_TIME_SLICE_CHANNEL) {
-//            // Pos_time ordered acquisistion need their timelapse minimum start time to be
+//            // Pos_time ordered acquisition need their timelapse minimum start time to be
 //            // adjusted for each position.  The only place to do that seems to be a hardware hook.
 //            currentAcquisition_.addHook(timeLapseHook(acquisitionSettings),
 //                  AcquisitionAPI.BEFORE_HARDWARE_HOOK);
@@ -695,9 +728,9 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
             if (cameraDeviceNames.size() < 2) {
                 throw new RuntimeException("Need two cameras for diSPIM simulation");
             }
-            cameraNames = cameraDeviceNames.toArray(new String[cameraDeviceNames.size()]);
+            cameraNames = cameraDeviceNames.toArray(new String[0]);
         } else {
-            if (acqSettings_.volumeSettings().numViews() > 1) {
+            if (asb_.vsb().numViews() > 1) {
                 cameraNames = new String[]{
                         model_.devices().getDevice("Imaging1Camera").getDeviceName(),
                         model_.devices().getDevice("Imaging2Camera").getDeviceName()
@@ -819,7 +852,6 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         // TODO: update gui (but not in the model)
     }
 
-    // TODO: only using acqSettings for cameraExposure which maybe should not exist?
     public DefaultTimingSettings.Builder getTimingFromPeriodAndLightExposure(DefaultAcquisitionSettingsDISPIM.Builder asb) {
         // uses algorithm Jon worked out in Octave code; each slice period goes like this:
         // 1. camera readout time (none if in overlap mode, 0.25ms in pseudo-overlap)
@@ -831,7 +863,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         ASIScanner scanner1 = model_.devices().getDevice("Illum1Beam");
         ASIScanner scanner2 = model_.devices().getDevice("Illum2Beam");
 
-        AndorCamera camera = model_.devices().getDevice("Imaging1Camera"); //.getImagingCamera(0);
+        CameraBase camera = model_.devices().getDevice("Imaging1Camera"); //.getImagingCamera(0);
         if (camera == null) {
             // just a dummy to test demo mode
             return new DefaultTimingSettings.Builder();
@@ -883,7 +915,7 @@ public class AcquisitionEngine implements AcquisitionManager, MMAcquistionContro
         float delayBeforeScan = globalExposureDelayMax - scanLaserBufferTime   // start scan 0.25ms before camera's global exposure
                 - scanDelayFilter; // start galvo moving early due to card's Bessel filter and delay of TTL signals via PLC
         float delayBeforeLaser = globalExposureDelayMax; // turn on laser as soon as camera's global exposure is reached
-        float delayBeforeCamera = cameraReadoutMax; // camera must readout last frame before triggering again
+        float delayBeforeCamera = cameraReadoutMax; // camera must read out last frame before triggering again
         int scansPerSlice = 1;
 
         float cameraDuration = 0; // set in the switch statement below

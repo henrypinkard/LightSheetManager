@@ -1,6 +1,6 @@
 package org.micromanager.lightsheetmanager.api;
 
-// TODO: determine units for each of the methods (include units in arguments or method name?)
+// TODO: this is unused, maybe put the methods into hardware manager?
 
 /**
  * LightSheet Calibration settings.

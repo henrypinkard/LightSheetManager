@@ -3,16 +3,20 @@ package org.micromanager.lightsheetmanager.gui.tabs;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.components.TextPane;
 
-
+/**
+ *
+ */
 public class HelpTab extends Panel {
 
     private TextPane textPane_;
+
     public HelpTab() {
-        init();
+        createUserInterface();
+        createEventHandlers();
     }
 
     // TODO: update text
-    public void init() {
+    private void createUserInterface() {
 
         textPane_ = new TextPane();
         textPane_.setText("This plugin is a work in progress");
@@ -34,11 +38,13 @@ public class HelpTab extends Panel {
 //                        + "diSPIM User Manual</a>."
 //        );
 
-        textPane_.registerHyperlinkListener();
-
         // add ui elements to the panel
         add(textPane_, "");
     }
 
+    private void createEventHandlers() {
+        textPane_.registerHyperlinkListener();
+
+    }
 
 }

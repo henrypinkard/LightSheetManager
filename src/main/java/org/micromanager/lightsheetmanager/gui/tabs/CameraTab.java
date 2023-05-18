@@ -1,6 +1,7 @@
 package org.micromanager.lightsheetmanager.gui.tabs;
 
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
+import org.micromanager.lightsheetmanager.gui.TabPanel;
 import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.ComboBox;
 import org.micromanager.lightsheetmanager.gui.components.Label;
@@ -8,7 +9,7 @@ import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.tabs.acquisition.SliceSettingsPanel;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
-import javax.swing.JLabel;
+import java.awt.Font;
 import java.util.Objects;
 
 public class CameraTab extends Panel {
@@ -20,24 +21,23 @@ public class CameraTab extends Panel {
     private Button btnEigthROI_;
     private Button btnCustomROI_;
     private Button btnGetCurrentROI_;
-
     private ComboBox cmbCameraTriggerMode_;
 
-    private SliceSettingsPanel sliceSettingsPanel_;
+    private TabPanel tabPanel_;
     private LightSheetManagerModel model_;
 
-    public CameraTab(final LightSheetManagerModel model, final SliceSettingsPanel sliceSettingsPanel) {
-        sliceSettingsPanel_ = Objects.requireNonNull(sliceSettingsPanel);
+    public CameraTab(final LightSheetManagerModel model, final TabPanel tabPanel) {
+        tabPanel_ = Objects.requireNonNull(tabPanel);
         model_ = Objects.requireNonNull(model);
         createUserInterface();
         createEventHandlers();
     }
 
     private void createUserInterface() {
-        JLabel lblTitle = new JLabel("Cameras");
+        final Label lblTitle = new Label("Camera Settings", Font.BOLD, 18);
 
-        final Panel panelROI = new Panel("Imaging ROI");
-        final Panel panelCameraTrigger = new Panel("Camera Trigger Mode");
+        final Panel pnlROI = new Panel("Imaging ROI");
+        final Panel pnlCameraTrigger = new Panel("Camera Trigger Mode");
 
         final Label lblXOffset = new Label("X Offset:");
         final Label lblYOffset = new Label("Y Offset:");
@@ -53,35 +53,38 @@ public class CameraTab extends Panel {
         btnGetCurrentROI_ = new Button("Get Current ROI", 120, 30);
 
         cmbCameraTriggerMode_ = new ComboBox(CameraModes.toArray(),
-              model_.acquisitions().getAcquisitionSettings().cameraMode() != null ?
-                model_.acquisitions().getAcquisitionSettings().cameraMode().toString() : null);
+              model_.acquisitions().getAcquisitionSettings().cameraMode().toString());
 
-        panelROI.add(btnUnchangedROI_, "span 2, wrap");
-        panelROI.add(btnFullROI_, "");
-        panelROI.add(btnHalfROI_, "wrap");
-        panelROI.add(btnQuarterROI_, "");
-        panelROI.add(btnEigthROI_, "wrap");
-        panelROI.add(btnCustomROI_, "span 2, wrap");
-        panelROI.add(lblXOffset, "wrap");
-        panelROI.add(lblYOffset, "wrap");
-        panelROI.add(lblWidth, "wrap");
-        panelROI.add(lblHeight, "wrap");
-        panelROI.add(btnGetCurrentROI_, "span 2");
+        pnlROI.add(btnUnchangedROI_, "span 2, wrap");
+        pnlROI.add(btnFullROI_, "");
+        pnlROI.add(btnHalfROI_, "wrap");
+        pnlROI.add(btnQuarterROI_, "");
+        pnlROI.add(btnEigthROI_, "wrap");
+        pnlROI.add(btnCustomROI_, "span 2, wrap");
+        pnlROI.add(lblXOffset, "wrap");
+        pnlROI.add(lblYOffset, "wrap");
+        pnlROI.add(lblWidth, "wrap");
+        pnlROI.add(lblHeight, "wrap");
+        pnlROI.add(btnGetCurrentROI_, "span 2");
 
-        panelCameraTrigger.add(cmbCameraTriggerMode_, "");
+        pnlCameraTrigger.add(cmbCameraTriggerMode_, "");
 
         add(lblTitle, "wrap");
-        add(panelROI, "wrap");
-        add(panelCameraTrigger, "growx");
+        add(pnlROI, "wrap");
+        add(pnlCameraTrigger, "growx");
     }
 
     private void createEventHandlers() {
+
+        // camera trigger mode
         cmbCameraTriggerMode_.registerListener(e -> {
             final CameraModes cameraMode = CameraModes.fromString(cmbCameraTriggerMode_.getSelected());
             model_.acquisitions().getAcquisitionSettingsBuilder().cameraMode(cameraMode);
-            sliceSettingsPanel_.switchUI(cameraMode);
+            tabPanel_.getAcquisitionTab().getSliceSettingsPanel().switchUI(cameraMode);
+            tabPanel_.swapSetupPathPanels(cameraMode);
             //System.out.println("getCameraMode: " + model_.acquisitions().getAcquisitionSettings().getCameraMode());
         });
+
     }
 
 }

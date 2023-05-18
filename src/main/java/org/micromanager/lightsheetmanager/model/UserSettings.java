@@ -20,6 +20,9 @@ public class UserSettings {
     private static final String DEVICES_KEY = "Devices";
     private static final String SETTINGS_NOT_FOUND = "Settings Not Found";
 
+    // Note: increase this value based on the amount of nested json in the settings
+    private static final int MAX_RECURSION_DEPTH_JSON = 4;
+
     private final LightSheetManagerModel model_;
 
     public UserSettings(final Studio studio, final LightSheetManagerModel model) {
@@ -125,7 +128,17 @@ public class UserSettings {
         return loadedJson;
     }
 
+    // Overloaded method to give mergeSettingsJson a default parameter.
     private void mergeSettingsJson(JSONObject defaultJson, JSONObject loadedJson) throws JSONException {
+        mergeSettingsJson(defaultJson, loadedJson, 0);
+    }
+
+    private void mergeSettingsJson(JSONObject defaultJson, JSONObject loadedJson, final int level) throws JSONException {
+        // bail out if settings data is nested too deep
+        if (level > MAX_RECURSION_DEPTH_JSON) {
+            model_.studio().logs().logMessage("UserSettings: recursion too deep, increase max level.");
+            return; // early exit => recursion too deep
+        }
         // for every key in the default settings, check to make sure the loaded settings has that key
         Iterator<String> keys = defaultJson.keys();
         while (keys.hasNext()) {
@@ -141,7 +154,7 @@ public class UserSettings {
                 JSONObject subDefaultJson = (JSONObject)value;
                 JSONObject subLoadedJson = (JSONObject)loadedJson.get(key);
                 if (subLoadedJson.length() != subDefaultJson.length()) {
-                    mergeSettingsJson(subDefaultJson, subLoadedJson);
+                    mergeSettingsJson(subDefaultJson, subLoadedJson, level+1);
                     loadedJson.put(key, subLoadedJson);
                 }
             }

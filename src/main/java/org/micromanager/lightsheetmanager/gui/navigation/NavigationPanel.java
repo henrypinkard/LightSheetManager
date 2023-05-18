@@ -7,6 +7,7 @@ import org.micromanager.lightsheetmanager.gui.components.Panel;
 import mmcorej.CMMCore;
 import mmcorej.DeviceType;
 import org.micromanager.Studio;
+import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
 import javax.swing.JLabel;
 import javax.swing.SwingWorker;
@@ -29,16 +30,20 @@ public class NavigationPanel extends Panel {
 
     private Button btnRefreshNavPanel_;
     private Button btnHaltDevices_;
-    private CheckBox chkPollPositions_;
+    private CheckBox cbxPollPositions_;
 
     private DeviceManager devices_;
 
     private PositionUpdater positionUpdater_;
     private ArrayList<ControlPanel> controlPanels_;
-    public NavigationPanel(final Studio studio, final DeviceManager devices) {
-        studio_ = Objects.requireNonNull(studio);
-        devices_ = Objects.requireNonNull(devices);
-        core_ = studio.core();
+
+    private LightSheetManagerModel model_;
+
+    public NavigationPanel(final LightSheetManagerModel model) {
+        model_ = Objects.requireNonNull(model);
+        studio_ = model_.getStudio();
+        devices_ = model_.devices();
+        core_ = studio_.core();
 
         controlPanels_ = new ArrayList<>();
         isPollingPositions = true; // starts in polling mode
@@ -59,7 +64,7 @@ public class NavigationPanel extends Panel {
 
         btnHaltDevices_ = new Button("HALT", 120, 30);
         btnRefreshNavPanel_ = new Button("Refresh", 120, 30);
-        chkPollPositions_ = new CheckBox("Poll Positions", true);
+        cbxPollPositions_ = new CheckBox("Poll Positions", true);
 
         final int numImagingPaths = devices_.getDeviceAdapter().getNumImagingPaths();
         final int numIlluminationPaths = devices_.getDeviceAdapter().getNumIlluminationPaths();
@@ -151,7 +156,7 @@ public class NavigationPanel extends Panel {
             add(new JLabel("No devices or device adapter properties are not set."), "wrap");
             add(btnHaltDevices_, "wrap");
             add(btnRefreshNavPanel_, "wrap");
-            add(chkPollPositions_, "");
+            add(cbxPollPositions_, "");
             return;
         }
 
@@ -202,9 +207,9 @@ public class NavigationPanel extends Panel {
 //        infoPanel.add(new JLabel("Relative Move"), "");
 //        infoPanel.add(new JLabel("Absolute Move"), "");
         add(miscPanel, "wrap");
-        add(btnHaltDevices_, "wrap");
-        add(btnRefreshNavPanel_, "wrap");
-        add(chkPollPositions_, "");
+        add(btnHaltDevices_, "split 3");
+        add(btnRefreshNavPanel_, "");
+        add(cbxPollPositions_, "");
     }
 
     private void createEventHandlers() {
@@ -215,7 +220,7 @@ public class NavigationPanel extends Panel {
             init();
         });
         btnHaltDevices_.registerListener(e -> haltAllDevices());
-        chkPollPositions_.registerListener(e -> {
+        cbxPollPositions_.registerListener(e -> {
             isPollingPositions = !isPollingPositions;
             System.out.println("isPollingPositions: " + isPollingPositions);
         });

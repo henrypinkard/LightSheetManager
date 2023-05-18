@@ -51,11 +51,6 @@ public class PCOCamera extends CameraBase implements LightSheetCamera {
         }
     }
 
-    @Override
-    public CameraModes getTriggerMode() {
-        return mode_;
-    }
-
     // TODO: impl
     @Override
     public void setBinning() {

@@ -45,10 +45,6 @@ public class AndorCamera extends CameraBase implements LightSheetCamera {
         super(studio, deviceName);
     }
 
-    public String getDeviceName() {
-        return deviceName_;
-    }
-
     @Override
     public void setTriggerMode(CameraModes cameraMode) {
         mode_ = cameraMode;
@@ -118,11 +114,6 @@ public class AndorCamera extends CameraBase implements LightSheetCamera {
             default:
                 break;
         }
-    }
-
-    @Override
-    public CameraModes getTriggerMode() {
-        return mode_;
     }
 
     // TODO: impl

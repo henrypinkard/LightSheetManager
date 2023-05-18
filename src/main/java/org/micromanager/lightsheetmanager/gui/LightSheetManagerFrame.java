@@ -9,9 +9,9 @@ import org.micromanager.events.ExposureChangedEvent;
 import org.micromanager.events.LiveModeEvent;
 
 import org.micromanager.lightsheetmanager.LightSheetManagerPlugin;
+import org.micromanager.lightsheetmanager.api.data.GeometryType;
 import org.micromanager.lightsheetmanager.gui.components.Label;
 import org.micromanager.lightsheetmanager.gui.data.Icons;
-import org.micromanager.lightsheetmanager.gui.navigation.NavigationPanel;
 import org.micromanager.lightsheetmanager.gui.utils.WindowUtils;
 import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 import org.micromanager.internal.utils.WindowPositioning;
@@ -29,20 +29,35 @@ public class LightSheetManagerFrame extends JFrame {
     private final Studio studio_;
     private final CMMCore core_;
 
+    private TabPanel tabPanel_;
+
     private LightSheetManagerModel model_;
 
-    private TabPanel tabPanel_;
-    private NavigationPanel navigationPanel_;
-
-    public LightSheetManagerFrame(final Studio studio, final LightSheetManagerModel model, final boolean isLoaded) {
-        studio_ = Objects.requireNonNull(studio);
+    public LightSheetManagerFrame(final LightSheetManagerModel model, final boolean isLoaded) {
         model_ = Objects.requireNonNull(model);
+        studio_ = model_.studio();
         core_ = studio_.core();
 
-        WindowPositioning.setUpBoundsMemory(this, this.getClass(), this.getClass().getSimpleName());
+        // save window position
+        WindowPositioning.setUpBoundsMemory(
+                this, this.getClass(), this.getClass().getSimpleName());
 
+        // create the user interface based on the microscope geometry
         if (isLoaded) {
-            createUserInterface();
+            GeometryType geometryType = model_.devices()
+                    .getDeviceAdapter().getMicroscopeGeometry();
+            switch (geometryType) {
+                case DISPIM:
+                    createUserInterfaceDISPIM();
+                    break;
+                case SCAPE:
+                    createUserInterfaceSCAPE();
+                    break;
+                default:
+                    model_.setErrorText("Microscope geometry type is not supported yet.");
+                    createErrorUserInterface();
+                    break;
+            }
         } else {
             createErrorUserInterface();
         }
@@ -75,22 +90,24 @@ public class LightSheetManagerFrame extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
-    private void createUserInterface() {
+    /**
+     * The user interface for diSPIM.
+     */
+    private void createUserInterfaceDISPIM() {
         setTitle(LightSheetManagerPlugin.menuName);
         setResizable(false);
-        //setLocation(200, 200);
-        //setSize(600, 400);
-
-        // use MigLayout as the layout manager
-        setLayout(new MigLayout(
-            "insets 10 10 10 10",
-            "[]20[]",
-            "[]10[]"
-        ));
 
         final Label lblTitle = new Label(LightSheetManagerPlugin.menuName, Font.BOLD, 20);
         lblTitle.setFont(new Font(Font.MONOSPACED, Font.BOLD, 20));
 
+        // use MigLayout as the layout manager
+        setLayout(new MigLayout(
+                "insets 10 10 10 10",
+                "[]20[]",
+                "[]10[]"
+        ));
+
+        // main control area
         tabPanel_ = new TabPanel(studio_, model_, model_.getDeviceManager());
 
         // add ui elements to the panel
@@ -107,11 +124,46 @@ public class LightSheetManagerFrame extends JFrame {
         studio_.events().registerForEvents(this);
 
         WindowUtils.registerWindowClosingEvent(this, event -> {
-            tabPanel_.getDeviceTab().getNavigationFrame().stopTimer();
+            tabPanel_.getNavigationTab().stopTimer();
             model_.getUserSettings().save();
             System.out.println("main window closed!");
         });
 
+    }
+
+    /**
+     *  The user interface for SCAPE.
+     */
+    private void createUserInterfaceSCAPE() {
+        setTitle(LightSheetManagerPlugin.menuName);
+        setResizable(false);
+
+        final Label lblTitle = new Label(LightSheetManagerPlugin.menuName, Font.BOLD, 20);
+        lblTitle.setFont(new Font(Font.MONOSPACED, Font.BOLD, 20));
+
+        // use MigLayout as the layout manager
+        setLayout(new MigLayout(
+                "insets 10 10 10 10",
+                "[]20[]",
+                "[]10[]"
+        ));
+
+        // TODO: this is where GUI will be put
+
+        pack(); // fit window size to layout
+        setIconImage(Icons.MICROSCOPE.getImage());
+
+        // clean up resources when the frame is closed
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        // register micro-manager events
+        studio_.events().registerForEvents(this);
+
+        WindowUtils.registerWindowClosingEvent(this, event -> {
+            //tabPanel_.getDeviceTab().getNavigationFrame().stopTimer(); // TODO: put this somewhere else? or always use tabPanel
+            model_.getUserSettings().save();
+            System.out.println("main window closed!");
+        });
     }
 
     public Studio getStudio_() {

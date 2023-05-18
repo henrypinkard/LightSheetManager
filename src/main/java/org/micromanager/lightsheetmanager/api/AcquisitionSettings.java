@@ -1,5 +1,6 @@
 package org.micromanager.lightsheetmanager.api;
 
+import org.micromanager.lightsheetmanager.api.internal.DefaultAutofocusSettings;
 import org.micromanager.lightsheetmanager.model.DataStorage;
 
 /**
@@ -44,6 +45,18 @@ public interface AcquisitionSettings {
          */
         T saveMode(final DataStorage.SaveMode saveMode);
 
+        /**
+         * Returns the autofocus settings builder.
+         *
+         * @return the autofocus settings builder
+         */
+        DefaultAutofocusSettings.Builder autofocusSettingsBuilder();
+
+        // TODO: document this
+        /**
+         *
+         * @return
+         */
         T self();
 
         /**
@@ -54,6 +67,7 @@ public interface AcquisitionSettings {
         AcquisitionSettings build();
     }
 
+    // TODO: impl
     /**
      * Creates a Builder populated with settings of this AcquisitionSettings instance.
      *
@@ -95,4 +109,11 @@ public interface AcquisitionSettings {
      * @return the save mode of the acquisition.
      */
     DataStorage.SaveMode saveMode();
+
+    /**
+     * Returns the autofocus settings.
+     *
+     * @return the autofocus settings
+     */
+    DefaultAutofocusSettings autofocusSettings();
 }

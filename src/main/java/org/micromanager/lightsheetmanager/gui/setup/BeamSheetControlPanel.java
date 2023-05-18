@@ -1,13 +1,17 @@
 package org.micromanager.lightsheetmanager.gui.setup;
 
+import javafx.scene.Camera;
+import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;
 import org.micromanager.lightsheetmanager.gui.components.Panel;
 import org.micromanager.lightsheetmanager.gui.components.Slider;
 import org.micromanager.lightsheetmanager.gui.components.TextField;
+import org.micromanager.lightsheetmanager.model.LightSheetManagerModel;
 
 import javax.swing.JLabel;
 import javax.swing.UIManager;
+import java.util.Objects;
 
 public class BeamSheetControlPanel extends Panel {
 
@@ -18,7 +22,7 @@ public class BeamSheetControlPanel extends Panel {
     private JLabel lblSlopeUnits2_;
 
     // second panel
-    private CheckBox chkAutoSheetWidth_;
+    private CheckBox cbxAutoSheetWidth_;
     private TextField txtSheetWidth_;
     private Button btnCenterOffset_;
 
@@ -32,19 +36,21 @@ public class BeamSheetControlPanel extends Panel {
     private Slider sldSheetOffset_;
 
     // layout panels
-    private Panel firstPanel_;  // virtual slit camera trigger mode active
-    private Panel secondPanel_; // all other camera trigger modes
+    private Panel pnlFirst_;  // virtual slit camera trigger mode active
+    private Panel pnlSecond_; // all other camera trigger modes
 
-    private boolean isVirtualSlitMode_;
+    private LightSheetManagerModel model_;
 
-    public BeamSheetControlPanel() {
+    public BeamSheetControlPanel(final LightSheetManagerModel model) {
         super("Light Sheet Synchronization");
-        init();
+        model_ = Objects.requireNonNull(model);
+        createUserInterface();
+        createEventHandlers();
     }
 
-    private void init() {
-        firstPanel_ = new Panel();
-        secondPanel_ = new Panel();
+    private void createUserInterface() {
+        pnlFirst_ = new Panel();
+        pnlSecond_ = new Panel();
 
         // first panel for virtual slit mode
         final JLabel lblSlope = new JLabel("Speed / slope:");
@@ -62,7 +68,7 @@ public class BeamSheetControlPanel extends Panel {
         final JLabel lblSheetOffset = new JLabel("Sheet offset:");
         lblSlopeUnits2_ = new JLabel("μ°/px"); // TODO: reuse labels like this?
 
-        chkAutoSheetWidth_ = new CheckBox("Automatic", false);
+        cbxAutoSheetWidth_ = new CheckBox("Automatic", false);
         txtSheetWidth_ = new TextField();
         btnCenterOffset_ = new Button("Center", 100, 26);
 
@@ -77,50 +83,52 @@ public class BeamSheetControlPanel extends Panel {
         sldSheetWidth_ = new Slider(0, 8, 4);
         sldSheetOffset_ = new Slider(-1, 1, 0);
 
-        createEventHandlers();
+        // virtual slit trigger mode
+        pnlFirst_.add(lblSlope, "");
+        pnlFirst_.add(txtSlope_, "");
+        pnlFirst_.add(lblSlopeUnits, "wrap");
+        pnlFirst_.add(lblOffset, "");
+        pnlFirst_.add(txtOffset_, "");
+        pnlFirst_.add(lblOffsetUnits, "");
+        pnlFirst_.add(btnPlotProfile_, "gapleft 100");
 
-        firstPanel_.add(lblSlope, "");
-        firstPanel_.add(txtSlope_, "");
-        firstPanel_.add(lblSlopeUnits, "wrap");
-        firstPanel_.add(lblOffset, "");
-        firstPanel_.add(txtOffset_, "");
-        firstPanel_.add(lblOffsetUnits, "");
-        firstPanel_.add(btnPlotProfile_, "gapleft 100");
+        // regular trigger modes
+        pnlSecond_.add(lblSheetWidth, "");
+        pnlSecond_.add(cbxAutoSheetWidth_, "");
+        pnlSecond_.add(txtSheetWidth_, "");
+        pnlSecond_.add(lblSlopeUnits2_, "");
+        pnlSecond_.add(btnSheetWidthMinus_, "");
+        pnlSecond_.add(btnSheetWidthPlus_, "");
+        pnlSecond_.add(sldSheetWidth_, "wrap");
+        pnlSecond_.add(lblSheetOffset, "span 3");
+        pnlSecond_.add(btnCenterOffset_, "");
+        pnlSecond_.add(btnSheetOffsetMinus_, "");
+        pnlSecond_.add(btnSheetOffsetPlus_, "");
+        pnlSecond_.add(sldSheetOffset_, "");
 
-        secondPanel_.add(lblSheetWidth, "");
-        secondPanel_.add(chkAutoSheetWidth_, "");
-        secondPanel_.add(txtSheetWidth_, "");
-        secondPanel_.add(lblSlopeUnits2_, "");
-        secondPanel_.add(btnSheetWidthMinus_, "");
-        secondPanel_.add(btnSheetWidthPlus_, "");
-        secondPanel_.add(sldSheetWidth_, "wrap");
-        secondPanel_.add(lblSheetOffset, "span 3");
-        secondPanel_.add(btnCenterOffset_, "");
-        secondPanel_.add(btnSheetOffsetMinus_, "");
-        secondPanel_.add(btnSheetOffsetPlus_, "");
-        secondPanel_.add(sldSheetOffset_, "");
-
-        // TODO: select panel based on Microscope Geometry
-        // first panel => virtual slit mode
-        isVirtualSlitMode_ = true;
-        add(firstPanel_, "");
+        // add panel based on camera trigger mode
+        final CameraModes cameraMode =
+                model_.acquisitions().getAcquisitionSettingsBuilder().cameraMode();
+        if (cameraMode == CameraModes.VIRTUAL_SLIT) {
+            add(pnlFirst_, "");
+        } else {
+            add(pnlSecond_, "");
+        }
     }
 
     private void createEventHandlers() {
         // first panel
         btnPlotProfile_.registerListener(e -> {
-            swapPanels(); // for testing
+            System.out.println("do something here...");
         });
 
         // second panel
-        chkAutoSheetWidth_.registerListener(e -> {
-            //final boolean isSelected = chkAutoSheetWidth_.isSelected();
-            setEnabledSheetWidth(chkAutoSheetWidth_.isSelected());
+        cbxAutoSheetWidth_.registerListener(e -> {
+            setEnabledSheetWidth(cbxAutoSheetWidth_.isSelected());
         });
 
         btnCenterOffset_.registerListener(e -> {
             System.out.println("center offset pressed");
-            swapPanels(); // for testing
         });
 
     }
@@ -128,20 +136,16 @@ public class BeamSheetControlPanel extends Panel {
     /**
      * This is called when the camera trigger mode changes and updates the controls accordingly.
      */
-    public void swapPanels() {
-        if (isVirtualSlitMode_) {
-            remove(firstPanel_);
-            add(secondPanel_);
-            revalidate();
-            repaint();
-            isVirtualSlitMode_ = false;
+    public void swapPanels(final CameraModes cameraMode) {
+        if (cameraMode != CameraModes.VIRTUAL_SLIT) {
+            remove(pnlFirst_);
+            add(pnlSecond_, "");
         } else {
-            remove(secondPanel_);
-            add(firstPanel_);
-            revalidate();
-            repaint();
-            isVirtualSlitMode_ = true;
+            remove(pnlSecond_);
+            add(pnlFirst_, "");
         }
+        revalidate();
+        repaint();
     }
 
     /**

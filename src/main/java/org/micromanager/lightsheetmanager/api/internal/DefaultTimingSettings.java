@@ -19,27 +19,17 @@ public class DefaultTimingSettings implements TimingSettings {
         public Builder() {
         }
 
-        private Builder(
-                final int scansPerSlice,
-                final double delayBeforeScan,
-                final double scanDuration,
-                final double delayBeforeLaser,
-                final double laserTriggerDuration,
-                final double delayBeforeCamera,
-                final double cameraDuration,
-                final double cameraExposure,
-                final double sliceDuration,
-                final boolean alternateScanDirection) {
-            scansPerSlice_ = scansPerSlice;
-            delayBeforeScan_ = delayBeforeScan;
-            scanDuration_ = scanDuration;
-            delayBeforeLaser_ = delayBeforeLaser;
-            laserTriggerDuration_ = laserTriggerDuration;
-            delayBeforeCamera_ = delayBeforeCamera;
-            cameraTriggerDuration_ = cameraDuration;
-            cameraExposure_ = cameraExposure;
-            sliceDuration_ = sliceDuration;
-            alternateScanDirection_ = alternateScanDirection;
+        private Builder(DefaultTimingSettings timingSettings) {
+            scansPerSlice_ = timingSettings.scansPerSlice_;
+            delayBeforeScan_ = timingSettings.delayBeforeScan_;
+            scanDuration_ = timingSettings.scanDuration_;
+            delayBeforeLaser_ = timingSettings.delayBeforeLaser_;
+            laserTriggerDuration_ = timingSettings.laserTriggerDuration_;
+            delayBeforeCamera_ = timingSettings.delayBeforeCamera_;
+            cameraTriggerDuration_ = timingSettings.cameraTriggerDuration_;
+            cameraExposure_ = timingSettings.cameraExposure_;
+            sliceDuration_ = timingSettings.sliceDuration_;
+            alternateScanDirection_ = timingSettings.alternateScanDirection_;
         }
 
         /**
@@ -180,18 +170,7 @@ public class DefaultTimingSettings implements TimingSettings {
          */
         @Override
         public DefaultTimingSettings build() {
-            return new DefaultTimingSettings(
-                    scansPerSlice_,
-                    delayBeforeScan_,
-                    scanDuration_,
-                    delayBeforeLaser_,
-                    laserTriggerDuration_,
-                    delayBeforeCamera_,
-                    cameraTriggerDuration_,
-                    cameraExposure_,
-                    sliceDuration_,
-                    alternateScanDirection_
-            );
+            return new DefaultTimingSettings(this);
         }
     }
 
@@ -206,27 +185,17 @@ public class DefaultTimingSettings implements TimingSettings {
     private final double sliceDuration_;
     private final boolean alternateScanDirection_;
 
-    private DefaultTimingSettings(
-                final int scansPerSlice,
-                final double delayBeforeScan,
-                final double scanDuration,
-                final double delayBeforeLaser,
-                final double laserTriggerDuration,
-                final double delayBeforeCamera,
-                final double cameraTriggerDuration,
-                final double cameraExposure,
-                final double sliceDuration,
-                final boolean alternateScanDirection) {
-        scansPerSlice_ = scansPerSlice;
-        delayBeforeScan_ = delayBeforeScan;
-        scanDuration_ = scanDuration;
-        delayBeforeLaser_ = delayBeforeLaser;
-        laserTriggerDuration_ = laserTriggerDuration;
-        delayBeforeCamera_ = delayBeforeCamera;
-        cameraTriggerDuration_ = cameraTriggerDuration;
-        cameraExposure_ = cameraExposure;
-        sliceDuration_ = sliceDuration;
-        alternateScanDirection_ = alternateScanDirection;
+    private DefaultTimingSettings(Builder builder) {
+        scansPerSlice_ = builder.scansPerSlice_;
+        delayBeforeScan_ = builder.delayBeforeScan_;
+        scanDuration_ = builder.scanDuration_;
+        delayBeforeLaser_ = builder.delayBeforeLaser_;
+        laserTriggerDuration_ = builder.laserTriggerDuration_;
+        delayBeforeCamera_ = builder.delayBeforeCamera_;
+        cameraTriggerDuration_ = builder.cameraTriggerDuration_;
+        cameraExposure_ = builder.cameraExposure_;
+        sliceDuration_ = builder.sliceDuration_;
+        alternateScanDirection_ = builder.alternateScanDirection_;
     }
 
     /**
@@ -236,18 +205,7 @@ public class DefaultTimingSettings implements TimingSettings {
      */
     @Override
     public DefaultTimingSettings.Builder copyBuilder() {
-        return new Builder(
-                scansPerSlice_,
-                delayBeforeScan_,
-                scanDuration_,
-                delayBeforeLaser_,
-                laserTriggerDuration_,
-                delayBeforeCamera_,
-                cameraTriggerDuration_,
-                cameraExposure_,
-                sliceDuration_,
-                alternateScanDirection_
-        );
+        return new Builder(this);
     }
 
     /**

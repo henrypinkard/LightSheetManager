@@ -32,12 +32,19 @@ public class PositionPanel extends Panel {
 
     public PositionPanel() {
         super("Positions");
-        init();
+        createUserInterface();
+        createEventHandlers();
     }
 
-    private void init() {
+    private void createUserInterface() {
         final JLabel lblImagingCenter = new JLabel("Imaging Center:");
         lblImagingCenterValue_ = new JLabel("0.0 μm");
+
+        setMigLayout(
+                "",
+                "[]5[]",
+                "[]5[]"
+        );
 
         Button.setDefaultSize(50, 26);
         btnImagingCenterGo_ = new Button("Go");
@@ -63,8 +70,6 @@ public class PositionPanel extends Panel {
         lblSlicePositionValue_ = new JLabel("0.0 μm");
         lblImagingPositionValue_ = new JLabel("0.0 μm");
         lblIllumPositionValue_ = new JLabel("0.0 μm");
-
-        createEventHandlers();
 
         add(lblImagingCenter, "");
         add(lblImagingCenterValue_, "");

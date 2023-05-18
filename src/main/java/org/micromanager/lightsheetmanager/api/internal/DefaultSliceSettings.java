@@ -6,22 +6,14 @@ public class DefaultSliceSettings implements SliceSettings {
 
     public static class Builder implements SliceSettings.Builder {
 
-        double slicePeriod_ = 10.0;
-        double sampleExposure_ = 1.0;
-        boolean minimizeSlicePeriod_ = false;
+        private double slicePeriod_ = 10.0;
+        private double sampleExposure_ = 1.0;
+        private boolean minimizeSlicePeriod_ = false;
 
         public Builder() {
         }
 
-        public Builder(final double slicePeriod,
-                       final double sampleExposure,
-                       final boolean minimizeSlicePeriod) {
-            slicePeriod_ = slicePeriod;
-            sampleExposure_ = sampleExposure;
-            minimizeSlicePeriod_ = minimizeSlicePeriod;
-        }
-
-        public Builder(final DefaultSliceSettings sliceSettings) {
+        private Builder(final DefaultSliceSettings sliceSettings) {
             slicePeriod_ = sliceSettings.slicePeriod();
             sampleExposure_ = sliceSettings.sampleExposure();
             minimizeSlicePeriod_ = sliceSettings.isSlicePeriodMinimized();
@@ -51,34 +43,23 @@ public class DefaultSliceSettings implements SliceSettings {
 
         @Override
         public DefaultSliceSettings build() {
-            return new DefaultSliceSettings(
-                    slicePeriod_,
-                    sampleExposure_,
-                    minimizeSlicePeriod_
-            );
+            return new DefaultSliceSettings(this);
         }
     }
 
-    final double slicePeriod_;
-    final double sampleExposure_;
-    final boolean minimizeSlicePeriod_;
+    private final double slicePeriod_;
+    private final double sampleExposure_;
+    private final boolean minimizeSlicePeriod_;
 
-    private DefaultSliceSettings(
-            final double slicePeriod,
-            final double sampleExposure,
-            final boolean minimizeSlicePeriod) {
-        slicePeriod_ = slicePeriod;
-        sampleExposure_ = sampleExposure;
-        minimizeSlicePeriod_ = minimizeSlicePeriod;
+    private DefaultSliceSettings(Builder builder) {
+        slicePeriod_ = builder.slicePeriod_;
+        sampleExposure_ = builder.sampleExposure_;
+        minimizeSlicePeriod_ = builder.minimizeSlicePeriod_;
     }
 
     @Override
     public DefaultSliceSettings.Builder copyBuilder() {
-        return new Builder(
-                slicePeriod_,
-                sampleExposure_,
-                minimizeSlicePeriod_
-        );
+        return new Builder(this);
     }
 
     @Override
