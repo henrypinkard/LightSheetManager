@@ -663,16 +663,16 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
         return channels_;
     }
 
-    public String toJson() {
-        return new Gson().toJson(this);
-    }
+//    public String toJson() {
+//        return new Gson().toJson(this);
+//    }
 
-    public String toPrettyJson() {
-        final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(this);
-    }
+//    public String toPrettyJson() {
+//        final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//        return gson.toJson(this);
+//    }
 
-    public static DefaultAcquisitionSettingsDISPIM fromJson(final String json) {
-        return new Gson().fromJson(json, DefaultAcquisitionSettingsDISPIM.class);
-    }
+//    public static DefaultAcquisitionSettingsDISPIM fromJson(final String json) {
+//        return new Gson().fromJson(json, DefaultAcquisitionSettingsDISPIM.class);
+//    }
 }
