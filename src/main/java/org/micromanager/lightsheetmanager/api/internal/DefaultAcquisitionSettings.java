@@ -2,8 +2,11 @@ package org.micromanager.lightsheetmanager.api.internal;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.micromanager.lightsheetmanager.api.AcquisitionSettings;
 import org.micromanager.lightsheetmanager.model.DataStorage;
+
+import java.lang.reflect.Type;
 
 // TODO: make public instead of abstract? use this in demo mode?
 
@@ -207,17 +210,21 @@ public abstract class DefaultAcquisitionSettings implements AcquisitionSettings 
         );
     }
 
-//    public String toJson() {
-//        return new Gson().toJson(this);
-//    }
-//
-//    public String toPrettyJson() {
-//        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//        return gson.toJson(this);
+    public String toJson() {
+        return new Gson().toJson(this);
+    }
+
+    public String toPrettyJson() {
+        final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(this);
+    }
+
+    public static <T extends AcquisitionSettings> T fromJson(final String json, final Class<T> cls) {
+        return new Gson().fromJson(json, cls);
+    }
+
+//    public static DefaultAcquisitionSettingsDISPIM fromJson(final String json) {
+//        return new Gson().fromJson(json, DefaultAcquisitionSettingsDISPIM.class);
 //    }
 
-    // TODO: make subclasses implement this
-//    public static org.micromanager.lightsheetmanager.model.AcquisitionSettings fromJson(final String json) {
-//        return new Gson().fromJson(json, org.micromanager.lightsheetmanager.model.AcquisitionSettings.class);
-//    }
 }
