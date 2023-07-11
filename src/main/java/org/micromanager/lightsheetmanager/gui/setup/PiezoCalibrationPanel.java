@@ -63,11 +63,11 @@ public class PiezoCalibrationPanel extends Panel {
         txtStepSize_ = new TextField();
 
         if (pathNum_ == 1) {
-            txtSlope_.setText(String.valueOf(acqSettings.sliceCalibration().sliceSlope()));
-            txtOffset_.setText(String.valueOf(acqSettings.sliceCalibration().sliceOffset()));
+            txtSlope_.setText(String.valueOf(acqSettings.sliceCalibration(1).sliceSlope()));
+            txtOffset_.setText(String.valueOf(acqSettings.sliceCalibration(1).sliceOffset()));
         } else {
-            txtSlope_.setText(String.valueOf(acqSettings.sliceCalibration2().sliceSlope()));
-            txtOffset_.setText(String.valueOf(acqSettings.sliceCalibration2().sliceOffset()));
+            txtSlope_.setText(String.valueOf(acqSettings.sliceCalibration(2).sliceSlope()));
+            txtOffset_.setText(String.valueOf(acqSettings.sliceCalibration(2).sliceOffset()));
         }
         Button.setDefaultSize(26, 26);
         btnStepUp_ = new Button(Icons.ARROW_UP);

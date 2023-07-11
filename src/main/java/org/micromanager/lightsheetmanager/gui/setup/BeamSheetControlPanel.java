@@ -1,6 +1,5 @@
 package org.micromanager.lightsheetmanager.gui.setup;
 
-import javafx.scene.Camera;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.gui.components.Button;
 import org.micromanager.lightsheetmanager.gui.components.CheckBox;

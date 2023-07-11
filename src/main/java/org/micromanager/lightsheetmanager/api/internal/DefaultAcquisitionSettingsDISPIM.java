@@ -1,7 +1,5 @@
 package org.micromanager.lightsheetmanager.api.internal;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.micromanager.lightsheetmanager.api.AcquisitionSettingsDISPIM;
 import org.micromanager.lightsheetmanager.api.data.CameraModes;
 import org.micromanager.lightsheetmanager.model.channels.ChannelSpec;
@@ -17,6 +15,8 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
         private DefaultSliceSettingsLS.Builder ssbLS_ = new DefaultSliceSettingsLS.Builder();
         private DefaultScanSettings.Builder scsb_ = new DefaultScanSettings.Builder();
         private DefaultSheetCalibration.Builder shcb_ = new DefaultSheetCalibration.Builder();
+
+        private DefaultSliceCalibration.Builder[] slcb3_ = new DefaultSliceCalibration.Builder[2];
         private DefaultSliceCalibration.Builder slcb_ = new DefaultSliceCalibration.Builder();
         private DefaultSliceCalibration.Builder slcb2_ = new DefaultSliceCalibration.Builder();
         private AcquisitionModes acquisitionMode_ = AcquisitionModes.NONE;
@@ -49,8 +49,11 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
             ssb_ = acqSettings.sliceSettings_.copyBuilder();
             ssbLS_ = acqSettings.sliceSettingsLS_.copyBuilder();
             scsb_ = acqSettings.scanSettings_.copyBuilder();
-            slcb_ = acqSettings.sliceCalibration_.copyBuilder();
-            slcb2_ = acqSettings.sliceCalibration2_.copyBuilder();
+            for (int i = 0; i < 2; i++) {
+                slcb3_[i] = acqSettings.sliceCalibrations_[i].copyBuilder();
+            }
+//            slcb_ = acqSettings.sliceCalibration_.copyBuilder();
+//            slcb2_ = acqSettings.sliceCalibration2_.copyBuilder();
             shcb_ = acqSettings.sheetCalibration_.copyBuilder();
             acquisitionMode_ = acqSettings.acquisitionMode_;
             channelMode_ = acqSettings.channelMode_;
@@ -291,7 +294,6 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
             return ssb_;
         }
 
-
         // getters for builder
 
         public AcquisitionModes acquisitionMode() {
@@ -341,8 +343,10 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
     private final DefaultSliceSettings sliceSettings_;
     private final DefaultScanSettings scanSettings_;
     private final DefaultSheetCalibration sheetCalibration_;
-    private final DefaultSliceCalibration sliceCalibration_;
-    private final DefaultSliceCalibration sliceCalibration2_;
+//    private final DefaultSliceCalibration sliceCalibration_;
+//    private final DefaultSliceCalibration sliceCalibration2_;
+
+    private final DefaultSliceCalibration[] sliceCalibrations_;
 
     private final AcquisitionModes acquisitionMode_;
     private final MultiChannelModes channelMode_;
@@ -372,8 +376,12 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
         sliceSettingsLS_ = builder.ssbLS_.build();
         scanSettings_ = builder.scsb_.build();
         sheetCalibration_ = builder.shcb_.build();
-        sliceCalibration_ = builder.slcb_.build();
-        sliceCalibration2_ = builder.slcb2_.build();
+//        sliceCalibration_ = builder.slcb_.build();
+//        sliceCalibration2_ = builder.slcb2_.build();
+        sliceCalibrations_ = new DefaultSliceCalibration[2];
+        for (int i = 0; i < 2; i++) {
+            sliceCalibrations_[i] = builder.slcb_.build(); // TODO: !!!
+        }
         acquisitionMode_ = builder.acquisitionMode_;
         channelMode_ = builder.channelMode_;
         cameraMode_ = builder.cameraMode_;
@@ -458,7 +466,6 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
         return sliceSettings_;
     }
 
-
     /**
      * Returns the immutable DefaultSliceSettingsLS instance.
      *
@@ -490,17 +497,15 @@ public class DefaultAcquisitionSettingsDISPIM extends DefaultAcquisitionSettings
     }
 
     /**
-     * Returns the immutable DefaultSliceCalibration instance.
+     * Returns an immutable DefaultSliceCalibration instance.
+     * <p>
+     * Views start at index 1.
      *
      * @return immutable DefaultSliceCalibration instance.
      */
     @Override
-    public DefaultSliceCalibration sliceCalibration() {
-        return sliceCalibration_;
-    }
-
-    public DefaultSliceCalibration sliceCalibration2() {
-        return sliceCalibration2_;
+    public DefaultSliceCalibration sliceCalibration(final int view) {
+        return sliceCalibrations_[view-1];
     }
 
     /**
