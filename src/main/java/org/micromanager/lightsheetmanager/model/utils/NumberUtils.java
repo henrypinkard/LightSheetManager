@@ -45,7 +45,7 @@ public class NumberUtils {
 
     /**
      *
-     * @param f
+     * @param d
      * @param place number of places after decimal point, between 0 and 9
      * @return
      */
