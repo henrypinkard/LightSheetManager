@@ -32,7 +32,7 @@ jobs:
 
       - name: Find artifact
         id: find_artifact
-        run: echo "ARTIFACT_NAME=$(ls ./target/LightSheetManager-*.*.*.jar)" >> $GITHUB_ENV
+        run: echo "ARTIFACT_NAME=$(ls ./target/LightSheetManager-*.jar | grep -v -e '-sources' -e '-javadoc')" >> $GITHUB_ENV
 
 
       - name: Create Release
