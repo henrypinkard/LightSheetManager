@@ -193,7 +193,8 @@ public interface AcquisitionSettingsDISPIM extends AcquisitionSettings {
      *
      * @return immutable DefaultSliceCalibration instance.
      */
-    DefaultSliceCalibration sliceCalibration();
+    DefaultSliceCalibration sliceCalibration(final int view);
+    //DefaultSliceCalibration sliceCalibration();
 
     /**
      * Returns the acquisition mode.

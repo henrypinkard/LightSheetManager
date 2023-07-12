@@ -70,8 +70,8 @@ public class UserSettings {
             // validate user settings and create settings object
             JSONObject loadedJson = validateUserSettings(json);
             if (loadedJson != null) {
-                DefaultAcquisitionSettingsDISPIM acqSettings =
-                        DefaultAcquisitionSettingsDISPIM.fromJson(loadedJson.toString());
+                DefaultAcquisitionSettingsDISPIM acqSettings = DefaultAcquisitionSettingsDISPIM.fromJson(
+                        loadedJson.toString(), DefaultAcquisitionSettingsDISPIM.class);
                 model_.acquisitions().setAcquisitionSettings(acqSettings);
                 //System.out.println("loadedJson: " + loadedJson);
             }
