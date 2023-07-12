@@ -1,13 +1,11 @@
 name: Run pre-merge tests
 
 on:
-  push:
-    branches:
-      - main
-
+  pull_request:
+    branches: [ main ]
+  
 jobs:
-
-                     
+                 
   maven-deploy:
     # build with maven to make sure things compile correctly
       

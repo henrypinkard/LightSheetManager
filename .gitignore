@@ -10,7 +10,6 @@
 
 # Build
 *.class
-*.jar
 build/
 out/
 target/
